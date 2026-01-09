@@ -42,24 +42,8 @@ Una vez creado el proyecto, copia o coloca el `docker-compose.yml` y el `Dockerf
 
 ---
 
-## Paso 2: Dockerfile esperado
 
-```dockerfile
-FROM node:20
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-
-EXPOSE 5173
-```
-
----
-
-## Paso 3: Levantar el entorno con Docker
+## Paso 2: Levantar el entorno con Docker
 
 Desde la raíz del proyecto:
 
@@ -215,5 +199,6 @@ docker compose down -v
 ```
 
 ---
+
 
 
