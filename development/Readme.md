@@ -44,8 +44,6 @@ Una vez creado el proyecto, copia o coloca el `docker-compose.yml` y el `Dockerf
 
 ## Paso 2: Dockerfile esperado
 
-El servicio `frontend` asume un `Dockerfile` similar a este:
-
 ```dockerfile
 FROM node:20
 
@@ -217,4 +215,5 @@ docker compose down -v
 ```
 
 ---
+
 
