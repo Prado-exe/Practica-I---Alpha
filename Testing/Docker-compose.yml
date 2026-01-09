@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    container_name: frontend-qa
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - qa-net
+
+  playwright-qa:
+    image: mcr.microsoft.com/playwright:v1.57.0-jammy
+    container_name: playwright-qa
+    depends_on:
+      - frontend
+    environment:
+      - BASE_URL=http://frontend:5173
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: sleep infinity
+    networks:
+      - qa-net
+
+  postgres:
+    image: postgres:16
+    container_name: postgres-qa
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: testdb
+    ports:
+      - "55432:5432"
+    volumes:
+      - ./postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - qa-net
+
+  mysql:
+    image: mysql:8.4
+    container_name: mysql-qa
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+    ports:
+      - "53306:3306"
+    volumes:
+      - ./mysql_test_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - qa-net
+
+networks:
+  qa-net:
+    driver: bridge
