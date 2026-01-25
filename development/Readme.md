@@ -37,7 +37,7 @@ El archivo `Docker-compose.yml` orquesta 3 servicios conectados a través de la 
 - **Contexto de Build**: Carpeta `./frontend`.
 - **Puerto**: Expone el puerto `5173` al host.
 - **Volúmenes**:
-  - `./frontend:/app`: Sincroniza el código local con el contenedor para **Hot Reloading**.
+  - `./frontend:/app`: Sincroniza el código local con el contenedor.
   - `/app/node_modules`: Evita que `node_modules` del host sobrescriba el del contenedor.
 - **Variables de Entorno**:
   - `VITE_API_URL`: Apunta a `http://localhost:3000` (aunque para llamadas desde el navegador, "localhost" refiere al host, esto es útil para confirmar el puerto).
@@ -95,3 +95,4 @@ CMD ["npm", "run", "dev"] # Comando por defecto al iniciar
 3. Accede a:
    - **Frontend**: http://localhost:5173
    - **Backend Status**: http://localhost:3000/api/status
+
