@@ -26,7 +26,7 @@ Antes de usar este `docker-compose.yml`, debes tener instalado:
 Este paso se realiza **una sola vez**, fuera de Docker.
 
 ```bash
-npm create vite@latest frontend
+npm create vite@latest 'nombre_proyecto'
 cd frontend
 npm install
 ```
@@ -173,6 +173,7 @@ docker compose down -v
 ```
 
 ---
+
 
 
 
