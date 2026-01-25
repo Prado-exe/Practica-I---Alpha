@@ -7,7 +7,7 @@ Este archivo describe la configuración del entorno de Quality Assurance (QA) de
 Para levantar este entorno específico, debes usar el flag `-f` para seleccionar el archivo compose correcto:
 
 ```bash
-docker compose -f Docker-compose_qa.yml up --build
+docker compose up --build
 ```
 
 Esto levantará los siguientes contenedores en la red `qa-net`:
@@ -65,3 +65,4 @@ Una vez que el entorno está arriba (`docker compose up`), sigue estos pasos par
 ## Notas Importantes
 - **Base URL**: El contenedor de Playwright tiene configurada la variable `BASE_URL=http://frontend:5173`. Asegúrate de usar esta variable en tus tests o configurar `playwright.config.js` para usarla.
 - **Datos de Prueba**: La base de datos `postgres-qa` guarda sus datos en una carpeta separada (`postgres_data_qa`) para no interferir con tus datos de desarrollo.
+
