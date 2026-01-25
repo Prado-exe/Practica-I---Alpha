@@ -73,6 +73,7 @@ Luego abre `http://localhost:36575` en tu navegador.
 
 ## Notas de Desarrollo
 
-- **Persistencia de Datos**: Los datos de Postgres se guardan en `./postgres_data`. Si deseas resetear la base de datos, puedes borrar esta carpeta (con los contenedores apagados).
-- **Variables de Entorno**: El frontend utiliza `VITE_API_URL` para comunicarse con el backend. En este entorno de QA, está configurado para apuntar a `http://localhost:3000` (acceso directo desde el navegador).
+- **Persistencia de Datos**: Los datos de Postgres se guardan en `./postgres_data`.
+- **Variables de Entorno**: El frontend utiliza `VITE_API_URL` para comunicarse con el backend.
+
 
