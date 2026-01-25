@@ -1,104 +1,72 @@
-# Entorno de Despliegue (Deployment)
+# Entorno de Producción - Deployment
 
-Este directorio contiene la configuración de Docker lista para producción de la aplicación. Está diseñado para ser seguro, eficiente y escalable, utilizando Nginx como proxy inverso y construcciones multi-etapa para imágenes de contenedores optimizadas.
+Este directorio contiene la configuración final para desplegar la aplicación utilizando los artefactos generados en desarrollo. A diferencia de desarrollo, aquí no se utiliza Hot Reloading; se prioriza la estabilidad y el rendimiento sirviendo archivos estáticos.
 
-## Visión General de la Arquitectura
+## Inicio Rápido
 
-El siguiente diagrama ilustra el flujo de solicitudes y la interacción entre servicios dentro de la red Docker.
+Para poner en marcha el entorno de producción, asegúrate de haber seguido los pasos de **Preparación de Archivos** y luego ejecuta:
 
-```text
-      +-----------------------+
-      |   Navegador Cliente   |
-      +-----------+-----------+
-                  |
-           Puerto HTTP 80
-                  |
-                  v
-+---------------------------------------------+
-|                 Red Docker                  |
-|                                             |
-|        +---------------------+              |
-|        |     Proxy Nginx     |              |
-|        +---------+-----------+              |
-|                  |                          |
-|       / (Assets) |   /api/* (Datos)         |
-|      v           v                          |
-| +----------+  +-----------+                 |
-| | Frontend |  |  Backend  |                 |
-| +----------+  +-----+-----+                 |
-|                     |                       |
-|                     +-------+               |
-|                     |       |               |
-|              +------v-+  +--v----+          |
-|              |Postgres|  | MySQL |          |
-|              +--------+  +-------+          |
-|                                             |
-+---------------------------------------------+
+```bash
+docker compose up -d --build
 ```
 
-## Estructura de Directorios
+---
+
+## Preparación de Archivos (Paso Obligatorio)
+
+Para que este entorno funcione, debes "pasar" los archivos desde el entorno de desarrollo a esta carpeta siguiendo estos pasos:
+
+### 1. Frontend (Carpeta `dist`)
+- Realiza el build en desarrollo (`npm run build` dentro de la carpeta frontend).
+- Copia la carpeta `dist` resultante (que contiene `index.html` y `assets`) a la raíz de este directorio (`Deployment/dist`).
+
+### 2. Backend (Carpeta `backend-src`)
+- Crea una carpeta llamada `backend-src` dentro de este directorio.
+- Copia el código fuente de tu backend (archivo `package.json` y la carpeta `src`) dentro de `Deployment/backend-src/`.
+- El Dockerfile del backend ya está configurado para instalar solo las dependencias de producción.
+
+### 3. Configuración de Entorno
+- Asegúrate de tener un archivo `.env` en la raíz de `Deployment/` con las credenciales de la base de datos:
+  ```env
+  DB_HOST_POSTGRES=postgres
+  DB_USER=user
+  DB_PASS=password
+  DB_NAME=appdb
+  POSTGRES_USER=user
+  POSTGRES_PASSWORD=password
+  POSTGRES_DB=appdb
+  ```
+
+---
+
+## Estructura de la Carpeta Deployment
 
 ```text
 Deployment/
-├── backend/            # Dockerfile del Backend y contexto del código fuente
-├── frontend/           # Dockerfile del Frontend y contexto del código fuente
-├── nginx/              # Configuración Global del Proxy Nginx
-├── Docker-compose.yml  # Orquestación de Producción
-└── .env.production     # Variables de Entorno (Requerido)
+├── .env                # Variables de entorno de producción
+├── Docker-compose.yml  # Orquestador de producción
+├── dist/               # Archivos estáticos del frontend (Copiados)
+├── backend-src/        # Código fuente del backend (Copiado)
+│   └── Dockerfile      # Configuración de imagen de producción
+├── nginx/              # Configuración del servidor Web / Proxy
+│   ├── Dockerfile      # Genera la imagen personalizada de Nginx
+│   └── default.conf    # Reglas de ruteo (Frontend + API)
+└── postgres_data/      # Datos persistentes de la base de datos
 ```
 
-## Prerrequisitos
+---
 
-Antes de desplegar, asegúrate de cumplir con los siguientes requisitos:
+## Arquitectura de Red
 
-1.  **Código Fuente**: El código fuente completo debe estar presente en los contextos de construcción designados:
-    *   Código del Frontend en `Deployment/frontend/`
-    *   Código del Backend en `Deployment/backend/`
-2.  **Configuración del Entorno**: Crea un archivo `.env.production` en este directorio.
+El sistema utiliza **Nginx** como puerta de entrada única (puerto 80):
+- **Tráfico Web (`/`)**: Nginx sirve directamente los archivos de la carpeta `dist`.
+- **Tráfico API (`/api/`)**: Nginx actúa como Proxy Reverso y redirige las peticiones al contenedor de `backend` en el puerto 3000.
 
-## Configuración
+Esto permite que la aplicación sea más segura y eficiente al no exponer los servicios internos directamente al exterior.
 
-Crea un archivo `.env.production` con las siguientes claves. Asegúrate de que estas contraseñas sean seguras para un entorno de producción.
+---
 
-```ini
-# Credenciales de Base de Datos
-POSTGRES_USER=usuario_admin
-POSTGRES_PASSWORD=contraseña_segura
-POSTGRES_DB=produccion_db
+## Notas de Mantenimiento
 
-MYSQL_ROOT_PASSWORD=contraseña_root_segura
-MYSQL_DATABASE=produccion_db
-MYSQL_USER=usuario_admin
-MYSQL_PASSWORD=contraseña_segura
-```
-
-## Pasos de Despliegue
-
-1.  **Construir e Iniciar Servicios**
-    Ejecuta el siguiente comando para construir las imágenes optimizadas e iniciar los contenedores en modo "detached":
-
-    ```bash
-    docker compose up -d --build
-    ```
-
-2.  **Verificar Estado**
-    Comprueba que todos los contenedores se estén ejecutando y estén saludables:
-
-    ```bash
-    docker ps
-    ```
-
-3.  **Acceder a la Aplicación**
-    La aplicación será accesible en `http://localhost` (o la dirección IP de tu servidor) en el puerto 80.
-
-## Detalles de los Servicios
-
-| Servicio | Puerto Interno | Puerto Externo | Descripción |
-| :--- | :--- | :--- | :--- |
-| **Nginx** | 80 | **80** | Punto de entrada / Proxy Inverso |
-| **Frontend** | 80 | - | App React (Servida por Nginx interno) |
-| **Backend** | 3000 | - | API Node.js |
-| **PostgreSQL**| 5432 | - | Base de Datos Relacional |
-| **MySQL** | 3306 | - | Base de Datos Relacional |
-
-**Nota**: Los puertos de las bases de datos NO están expuestos al sistema host por razones de seguridad. Solo son accesibles por el servicio Backend dentro de la red Docker.
+- **Actualizaciones**: Cada vez que realices cambios en el código, recuerda regenerar el `dist` en desarrollo y volver a copiarlo aquí antes de hacer un `docker compose up --build`.
+- **Logs**: Puedes monitorear el estado de los servicios con `docker compose logs -f`.
