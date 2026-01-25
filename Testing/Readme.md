@@ -1,68 +1,75 @@
-# Documentación del Entorno de QA (Playwright)
+# QA Environment - Testing/Proyecto
 
-Este archivo describe la configuración del entorno de Quality Assurance (QA) definido en `Docker-compose_qa.yml`. Este entorno replíca la arquitectura de desarrollo pero añade herramientas específicas para pruebas de extremo a extremo (E2E).
+Este directorio contiene el entorno de pruebas automatizadas (QA) del proyecto, configurado con **Docker**, **Next.js/React**, **PostgreSQL** y **Playwright**.
 
-## Cómo Iniciar el Entorno QA
+## Inicio Rápido
 
-Para levantar este entorno específico, debes usar el flag `-f` para seleccionar el archivo compose correcto:
+Para levantar todo el entorno, ejecuta el siguiente comando en la raíz de esta carpeta:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
-Esto levantará los siguientes contenedores en la red `qa-net`:
-- `frontend-qa`
-- `backend-qa`
-- `postgres-qa`
-- `playwright-qa`
+Esto iniciará los siguientes servicios:
+- **Frontend** (Vite/React) en `http://localhost:5173`
+- **Backend** (Node.js) en `http://localhost:3000`
+- **PostgreSQL** en `localhost:5432`
+- **Playwright** (Contenedor de pruebas en reposo)
 
 ---
 
-## Arquitectura de Servicios
+## Estructura del Proyecto
 
-### 1. Aplicación Completa (Frontend + Backend + DB)
-El entorno levanta una instancia completa de la aplicación para que las pruebas tengan un objetivo real contra el cual ejecutarse.
-- **Frontend**: Accesible internamente en `http://frontend:5173`.
-- **Backend**: Accesible internamente en `http://backend:3000`.
-- **Postgres**: Base de datos dedicada para pruebas (volumen `./postgres_data_qa`).
-
-### 2. Playwright (`playwright-qa`)
-Este es el contenedor principal para la ejecución de pruebas.
-
-* **Imagen**: `mcr.microsoft.com/playwright:v1.57.0-jammy` (Incluye navegadores y dependencias de Playwright).
-* **Volumen**: Monta el directorio actual `.` en `/app`. Esto permite que el contenedor acceda a tus scripts de prueba locales.
-* **Network**: Está en la misma red `qa-net`, por lo que puede "ver" al frontend usando el nombre del servicio `frontend`.
-* **Comando**: `sleep infinity`. El contenedor se inicia y se queda esperando. No ejecuta pruebas automáticamente al arrancar, lo que te permite entrar en él y ejecutarlas manualmente cuando desees.
+```text
+Testing/Proyecto/
+├── backend/            # Código fuente del servidor
+├── frontend/           # Código fuente de la interfaz de usuario
+├── tests/              # Pruebas automatizadas de Playwright (.spec.js)
+├── postgres_data/      # Datos persistentes de la base de datos (Postgres)
+├── Docker-compose.yml  # Orquestación de servicios
+├── Dockerfile          # Imagen base para el entorno de desarrollo
+├── playwright.config.js # Configuración de Playwright
+└── package.json        # Dependencias de testing y scripts
+```
 
 ---
 
-## Cómo Ejecutar Pruebas
+## Configuración Docker
 
-Una vez que el entorno está arriba (`docker compose up`), sigue estos pasos para correr tus tests:
+### Dockerfile
+El `Dockerfile` en la raíz de `Testing/Proyecto` está diseñado para crear un entorno de desarrollo consistente. 
+- Utiliza `node:20-alpine` por su ligereza.
+- Instala las dependencias definidas en el `package.json` raíz.
+- Expone el puerto `5173` para el servidor de desarrollo.
 
-1. **Entrar al contenedor de Playwright:**
-   Abrir una nueva terminal y ejecutar:
-   ```bash
-   docker exec -it playwright-qa /bin/bash
-   ```
+### Docker Compose
+El `Docker-compose.yml` gestiona 4 servicios principales:
+1.  **frontend**: Construye y sirve la app de React. Usa volúmenes para reflejar cambios en tiempo real.
+2.  **backend**: Serve el API de la aplicación.
+3.  **postgres**: Base de datos relacional. Persiste los datos en la carpeta local `./postgres_data`.
+4.  **playwright-qa**: Un contenedor especializado que ya incluye todos los navegadores necesarios para ejecutar pruebas E2E.
 
-2. **Instalar dependencias (si es la primera vez):**
-   Dentro del contenedor:
-   ```bash
-   npm install
-   ```
+---
 
-3. **Instalar navegadores de Playwright (si es necesario):**
-   ```bash
-   npx playwright install
-   ```
+## Ejecución de Tests (Playwright)
 
-4. **Ejecutar los tests:**
-   ```bash
-   npx playwright test
-   ```
+Para ejecutar las pruebas dentro del contenedor de QA:
 
-## Notas Importantes
-- **Base URL**: El contenedor de Playwright tiene configurada la variable `BASE_URL=http://frontend:5173`. Asegúrate de usar esta variable en tus tests o configurar `playwright.config.js` para usarla.
-- **Datos de Prueba**: La base de datos `postgres-qa` guarda sus datos en una carpeta separada (`postgres_data_qa`) para no interferir con tus datos de desarrollo.
+### 1. Ejecutar todos los tests
+```bash
+docker compose exec playwright-qa npm test
+```
 
+### 2. Ver reporte de resultados
+Si hay fallos o quieres ver el detalle visual, ejecuta:
+```bash
+docker compose exec playwright-qa npm run report
+```
+Luego abre `http://localhost:36575` en tu navegador.
+
+---
+
+## Notas de Desarrollo
+
+- **Persistencia de Datos**: Los datos de Postgres se guardan en `./postgres_data`. Si deseas resetear la base de datos, puedes borrar esta carpeta (con los contenedores apagados).
+- **Variables de Entorno**: El frontend utiliza `VITE_API_URL` para comunicarse con el backend. En este entorno de QA, está configurado para apuntar a `http://localhost:3000` (acceso directo desde el navegador).
