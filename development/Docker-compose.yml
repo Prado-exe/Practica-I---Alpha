@@ -1,17 +1,36 @@
 version: '3.8'
 
 services:
+
   frontend:
-    build: .
+    build: ./frontend
     container_name: frontend-dev
     ports:
       - "5173:5173"
     volumes:
-      - .:/app
+      - ./frontend:/app
       - /app/node_modules
     environment:
       - VITE_API_URL=http://localhost:3000
     command: npm run dev -- --host 0.0.0.0
+    networks:
+      - dev-net
+
+  backend:
+    build: ./backend
+    container_name: backend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - DB_HOST_POSTGRES=postgres
+      - DB_USER=user
+      - DB_PASS=password
+      - DB_NAME=appdb
+    depends_on:
+      - postgres
     networks:
       - dev-net
 
@@ -26,22 +45,6 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
-    networks:
-      - dev-net
-
-  mysql:
-    image: mysql:8.4
-    container_name: mysql-dev
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: appdb
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-    ports:
-      - "3308:3306"
-    volumes:
-      - ./mysql_data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
     networks:
       - dev-net
 
