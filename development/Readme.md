@@ -30,7 +30,10 @@ development/nombre-del-proyecto/
 ├── postgres_data/      # Base de datos persistente (Dev)
 └── Docker-compose.yml  # Configuración de orquestación local
 ```
+---
+<img width="282" height="482" alt="image" src="https://github.com/user-attachments/assets/cc88fae5-e90d-4be9-83bb-53617a0c4836" />
 
+---
 ---
 
 ## Configuración Docker
@@ -74,3 +77,4 @@ Si deseas generar los archivos para llevar a producción (`Deployment`), debes g
 
 - **Limpieza**: Si deseas resetear los datos de desarrollo, puedes borrar la carpeta `postgres_data` y volver a ejecutar el docker compose.
 - **Variables de Entorno**: El frontend en desarrollo usa `http://localhost:3000` como base para las peticiones al API.
+
