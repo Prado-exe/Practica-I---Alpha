@@ -47,7 +47,7 @@ El archivo `Docker-compose.yml` orquesta 3 servicios conectados a través de la 
 - **Contexto de Build**: Carpeta `./backend`.
 - **Puerto**: Expone el puerto `3000` al host.
 - **Volúmenes**:
-  - `./backend:/app`: Permite edición de código en caliente (si se usa nodemon).
+  - `./backend:/app`
 - **Dependencia**: Espera a que `postgres` esté listo antes de iniciar.
 - **Conexión a BD**: Se conecta al host `postgres` (nombre del servicio) en el puerto `5432`.
 
@@ -95,4 +95,5 @@ CMD ["npm", "run", "dev"] # Comando por defecto al iniciar
 3. Accede a:
    - **Frontend**: http://localhost:5173
    - **Backend Status**: http://localhost:3000/api/status
+
 
