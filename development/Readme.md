@@ -40,8 +40,8 @@ El archivo `Docker-compose.yml` orquesta 3 servicios conectados a través de la 
   - `./frontend:/app`: Sincroniza el código local con el contenedor.
   - `/app/node_modules`: Evita que `node_modules` del host sobrescriba el del contenedor.
 - **Variables de Entorno**:
-  - `VITE_API_URL`: Apunta a `http://localhost:3000` (aunque para llamadas desde el navegador, "localhost" refiere al host, esto es útil para confirmar el puerto).
-- **Comando**: `npm run dev -- --host 0.0.0.0` para permitir conexiones externas al contenedor.
+  - `VITE_API_URL`: Apunta a `http://localhost:3000
+- **Comando**: `npm run dev -- --host 0.0.0.0`
 
 ### 2. Servicio `backend`
 - **Contexto de Build**: Carpeta `./backend`.
@@ -95,5 +95,6 @@ CMD ["npm", "run", "dev"] # Comando por defecto al iniciar
 3. Accede a:
    - **Frontend**: http://localhost:5173
    - **Backend Status**: http://localhost:3000/api/status
+
 
 
