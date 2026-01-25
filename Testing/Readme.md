@@ -1,89 +1,67 @@
-# Estructura de Carpetas  para el Proyecto
+# Documentación del Entorno de QA (Playwright)
 
-A continuación, se presenta una estructura de carpetas recomendada y profesional para el proyecto basado en **Vite, React, Playwright y Docker en conjunto a (mysql,mariadb,postgresql)**
+Este archivo describe la configuración del entorno de Quality Assurance (QA) definido en `Docker-compose_qa.yml`. Este entorno replíca la arquitectura de desarrollo pero añade herramientas específicas para pruebas de extremo a extremo (E2E).
 
+## Cómo Iniciar el Entorno QA
 
+Para levantar este entorno específico, debes usar el flag `-f` para seleccionar el archivo compose correcto:
 
-#  QA Automation - React + Vite + Playwright + Docker
-
-Este proyecto es un entorno de desarrollo y pruebas automatizadas (QA) que utiliza **React** con **Vite**, orquestado con **Docker** y testeado con **Playwright**.
-
-##  Estructura del Proyecto
-La organización del código sigue los estándares de mantenibilidad y escalabilidad:
-* **/src**: Código fuente de la aplicación React (componentes, hooks, servicios).
-* **/tests/e2e**: Pruebas de extremo a extremo (End-to-End) con Playwright.
-* **/tests/integration**: Pruebas de integración de componentes.
-* **Dockerfile & docker-compose.yml**: Configuración del entorno de contenedores.
-
-##  Requisitos Previos
-* Tener instalado **Docker** y **Docker Compose**.
-* Node.js (opcional, para autocompletado en el editor).
-
-# Ejecución de Pruebas de QA
-Una vez que los contenedores estén corriendo, puedes ejecutar los tests de automatización con el siguiente comando:
-
-* docker exec -it engine-qa npx playwright test
-
-# Ver Reportes de Pruebas
-Si quieres ver el reporte visual de los resultados:
-
-docker exec -it engine-qa npx playwright show-report --host 0.0.0.0
-
-## Estructura Recomendada
-
-```
-/project-root
-├── .dockerignore
-├── .env.example
-├── .gitignore
-├── docker-compose.yml
-├── Dockerfile
-├── package.json
-├── playwright.config.ts
-├── README.md
-├── tsconfig.json
-├── vite.config.ts
-|
-├── /dist
-├── /node_modules
-├── /public
-|
-├── /src
-│   ├── /assets
-│   │   ├── images
-│   │   └── styles
-│   │
-│   ├── /components
-│   │
-│   ├── /hooks
-│   │
-│   ├── /pages
-│   │
-│   ├── /services
-│   │
-│   ├── /utils
-│   │
-│   ├── App.jsx
-│
-└── /tests
-    ├── /e2e
-    │   └── home.spec.ts
-    └── /integration
-        └── component.spec.ts
-
+```bash
+docker compose -f Docker-compose_qa.yml up --build
 ```
 
-## Descripción de Directorios y Archivos Clave
+Esto levantará los siguientes contenedores en la red `qa-net`:
+- `frontend-qa`
+- `backend-qa`
+- `postgres-qa`
+- `playwright-qa`
 
-### Archivos Raíz
+---
 
-| Archivo | Propósito |
-| :--- | :--- |
-| **`Dockerfile`** | Define la imagen de Docker para la aplicación. Contiene los pasos para instalar dependencias, copiar el código y ejecutar la aplicación en un entorno aislado. |
-| **`docker-compose.yml`** | Orquesta los servicios de la aplicación (ej. la app de React y el motor de pruebas de Playwright). Facilita la ejecución del entorno completo con un solo comando. |
-| **`.dockerignore`** | Excluye archivos y directorios (como `node_modules`) de ser copiados a la imagen de Docker, optimizando el proceso de build. |
-| **`.gitignore`** | Especifica qué archivos y directorios deben ser ignorados por el control de versiones Git. |
-| **`playwright.config.ts`** | Archivo de configuración para las pruebas de Playwright, donde se definen navegadores, `baseURL`, y otras opciones de testeo. |
-| **`vite.config.ts`** | Configuración de Vite, el empaquetador y servidor de desarrollo. |
-| **`package.json`** | Define los metadatos del proyecto, dependencias (React, Vite) y scripts (dev, build, test). |
-| **`README.md`** | Documentación principal del proyecto. Debe incluir cómo instalar, configurar y ejecutar el proyecto. |
+## Arquitectura de Servicios
+
+### 1. Aplicación Completa (Frontend + Backend + DB)
+El entorno levanta una instancia completa de la aplicación para que las pruebas tengan un objetivo real contra el cual ejecutarse.
+- **Frontend**: Accesible internamente en `http://frontend:5173`.
+- **Backend**: Accesible internamente en `http://backend:3000`.
+- **Postgres**: Base de datos dedicada para pruebas (volumen `./postgres_data_qa`).
+
+### 2. Playwright (`playwright-qa`)
+Este es el contenedor principal para la ejecución de pruebas.
+
+* **Imagen**: `mcr.microsoft.com/playwright:v1.57.0-jammy` (Incluye navegadores y dependencias de Playwright).
+* **Volumen**: Monta el directorio actual `.` en `/app`. Esto permite que el contenedor acceda a tus scripts de prueba locales.
+* **Network**: Está en la misma red `qa-net`, por lo que puede "ver" al frontend usando el nombre del servicio `frontend`.
+* **Comando**: `sleep infinity`. El contenedor se inicia y se queda esperando. No ejecuta pruebas automáticamente al arrancar, lo que te permite entrar en él y ejecutarlas manualmente cuando desees.
+
+---
+
+## Cómo Ejecutar Pruebas
+
+Una vez que el entorno está arriba (`docker compose up`), sigue estos pasos para correr tus tests:
+
+1. **Entrar al contenedor de Playwright:**
+   Abrir una nueva terminal y ejecutar:
+   ```bash
+   docker exec -it playwright-qa /bin/bash
+   ```
+
+2. **Instalar dependencias (si es la primera vez):**
+   Dentro del contenedor:
+   ```bash
+   npm install
+   ```
+
+3. **Instalar navegadores de Playwright (si es necesario):**
+   ```bash
+   npx playwright install
+   ```
+
+4. **Ejecutar los tests:**
+   ```bash
+   npx playwright test
+   ```
+
+## Notas Importantes
+- **Base URL**: El contenedor de Playwright tiene configurada la variable `BASE_URL=http://frontend:5173`. Asegúrate de usar esta variable en tus tests o configurar `playwright.config.js` para usarla.
+- **Datos de Prueba**: La base de datos `postgres-qa` guarda sus datos en una carpeta separada (`postgres_data_qa`) para no interferir con tus datos de desarrollo.
