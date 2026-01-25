@@ -31,7 +31,9 @@ Testing/Proyecto/
 ├── playwright.config.js # Configuración de Playwright
 └── package.json        # Dependencias de testing y scripts
 ```
-
+---
+<img width="296" height="656" alt="image" src="https://github.com/user-attachments/assets/8830fb94-6cce-4512-93e5-28f387e4793e" />
+---
 ---
 
 ## Configuración Docker
@@ -73,3 +75,4 @@ Luego abre `http://localhost:36575` en tu navegador.
 
 - **Persistencia de Datos**: Los datos de Postgres se guardan en `./postgres_data`. Si deseas resetear la base de datos, puedes borrar esta carpeta (con los contenedores apagados).
 - **Variables de Entorno**: El frontend utiliza `VITE_API_URL` para comunicarse con el backend. En este entorno de QA, está configurado para apuntar a `http://localhost:3000` (acceso directo desde el navegador).
+
