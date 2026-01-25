@@ -53,7 +53,9 @@ Deployment/
 │   └── default.conf    # Reglas de ruteo (Frontend + API)
 └── postgres_data/      # Datos persistentes de la base de datos
 ```
-
+---
+<img width="286" height="389" alt="image" src="https://github.com/user-attachments/assets/6df1e8a7-56e2-4ea3-b816-284461981945" />
+---
 ---
 
 ## Arquitectura de Red
@@ -70,3 +72,4 @@ Esto permite que la aplicación sea más segura y eficiente al no exponer los se
 
 - **Actualizaciones**: Cada vez que realices cambios en el código, recuerda regenerar el `dist` en desarrollo y volver a copiarlo aquí antes de hacer un `docker compose up --build`.
 - **Logs**: Puedes monitorear el estado de los servicios con `docker compose logs -f`.
+
