@@ -11,7 +11,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://backend:3000
+      - VITE_API_URL=http://localhost:3000
     command: npm run dev -- --host 0.0.0.0
     networks:
       - qa-net
@@ -44,21 +44,23 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres_data_qa:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
     networks:
       - qa-net
 
   playwright-qa:
-    image: mcr.microsoft.com/playwright:v1.57.0-jammy
+    image: mcr.microsoft.com/playwright:v1.58.0-jammy
     container_name: playwright-qa
     depends_on:
       - frontend
     environment:
-      - BASE_URL=http://frontend:5173
+      - BASE_URL=http://localhost:5173
     volumes:
       - .:/app
     working_dir: /app
     command: sleep infinity
+    ports:
+      - "36575:36575"
     networks:
       - qa-net
 
