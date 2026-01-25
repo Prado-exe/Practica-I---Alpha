@@ -6,7 +6,6 @@ Este repositorio contiene la configuración necesaria para levantar un **entorno
 
 * Un **frontend en React + Vite**
 * Un contenedor de **PostgreSQL**
-* Un contenedor de **MySQL**
 
 **Importante:** el proyecto **React + Vite debe crearse previamente de forma local**. Docker **no crea el proyecto**, solo lo **ejecuta y sirve** dentro de un contenedor.
 
@@ -57,7 +56,6 @@ Esto levantará **3 contenedores**:
 | -------- | ------------ | ----------- |
 | Frontend | frontend-dev | 5173        |
 | Postgres | postgres-dev | 5432        |
-| MySQL    | mysql-dev    | 3308        |
 
 ---
 
@@ -99,11 +97,6 @@ Ejemplo de archivo `.env`:
 POSTGRES_USER=user
 POSTGRES_PASSWORD=password
 POSTGRES_DB=appdb
-
-MYSQL_ROOT_PASSWORD=rootpassword
-MYSQL_DATABASE=appdb
-MYSQL_USER=user
-MYSQL_PASSWORD=password
 ```
 
 Ejemplo de uso en `docker-compose.yml`:
@@ -152,24 +145,6 @@ import.meta.env.VITE_API_URL
 
 ---
 
-## Base de Datos – MySQL
-
-**Credenciales:**
-
-* Usuario: `user`
-* Password: `password`
-* Root password: `rootpassword`
-* Base de datos: `appdb`
-* Puerto host: `3308`
-
-**Persistencia:**
-
-```text
-./mysql_data
-```
-
----
-
 ## Red Docker
 
 Todos los servicios comparten la red:
@@ -181,7 +156,6 @@ dev-net
 Esto permite que los contenedores se comuniquen entre sí usando los nombres:
 
 * `postgres`
-* `mysql`
 * `frontend`
 
 ---
@@ -199,6 +173,7 @@ docker compose down -v
 ```
 
 ---
+
 
 
 
