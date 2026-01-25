@@ -1,180 +1,97 @@
-# README – Entorno de Desarrollo con Docker (React + Vite + DBs)
+# Documentación del Proyecto Docker (React + Node + Postgres)
 
-## Descripción General
+Este repositorio contiene la configuración para un entorno de desarrollo contenerizado. A continuación se detalla la arquitectura, los componentes de Docker y la estructura correcta del proyecto.
 
-Este repositorio contiene la configuración necesaria para levantar un **entorno de desarrollo** usando **Docker Compose**, el cual incluye:
+## Estructura del Proyecto
 
-* Un **frontend en React + Vite**
-* Un contenedor de **PostgreSQL**
-
-**Importante:** el proyecto **React + Vite debe crearse previamente de forma local**. Docker **no crea el proyecto**, solo lo **ejecuta y sirve** dentro de un contenedor.
-
----
-
-## Requisitos Previos
-
-Antes de usar este `docker-compose.yml`, debes tener instalado:
-
-* Docker
-* Docker Compose
-* Node.js (solo para crear el proyecto inicialmente)
-
----
-
-## Paso 1: Crear el proyecto React + Vite (previo a Docker)
-
-Este paso se realiza **una sola vez**, fuera de Docker.
-
-```bash
-npm create vite@latest 'nombre_proyecto'
-cd frontend
-npm install
-```
-
-Asegúrate de que el proyecto tenga al menos:
-
-* `package.json`
-* `node_modules/` (opcional, Docker lo recrea)
-* `vite.config.js`
-
-Una vez creado el proyecto, copia o coloca el `docker-compose.yml` y el `Dockerfile` **en la raíz del proyecto React**.
-
----
-
-
-## Paso 2: Levantar el entorno con Docker
-
-Desde la raíz del proyecto:
-
-```bash
-docker compose up --build
-```
-
-Esto levantará **3 contenedores**:
-
-| Servicio | Contenedor   | Puerto Host |
-| -------- | ------------ | ----------- |
-| Frontend | frontend-dev | 5173        |
-| Postgres | postgres-dev | 5432        |
-
----
-
-## Acceso al Frontend
-
-Una vez levantado el entorno, accede desde el navegador a:
-
-```
-http://localhost:5173
-```
-
-El servidor Vite se ejecuta con:
-
-```bash
-npm run dev -- --host 0.0.0.0
-```
-
-Esto permite el acceso desde fuera del contenedor.
-
----
-
-## Variables de Entorno
-
-### Recomendación de Seguridad (Muy Importante)
-
-Se recomienda **no definir credenciales sensibles directamente en el `docker-compose.yml`**. Todas las credenciales de acceso a bases de datos (usuarios, contraseñas, nombres de BD, puertos sensibles, etc.) **deben declararse mediante variables de entorno**, idealmente usando un archivo `.env`.
-
-Esto mejora significativamente la **seguridad**, **portabilidad** y **mantenibilidad** del proyecto.
-
-**Buenas prácticas:**
-
-* Usar un archivo `.env` (no versionado en Git)
-* Referenciar las variables desde `docker-compose.yml`
-* Definir valores distintos para desarrollo, testing y producción
-
-Ejemplo de archivo `.env`:
-
-```env
-POSTGRES_USER=user
-POSTGRES_PASSWORD=password
-POSTGRES_DB=appdb
-```
-
-Ejemplo de uso en `docker-compose.yml`:
-
-```yaml
-environment:
-  POSTGRES_USER: ${POSTGRES_USER}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  POSTGRES_DB: ${POSTGRES_DB}
-```
-
-**Nunca subas el archivo `.env` al repositorio**. Agrégalo a `.gitignore`.
-
----
-
-## Variables de Entorno
-
-El frontend recibe la siguiente variable:
-
-```env
-VITE_API_URL=http://localhost:3000
-```
-
-Esta variable puede ser utilizada dentro de React como:
-
-```js
-import.meta.env.VITE_API_URL
-```
-
----
-
-## Base de Datos – PostgreSQL
-
-**Credenciales:**
-
-* Usuario: `user`
-* Password: `password`
-* Base de datos: `appdb`
-* Puerto: `5432`
-
-**Persistencia:**
+Para que la construcción de Docker funcione correctamente, el proyecto debe seguir esta estructura de archivos. Es **crítico** que la carpeta `public` (con `vite.svg` dentro) esté ubicada dentro de `frontend/` y no en la raíz.
 
 ```text
-./postgres_data
+.
+├── Docker-compose.yml      # Orquestación de contenedores
+├── Readme.md               # Esta documentación
+├── backend/                # Código del Backend (Node.js/Express)
+│   ├── Dockerfile          # Definición de imagen del backend
+│   ├── package.json        # Dependencias (express, pg, cors)
+│   └── src/
+│       └── index.js        # Punto de entrada del servidor
+├── frontend/               # Código del Frontend (React + Vite)
+│   ├── Dockerfile          # Definición de imagen del frontend
+│   ├── package.json        # Dependencias de React/Vite
+│   ├── vite.config.js      # Configuración de Vite
+│   ├── public/             # Archivos estáticos públicos
+│   │   └── vite.svg        # Logo de Vite (importante para el build)
+│   └── src/
+│       ├── App.jsx         # Componente principal
+│       └── main.jsx        # Punto de entrada de React
+└── postgres_data/          # Persistencia de datos (generado automáticamente)
 ```
 
 ---
 
-## Red Docker
+## Docker Compose
 
-Todos los servicios comparten la red:
+El archivo `Docker-compose.yml` orquesta 3 servicios conectados a través de la red `dev-net`.
 
-```text
-dev-net
-```
+### 1. Servicio `frontend`
+- **Contexto de Build**: Carpeta `./frontend`.
+- **Puerto**: Expone el puerto `5173` al host.
+- **Volúmenes**:
+  - `./frontend:/app`: Sincroniza el código local con el contenedor para **Hot Reloading**.
+  - `/app/node_modules`: Evita que `node_modules` del host sobrescriba el del contenedor.
+- **Variables de Entorno**:
+  - `VITE_API_URL`: Apunta a `http://localhost:3000` (aunque para llamadas desde el navegador, "localhost" refiere al host, esto es útil para confirmar el puerto).
+- **Comando**: `npm run dev -- --host 0.0.0.0` para permitir conexiones externas al contenedor.
 
-Esto permite que los contenedores se comuniquen entre sí usando los nombres:
+### 2. Servicio `backend`
+- **Contexto de Build**: Carpeta `./backend`.
+- **Puerto**: Expone el puerto `3000` al host.
+- **Volúmenes**:
+  - `./backend:/app`: Permite edición de código en caliente (si se usa nodemon).
+- **Dependencia**: Espera a que `postgres` esté listo antes de iniciar.
+- **Conexión a BD**: Se conecta al host `postgres` (nombre del servicio) en el puerto `5432`.
 
-* `postgres`
-* `frontend`
+### 3. Servicio `postgres`
+- **Imagen**: `postgres:16`.
+- **Puertos**: Expone el puerto estándar `5432`.
+- **Volúmenes**: `./postgres_data` mapeado a `/var/lib/postgresql/data` para persistencia de datos (la base de datos no se borra al detener el contenedor).
+- **Credenciales**: Configuradas en `environment` (Usuario: `user`, Pass: `password`, DB: `appdb`).
 
 ---
 
-## Detener el entorno
+## Explicación de Dockerfiles
 
-```bash
-docker compose down
+### Frontend (`frontend/Dockerfile`)
+```dockerfile
+FROM node:20            # Imagen base de Node.js versión 20
+WORKDIR /app            # Directorio de trabajo dentro del contenedor
+COPY package*.json ./   # Copia archivos de dependencias primero (para optimizar caché)
+RUN npm install         # Instala dependencias del frontend
+COPY . .                # Copia el resto del código fuente
+EXPOSE 5173             # Documenta que el contenedor usa el puerto 5173
+# El comando de inicio se define en docker-compose (npm run dev)
 ```
 
-Para eliminar también los volúmenes:
-
-```bash
-docker compose down -v
+### Backend (`backend/Dockerfile`)
+```dockerfile
+FROM node:20            # Misma imagen base para consistencia
+WORKDIR /app
+COPY package*.json ./   # Copia manifiestos de dependencias
+RUN npm install         # Instala express, pg, cors, etc.
+COPY . .                # Copia el código fuente (src/index.js, etc.)
+EXPOSE 3000             # Documenta el puerto de la API
+CMD ["npm", "run", "dev"] # Comando por defecto al iniciar
 ```
 
 ---
 
+## Cómo Iniciar
 
-
-
-
+1. Asegúrate de tener la estructura correcta (especialmente `frontend/public`).
+2. Ejecuta el comando:
+   ```bash
+   docker compose up --build
+   ```
+3. Accede a:
+   - **Frontend**: http://localhost:5173
+   - **Backend Status**: http://localhost:3000/api/status
