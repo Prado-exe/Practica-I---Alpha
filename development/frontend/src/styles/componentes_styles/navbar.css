@@ -1,0 +1,206 @@
+/* -- navbar base completo -- */
+.navbar {
+  width: 100%;
+  margin: 0 ;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 0;
+  font-family: var(--font-body);
+}
+
+body{
+  margin: 0;
+}
+
+/*-- tengo dividido el navbar en dos partes, superior e inferior --*/
+/* --parte sup navbar -- */
+.navbar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+}
+
+.navbar-logo img {
+  height: 80px;
+  width: auto;
+  margin-left: 1rem;
+}
+
+/* -- btn accesibilidad--*/
+.navbar-right {
+  display: flex;
+  margin-left: auto;
+  
+}
+
+.navbar-right button {
+  width: 40px;             
+  height: 40px;
+  border: 1px solid #ccc;   
+  border-radius: 10px;     
+  cursor: pointer;
+  display: flex;            
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+.navbar-right button:hover {
+  background-color: #eeeeeeaa;
+}
+
+/* -- btn login - register --*/
+
+.navbar-auth {
+  display: flex;
+  gap: 6px;
+  margin-right: 1rem;
+  margin-left: 2rem;
+}
+
+.navbar-auth a {
+  text-decoration: none;
+}
+
+.btn {
+  display: flex;                 
+  align-items: center;
+  gap: 10px;                      
+  padding: 6px 16px;      
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  background-color: transparent;
+}
+
+.btn-icon {
+  font-size: 16px;
+  color: #0B5ED7;               
+}
+
+.login {
+  background-color: transparent;
+  color: #0B5ED7;
+  font-size: 1rem;
+}
+
+.register {
+  background-color: transparent;
+  color: #1565C0;
+  font-size: 1rem;
+}
+
+
+/* ───────── BOTTOM ───────── */
+/* --parte inf navbar -- */
+.navbar-bottom {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap: 10px;
+  padding: 8px 0;
+  background-color: #0B5ED7;
+}
+
+/*este boton es una prueba, para redireciconamiento del navbar, es mas un link estilizado que un boton en si*/
+.nav-btn {
+  flex: 1;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  color: white;                                                                                               /*->>>>>>>>>>>>>>>         BOTON DE PRUEBA, ACORDARME DE CAMBIARLO, MODIFICARLO, LO QUE SEA*/
+  font-size: 1.125rem;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--font-body);
+  transition: background-color 0.2s;
+}
+
+.nav-btn:hover {
+  background-color: #0D47A1;
+}
+
+/* -- botones inferior -- */
+.navbar-bottom button {
+  flex: 1;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.125rem;
+  cursor: pointer;
+  text-transform: capitalize;
+  padding: 12px 0;
+  transition: background-color 0.2s;
+  font-family: var(--font-body);
+}
+
+.navbar-bottom button:hover {
+  background-color: #0D47A1; 
+  text-decoration: none;
+}
+
+.navbar-bottom > * {
+  flex: 1;
+}
+
+/* -- botones desplegables -- */
+.dropdown-btn {
+  width: 100%;
+  background: none;
+  color: white;
+  border: none;
+  padding: 12px 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.dropdown:hover .dropdown-btn {
+  background-color: #0D47A1;
+}
+
+/* contenedor dropdown */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  display: none;
+  border-radius: 10px;
+  background:#1565C0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: 0.4s;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown:focus-within .dropdown-menu {  /*con este, me encargo de mantener el desplegable tanto por click como por pasar encima*/
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* opciones */
+.dropdown-menu button {
+  width: 100%;
+  background: #0B5ED7;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.4s;
+}
+
+.dropdown-menu button:hover {
+  background-color: #0D47A1; 
+}
+

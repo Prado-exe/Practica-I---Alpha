@@ -1,0 +1,182 @@
+.carousel-wrapper {
+  position: relative;
+  margin: 0rem 5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ===================== */
+/* Carrusel */
+/* ===================== */
+.carousel {
+  display: flex;
+  overflow: hidden; /* ← importante */
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  min-height: 300px;
+  position: relative;
+}
+
+.carousel-item {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  height: 500px;
+  background: #ddd;
+  border-radius: 0px;
+  padding: 3rem;
+  box-sizing: border-box;
+  scroll-snap-align: start;
+}
+
+/* Imagen izquierda */
+.carousel-item img {
+  width: 40%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0; /* ← CLAVE */
+}
+
+/* Texto derecha */
+.carousel-text {
+  width: 60%;
+  padding-left: 2rem;
+}
+
+.carousel-text h2 {
+  margin-bottom: 0.5rem;
+}
+
+.carousel-text p {
+  line-height: 1.5;
+}
+
+/* ===================== */
+/* Skeleton (loading) */
+/* ===================== */
+.carousel-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-skeleton {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 25%,
+    #f0f0f0 37%,
+    #e0e0e0 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ===================== */
+/* Flechas */
+/* ===================== */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.carousel-arrow.left {
+  left: -20px;
+}
+
+.carousel-arrow.right {
+  right: -20px;
+}
+
+.carousel-arrow:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+
+/* ===================== */
+/* Contenido derecho del slide */
+/* ===================== */
+.carousel-content {
+  width: 60%;
+  padding-left: 2rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+/* Parte superior */
+.carousel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.carousel-title {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.carousel-subtitle {
+  margin: 0;
+  font-size: 1.7rem;
+  color: #555;
+}
+
+.carousel-description {
+  margin-top: 0.5rem;
+  font-size: 1.rem;
+  line-height: 1.6;
+  color: #333;
+  max-width: 90%;
+}
+
+/* ===================== */
+/* Footer inferior */
+/* ===================== */
+.carousel-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.carousel-date {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Botón */
+.carousel-btn {
+  padding: 0.55rem 1.4rem;
+  border-radius: 20px;
+  border: none;
+  background: #1565c0;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.carousel-btn:hover {
+  background: #0d47a1;
+}

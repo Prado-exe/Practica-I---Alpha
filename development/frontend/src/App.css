@@ -1,8 +1,16 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  --font-scale: 1;
+  --font-heading: "Montserrat", system-ui, sans-serif;
+  --font-subheading: "Inter", system-ui, sans-serif;
+  --font-body: "roboto", Arial, sans-serif;
+  --bg-color: #FAFAFA;
+  --text-color: #000;
+
+  font-size: calc(100% * var(--font-scale));
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 .logo {

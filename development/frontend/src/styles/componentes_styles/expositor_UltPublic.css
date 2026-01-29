@@ -1,0 +1,158 @@
+/* ===================== */
+/* Marco gris exterior */
+/* ===================== */
+.ultpublic-wrapper {
+  background-color: #eeeeee;
+  padding: 3rem 2rem;
+  margin: 3rem 8rem;
+  border-radius: 0px;
+}
+
+/* ===================== */
+/* Contenedor interno */
+/* ===================== */
+.ultpublic-container {
+  width: 100%;
+}
+
+/* ===================== */
+/* Encabezado */
+/* ===================== */
+.ultpublic-header {
+  margin-bottom: 2rem;
+  margin-left: 2rem;
+  text-align: start;
+}
+
+.ultpublic-header h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.ultpublic-header p {
+  font-size: 1.5rem;
+  color: #666;
+}
+
+/* ===================== */
+/* Grid vertical (1 columna) */
+/* ===================== */
+.ultpublic-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* solo una columna */
+  gap: 2rem;          
+  margin:2rem 2rem;        /* separación entre cards */
+  justify-items: stretch;       /* centra cada card horizontalmente */
+  align-items: start;
+}
+
+/* ===================== */
+/* Cards: imagen a la izquierda, contenido a la derecha */
+/* ===================== */
+.ultpublic-card {
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row; /* fila en vez de columna */
+  width: 100%;
+  max-width: none;
+  height: 300px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ultpublic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Imagen */
+.ultpublic-card-image {
+  width: 25%; /* ocupa la izquierda */
+  height: auto;
+  object-fit: cover;
+  padding: 30px;
+  border-radius: 0px;
+}
+
+/* Contenido */
+.ultpublic-card-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1; /* toma el espacio restante a la derecha */
+}
+
+.ultpublic-card-content h3 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.ultpublic-card-content p {
+  font-size: 1.4rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Botón */
+.ultpublic-card-button {
+  margin-top: auto; /* fuerza el botón abajo */
+  align-self: flex-end; /* alineado a la izquierda dentro del contenido */
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #1565c0;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ultpublic-card-button:hover {
+  background-color: #0d47a1;
+}
+
+/* Separador */
+.ultpublic-separator {
+  width: auto;
+  height: 1px;
+  background-color: black;
+  border: none;
+  margin: 0.5rem auto 2rem auto;
+  border-radius: 2px;
+}
+
+/* ===================== */
+/* Responsive */
+/* ===================== */
+@media (max-width: 1024px) {
+  .ultpublic-card {
+    flex-direction: column; /* se vuelve vertical en pantallas medianas */
+  }
+
+  .ultpublic-card-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+  }
+
+  .ultpublic-card-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .ultpublic-card {
+    width: 95%;
+  }
+
+  .ultpublic-header h2 {
+    font-size: 2rem;
+  }
+
+  .ultpublic-header p {
+    font-size: 1.3rem;
+  }
+}

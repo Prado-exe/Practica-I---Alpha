@@ -1,0 +1,147 @@
+/* ===================== */
+/* Marco gris exterior */
+/* ===================== */
+.expositor-wrapper {
+  background-color: #eeeeee; /* gris suave */
+  padding: 4rem;             /* separación interna */
+  margin: 2rem 8rem;         /* separación del borde de la página */
+  border-radius: 0px;
+}
+
+/* ===================== */
+/* Contenido interno */
+/* ===================== */
+.expositor-popdata {
+  width: 100%;
+}
+
+/* ===================== */
+/* Encabezado */
+/* ===================== */
+.expositor-header {
+  margin-bottom: 2.5rem;
+}
+
+.expositor-header h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.expositor-header p {
+  font-size: 1.7rem;
+  color: #666;
+}
+
+/* ===================== */
+/* Grid */
+/* ===================== */
+.expositor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas fijas */
+  gap: 1rem;                              /* espacio entre cards */
+  justify-items: stretch;                   /* centra cada card en su columna */
+  align-items: start;                      /* alinea cards arriba */
+}
+
+/* ===================== */
+/* Cards */
+/* ===================== */
+.expositor-card {
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 600px;    /* altura vertical */
+  width: 420px;     /* ancho de cada card */
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.expositor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Imagen */
+.card-image {
+  width: 60%;          /* ocupa casi todo el ancho de la card */
+  height: 45%;         /* ocupa 40% de la altura total */
+  max-width: 100%;
+  object-fit: cover;
+  display: block;
+  margin: 44px auto 0 auto; /* centrada horizontal y separada arriba */
+  border-radius: 0px;
+}
+
+/* Contenido */
+.card-content {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex-grow: 1;       /* fuerza que el botón quede abajo */
+}
+
+.card-content h3 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.card-content p {
+  font-size: 1.4rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Botón */
+.card-button {
+  margin-top: auto;
+  align-self: flex-end;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #1565c0;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.card-button:hover {
+  background-color: #0d47a1;
+}
+
+/* ===================== */
+/* Responsive (opcional) */
+/* ===================== */
+@media (max-width: 1024px) {
+  .expositor-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+  .expositor-card {
+    max-width: 280px;
+    min-height: 380px;
+  }
+}
+
+@media (max-width: 640px) {
+  .expositor-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  .expositor-card {
+    max-width: 100%;
+    min-height: 360px;
+  }
+}
+
+.expositor-separator {
+  width: auto;            /* ancho de la línea */
+  height: 1px;            /* grosor */
+  background-color: black; /* color del separador */
+  border: none;           /* quita borde por defecto del hr */
+  margin: 0.5rem auto 2rem auto; /* separaciones arriba y abajo */
+  border-radius: 2px;     /* bordes redondeados opcional */
+}
