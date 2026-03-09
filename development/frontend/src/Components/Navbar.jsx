@@ -102,9 +102,17 @@ function Navbar() {
 
         {/* PARTE INFERIOR */}
         <nav className={`navbar-bottom ${menuOpen ? "open" : ""}`} role="navigation" aria-label="Navegación principal">
-          {["Inicio", "Datos", "Instituciones", "Indicadores", "Publicaciones", "Noticias", "Contacto"].map((item) => (
-            <Link key={item} to={`/${item.toLowerCase()}`} className="nav-btn">
-              {item}
+          {[
+            { label: "Inicio"},
+            { label: "Datos"},
+            { label: "Instituciones"},
+            { label: "Indicadores"},
+            { label: "Publicaciones"},
+            { label: "Noticias" },
+            { label: "Contacto", path: "/formulario" },
+          ].map((item) => (
+            <Link key={item.path} to={item.path} className="nav-btn">
+              {item.label}
             </Link>
           ))}
 
