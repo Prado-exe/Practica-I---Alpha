@@ -14,6 +14,7 @@ import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Formulario from "./Pages/Formulario";
+import ConjuntoDatos from "./Pages/ConjuntoDatos";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/formulario" element={<Formulario />} />
+          <Route path="/conjuntodatos" element={<ConjuntoDatos />} />
         </Routes>
       </main>
       <Footer />

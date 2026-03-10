@@ -103,8 +103,8 @@ function Navbar() {
         {/* PARTE INFERIOR */}
         <nav className={`navbar-bottom ${menuOpen ? "open" : ""}`} role="navigation" aria-label="Navegación principal">
           {[
-            { label: "Inicio"},
-            { label: "Datos"},
+            { label: "Inicio", path: "/"},
+            { label: "Datos", path: "/conjuntodatos"},
             { label: "Instituciones"},
             { label: "Indicadores"},
             { label: "Publicaciones"},
