@@ -2,6 +2,7 @@ import { useState } from "react";
 import "../styles/pages_styles/Login.css";
 import logo from "../assets/content.png";
 import Captcha from "../Components/Subcomponents/Captcha";
+import { Link } from "react-router-dom";
 
 function Login() {
 
@@ -95,8 +96,10 @@ function Login() {
         </button>
 
         <div className="login-links">
-          <a href="/register">Registrarse</a>
-          <a href="/forgot">¿Olvidaste tu contraseña?</a>
+          <div className="login-links">
+            <Link to="/register">Registrarse</Link>
+            <Link to="/Recuperar_Contraseña">¿Olvidaste tu contraseña?</Link>
+          </div>
         </div>
 
       </form>

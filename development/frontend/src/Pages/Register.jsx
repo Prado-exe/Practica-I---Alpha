@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/pages_styles/register.css";
 import logo from "../assets/content.png";
 import Captcha from "../Components/Subcomponents/Captcha";
@@ -12,6 +13,7 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
 
@@ -52,6 +54,14 @@ function Register() {
       const data = await response.json();
 
       console.log("Respuesta backend:", data);
+
+      if (response.ok) {
+        navigate("/verificacion", {
+          state: { email }
+        });
+      } else {
+        alert(data.message || "Error en el registro");
+      }
 
     } catch (error) {
 
