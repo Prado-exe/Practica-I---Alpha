@@ -105,10 +105,10 @@ function Navbar() {
           {[
             { label: "Inicio", path: "/"},
             { label: "Datos", path: "/conjuntodatos"},
-            { label: "Instituciones"},
+            { label: "Instituciones", path: "/instituciones"},
             { label: "Indicadores"},
-            { label: "Publicaciones"},
-            { label: "Noticias" },
+            { label: "Publicaciones", path: "/publicaciones"},
+            { label: "Noticias", path: "/noticias"},
             { label: "Contacto", path: "/formulario" },
           ].map((item) => (
             <Link key={item.path} to={item.path} className="nav-btn">

@@ -15,6 +15,9 @@ import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Formulario from "./Pages/Formulario";
 import ConjuntoDatos from "./Pages/ConjuntoDatos";
+import Publicaciones from "./Pages/publicaciones";
+import Instituciones from "./Pages/Instituciones";
+import Noticias from "./Pages/Noticias";
 
 function App() {
   return (
@@ -28,6 +31,11 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/formulario" element={<Formulario />} />
           <Route path="/conjuntodatos" element={<ConjuntoDatos />} />
+          <Route path="/publicaciones" element={<Publicaciones />} />
+          <Route path="/instituciones" element={<Instituciones />} />
+          <Route path="/noticias" element={<Noticias />} />
+          
+
         </Routes>
       </main>
       <Footer />
