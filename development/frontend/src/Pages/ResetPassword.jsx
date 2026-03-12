@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import "../styles/pages_styles/Recuperar_contraseña.css"; // reutiliza el mismo CSS
+import "../styles/pages_styles/RecuperarContrasena.css"; // reutiliza el mismo CSS
 import logo from "../assets/content.png";
 
 function ResetPassword() {

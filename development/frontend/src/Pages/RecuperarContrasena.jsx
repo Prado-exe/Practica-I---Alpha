@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import "../styles/pages_styles/Recuperar_contraseña.css";
+import "../styles/pages_styles/RecuperarContrasena.css";
 import logo from "../assets/content.png";
 
-function Recuperar_Contraseña() {
+function RecuperarContrasena() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -78,4 +78,4 @@ function Recuperar_Contraseña() {
   );
 }
 
-export default Recuperar_Contraseña;
+export default RecuperarContrasena;

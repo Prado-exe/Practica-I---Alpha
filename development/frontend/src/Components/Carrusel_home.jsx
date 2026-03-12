@@ -1,5 +1,5 @@
 import { useRef, useState, useContext } from "react";
-import { AccessibilityContext } from "./Subcomponents/AccessibilityContext";
+import { AccessibilityContext } from "../context/AccessibilityContext";
 
 import slide1 from "../assets/slide1.jpeg";
 import slide2 from "../assets/slide2.png";

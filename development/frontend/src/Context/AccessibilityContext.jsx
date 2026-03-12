@@ -1,8 +1,6 @@
 import { createContext, useState, useEffect } from "react";
-
-
-
 export const AccessibilityContext = createContext();
+export default AccessibilityContext;
 
 export function AccessibilityProvider({ children }) {
   const MIN_FONT_SCALE = 0.8;

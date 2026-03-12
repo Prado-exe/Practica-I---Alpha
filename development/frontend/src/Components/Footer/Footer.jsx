@@ -1,4 +1,4 @@
-import "../Styles/Component_styles/Footer.css";
+import "../../Styles/Component_styles/Footer.css";
 
 function Footer() {
   return (
@@ -11,7 +11,7 @@ function Footer() {
           <div className="footer-logos">
             <img
               src="/src/assets/content.png"
-              alt="Logo proyecto Content"
+              alt="Logo del proyecto Content"
               className="logo-main"
             />
 
@@ -23,9 +23,13 @@ function Footer() {
           </div>
 
           {/* Datos */}
-          <nav className="footer-section" aria-label="Datos y contenidos">
-            <h4>Datos y contenidos</h4>
-            <ul>
+          <nav
+            className="footer-section"
+            aria-labelledby="footer-datos"
+          >
+            <h4 id="footer-datos">Datos y contenidos</h4>
+
+            <ul role="list">
               <li><a href="#">Datos</a></li>
               <li><a href="#">Instituciones</a></li>
               <li><a href="#">Indicadores</a></li>
@@ -35,9 +39,13 @@ function Footer() {
           </nav>
 
           {/* Sobre nosotros */}
-          <nav className="footer-section" aria-label="Sobre nosotros">
-            <h4>Sobre nosotros</h4>
-            <ul>
+          <nav
+            className="footer-section"
+            aria-labelledby="footer-nosotros"
+          >
+            <h4 id="footer-nosotros">Sobre nosotros</h4>
+
+            <ul role="list">
               <li><a href="#">Objetivo estratégico</a></li>
               <li><a href="#">Visión y misión</a></li>
               <li><a href="#">Principios</a></li>
@@ -46,18 +54,28 @@ function Footer() {
           </nav>
 
           {/* Contacto */}
-          <nav className="footer-section" aria-label="Contacto">
-            <h4>Contacto</h4>
-            <ul>
+          <nav
+            className="footer-section"
+            aria-labelledby="footer-contacto"
+          >
+            <h4 id="footer-contacto">Contacto</h4>
+
+            <ul role="list">
               <li><a href="#">Formulario de contacto</a></li>
             </ul>
           </nav>
 
         </div>
 
-        <p className="footer-copy">
-          © 2026 Plataforma de Datos – Todos los derechos reservados
-        </p>
+        {/* Separador institucional */}
+        <div className="footer-divider"></div>
+
+        {/* copyright */}
+        <div className="footer-bottom">
+          <p>
+            © 2026 Plataforma de Datos – Universidad de La Serena
+          </p>
+        </div>
 
       </div>
     </footer>

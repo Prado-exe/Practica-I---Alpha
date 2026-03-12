@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import "../styles/pages_styles/Verificacion_de_seguridad.css";
+import "../styles/pages_styles/VerificacionSeguridad.css";
 import logo from "../assets/content.png";
 
 function Verificacion_de_seguridad() {

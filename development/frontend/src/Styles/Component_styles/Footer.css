@@ -4,13 +4,13 @@
   padding: 2.5rem 1.5rem;
 }
 
-/* contenedor alineado con el resto de la página */
+/* contenedor */
 .footer-container {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-/* grid principal */
+/* GRID PRINCIPAL */
 .footer-grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr 1fr;
@@ -18,41 +18,58 @@
   align-items: start;
 }
 
-/* logos */
+/* SEPARACIÓN ENTRE COLUMNAS */
+.footer-section {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.footer-section::before {
+  content: "";
+  position: absolute;
+  left: -1rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255,255,255,0.2);
+}
+
+/* evitar línea antes de logos */
+.footer-logos + .footer-section::before {
+  display: block;
+}
+
+/* LOGOS */
 .footer-logos {
   display: grid;
-  grid-template-columns: repeat(2, auto); /* máximo 2 por fila */
+  grid-template-columns: repeat(2, auto);
   gap: 1rem;
   align-items: center;
   justify-content: center;
 }
 
-/* imágenes */
 .footer-logos img {
   object-fit: contain;
-  max-height: 10rem;
-  width: auto;
+  max-height: 9rem;
 }
 
-/* tamaños específicos */
 .logo-main {
   width: 8rem;
-  max-width: 100%;
 }
 
 .logo-uls {
   width: 8rem;
-  max-width: 100%;
 }
 
-/* secciones */
+/* TITULOS */
 .footer-section h4 {
   margin-bottom: 0.7rem;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
+  color: #ffffff;
 }
 
-/* lista accesible */
+/* LISTAS */
 .footer-section ul {
   list-style: none;
   padding: 0;
@@ -63,54 +80,52 @@
   margin-bottom: 0.35rem;
 }
 
-/* enlaces */
+/* LINKS */
 .footer-section a {
   color: #E3F2FD;
   text-decoration: none;
   font-size: 0.95rem;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
-/* hover */
 .footer-section a:hover {
   color: #ffffff;
   text-decoration: underline;
 }
 
-/* accesibilidad teclado */
+/* ACCESIBILIDAD */
 .footer-section a:focus {
   outline: 2px solid #ffffff;
   outline-offset: 3px;
 }
 
-/* copyright */
-.footer-copy {
-  margin-top: 2rem;
+
+/* ZONA INFERIOR */
+.footer-bottom {
+  margin-top: 1rem;
   text-align: center;
   font-size: 0.9rem;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
-/* -------- RESPONSIVE -------- */
+/* ---------- RESPONSIVE ---------- */
 
-/* tablet */
 @media (max-width: 900px) {
+
   .footer-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
   }
 
-  .footer-logos {
-    flex-direction: row;
-    align-items: center;
+  .footer-section::before {
+    display: none;
   }
+
 }
 
-/* móvil */
 @media (max-width: 600px) {
+
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
   }
 
   .footer-logos {
@@ -120,4 +135,5 @@
   .footer-section {
     text-align: center;
   }
+
 }
