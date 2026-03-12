@@ -11,7 +11,7 @@ function Register() {
   const [institution, setInstitution] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [captchaToken, setCaptchaToken] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -19,10 +19,7 @@ function Register() {
 
     e.preventDefault();
 
-    if (!captchaToken) {
-      alert("Debes completar el captcha");
-      return;
-    }
+    
 
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden");
@@ -45,8 +42,8 @@ function Register() {
           name,
           email,
           institution,
-          password,
-          captchaToken
+          password
+          
         })
 
       });
@@ -142,7 +139,7 @@ function Register() {
           required
         />
 
-        <Captcha onVerify={setCaptchaToken} />
+        
 
         <button className="login-btn" disabled={loading}>
           {loading ? "Registrando..." : "Registrarse"}
