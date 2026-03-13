@@ -1,106 +1,42 @@
-/* Variables globales */
-:root {
-  --font-scale: 1;
-
-  /* Colores principales */
-  --bg-color: #fafafa;
-  --text-color: #000000;
-  --heading-color: #000000;
-  --link-color: #1565c0;
-
-  /* Colores secundarios */
-  --border-color: #e0e0e0;
-  --card-bg: #ffffff;
-
-  /* Tipografía */
-  --font-body: "Roboto", Arial, sans-serif;
-  --font-heading: "Roboto", Arial, sans-serif;
-
-  /* Espaciado (usando rem) */
-  --space-xs: 0.25rem;   
-  --space-sm: 0.5rem;  
-  --space-md: 1rem;    
-  --space-lg: 1.5rem; 
-  --space-xl: 2rem;    
-
-  /* Bordes */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;   
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
 }
 
-/* reset */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-html {
-  font-size: calc(100% * var(--font-scale));
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-
-  background-color: var(--bg-color);
-  color: var(--text-color);
-
-  font-family: var(--font-body);
-  line-height: 1.5;
-}
-
-/* tipografia base */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: var(--heading-color);
-  font-family: var(--font-heading);
-  margin-top: 0;
-}
-
-p {
-  margin-bottom: var(--space-md);
-}
-
-a {
-  color: var(--link-color);
-  text-decoration: underline;
-}
-
-/* accesibilidad con tab */
-:focus-visible {
-  outline: 0.1875rem solid var(--link-color); 
-  outline-offset: 0.125rem;
-}
-
-/* modo alto contraste */
-html.high-contrast {
-
-  --bg-color: #000000;
-  --text-color: #ffffff;
-
-  --heading-color: #ffff00;
-  --link-color: #00ffff;
-
-  --border-color: #ffffff;
-  --card-bg: #000000;
-}
-
-/* modo oscuro automatico (por si esta por defecto en el sistema ) 
-@media (prefers-color-scheme: dark) {
-
-  :root {
-    --bg-color: #121212;
-    --text-color: #ffffff;
-    --heading-color: #ffffff;
-    --card-bg: #1e1e1e;
-    --border-color: #333333;
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
   }
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-}*/
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
