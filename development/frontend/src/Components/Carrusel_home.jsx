@@ -9,7 +9,7 @@ import "../styles/Component_styles/Carrusel_home.css";
 
 function Carrusel_home() {
   const carouselRef = useRef(null);
-  const { fontSize, highContrast, reducedMotion } = useContext(AccessibilityContext);
+  const { fontScale, highContrast, reducedMotion } = useContext(AccessibilityContext);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const slidesData = [
@@ -62,7 +62,7 @@ function Carrusel_home() {
   return (
     <div
       className={`carousel-wrapper ${highContrast ? "hc" : ""}`}
-      style={{ fontSize: `${fontSize}rem` }}
+      style={{ fontSize: `${fontScale}rem` }}
     >
       {/* Flecha izquierda */}
       <button

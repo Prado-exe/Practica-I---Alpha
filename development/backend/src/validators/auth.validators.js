@@ -12,8 +12,14 @@ const loginSchema = z.object({
   password: z.string().min(1, "La contraseña es obligatoria"),
 });
 
+const verifyCodeSchema = z.object({
+  email: z.string().email("Correo inválido"),
+  codigo: z.string().min(4, "Código inválido").max(10, "Código inválido"),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
+  verifyCodeSchema,
 };
 

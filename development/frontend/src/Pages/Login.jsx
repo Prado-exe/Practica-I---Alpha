@@ -8,14 +8,17 @@ function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+  //const [captchaToken, setCaptchaToken] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
 
     e.preventDefault();
 
-    
+    //if (!captchaToken) {
+    //  alert("Debes completar el captcha");
+    //  return;
+    //}
 
     try {
 
@@ -32,6 +35,7 @@ function Login() {
         body: JSON.stringify({
           email,
           password,
+          //captchaToken
         })
 
       });
@@ -85,7 +89,7 @@ function Login() {
           required
         />
 
-        
+       
 
         <button className="login-btn" disabled={loading}>
           {loading ? "Validando..." : "Iniciar sesión"}

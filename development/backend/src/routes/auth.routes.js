@@ -1,7 +1,7 @@
 const { readJsonBody } = require("../utils/body");
 const { sendJson } = require("../utils/json");
-const { registerSchema, loginSchema } = require("../validators/auth.validators");
-const { registerUser, loginUser } = require("../services/auth.service");
+const { registerSchema, loginSchema, verifyCodeSchema } = require("../validators/auth.validators");
+const { registerUser, loginUser, verifyEmailCode } = require("../services/auth.service");
 
 async function handleAuthRoutes(req, res) {
   if (req.method === "POST" && req.url === "/api/register") {
@@ -59,6 +59,32 @@ async function handleAuthRoutes(req, res) {
 
       sendJson(res, error.statusCode || 500, {
         ok: false,
+        message: error.message || "Error interno del servidor",
+      });
+      return true;
+    }
+  }
+
+  if (req.method === "POST" && req.url === "/api/verificar") {
+    try {
+      const body = await readJsonBody(req);
+      const payload = verifyCodeSchema.parse(body);
+      const result = await verifyEmailCode(payload);
+
+      sendJson(res, 200, result);
+      return true;
+    } catch (error) {
+      if (error.name === "ZodError") {
+        sendJson(res, 400, {
+          valid: false,
+          message: "Datos inválidos",
+          errors: error.issues,
+        });
+        return true;
+      }
+
+      sendJson(res, error.statusCode || 500, {
+        valid: false,
         message: error.message || "Error interno del servidor",
       });
       return true;
