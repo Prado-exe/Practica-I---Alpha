@@ -280,3 +280,14 @@ button:focus-visible{
     border-radius:0;
   }
 }
+
+.navbar-user{
+  display:flex;
+  align-items:center;
+  gap:0.4rem;
+  font-weight:500;
+}
+
+.logout-btn{
+  cursor:pointer;
+}

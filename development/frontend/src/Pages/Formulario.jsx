@@ -1,206 +1,265 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import "../Styles/Pages_styles/Formulario.css";
+import Breadcrumb from "../Components/Common/Breadcrumb"
 
 function Formulario() {
 
-  const maxChars = 3000;
-  const [mensaje, setMensaje] = useState("");
-  const [fileName, setFileName] = useState("");
   const [dragActive, setDragActive] = useState(false);
-  const handleMessage = (e) => {
-    if (e.target.value.length <= maxChars) {
-      setMensaje(e.target.value);
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    category: "",
+    reason: "",
+    message: "",
+    file: null
+  });
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+
+    if (files) {
+      setForm({ ...form, file: files[0] });
+    } else {
+      setForm({ ...form, [name]: value });
     }
   };
 
-  const handleFile = (file) => {
-  if (file) {
-    setFileName(file.name);
-  }
-};
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-const handleDrop = (e) => {
-  e.preventDefault();
-  setDragActive(false);
-  handleFile(e.dataTransfer.files[0]);
-};
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else {
+      setDragActive(false);
+    }
+  };
 
-const handleDrag = (e) => {
-  e.preventDefault();
-  setDragActive(true);
-};
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
 
-const handleLeave = () => {
-  setDragActive(false);
-};
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setForm({ ...form, file: e.dataTransfer.files[0] });
+    }
+  };
+
+  const clearForm = () => {
+    setForm({
+      name: "",
+      email: "",
+      category: "",
+      reason: "",
+      message: "",
+      file: null
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(form);
+  };
 
   return (
-    <main className="form-page">
+    <div className="contact-page">
 
-      {/* Breadcrumb */}
-      <nav className="breadcrumb">
-        <Link to="/">Home</Link>
-        <span> &gt; </span>
-        <span>Formulario</span>
-      </nav>
+      <Breadcrumb />
 
-      {/* Encabezado */}
-      <header className="form-header">
+      <header className="contact-header">
         <h1>Formulario de contacto</h1>
         <p>
-          Complete el siguiente formulario para ponerse en contacto con
-          nosotros. La información proporcionada nos ayudará a responder su
-          solicitud de forma eficiente.
+          Complete el siguiente formulario para ponerse en contacto con nosotros.
+          La información proporcionada nos ayudará a responder su solicitud de
+          forma eficiente.
         </p>
       </header>
 
-      <div className="form-progress">
-        <div className="step active">
-          <span>1</span>
-          <p>Información</p>
-        </div>
-
-        <div className="progress-line"></div>
-
-        <div className="step active">
-          <span>2</span>
-          <p>Consulta</p>
-        </div>
-
-        <div className="progress-line"></div>
-
-        <div className="step">
-          <span>3</span>
-          <p>Enviar</p>
-        </div>
-
-      </div>
-
-      <form className="form-container">
+      <form className="contact-form" onSubmit={handleSubmit}>
 
         {/* PASO 1 */}
-        <section className="form-section">
-          <h2>Paso 1: Información del usuario</h2>
 
-          <div className="form-grid">
+        <div className="step-container">
 
-            <div className="form-group">
-              <label htmlFor="nombre">Nombre</label>
-              <input id="nombre" type="text" required />
-            </div>
+          <div className="step-header">
 
-            <div className="form-group">
-              <label htmlFor="apellido">Apellido</label>
-              <input id="apellido" type="text" required />
-            </div>
+            <div className="step-number">1</div>
 
-            <div className="form-group">
-              <label htmlFor="correo">Correo electrónico</label>
-              <input id="correo" type="email" required />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="categoria">Categoría de usuario</label>
-              <select id="categoria" required>
-                <option value="">Seleccione una categoría</option>
-                <option>Usuario estándar</option>
-                <option>Institución</option>
-                <option>No registrado</option>
-              </select>
+            <div>
+              <h2>Paso 1</h2>
+              <p>Información de contacto</p>
             </div>
 
           </div>
-        </section>
 
-        {/* PASO 2 */}
-        <section className="form-section">
-          <h2>Paso 2: Motivo de consulta</h2>
+          <div className="form-row">
 
-          <div className="form-group">
-            <label htmlFor="motivo">Motivo de consulta</label>
-            <select id="motivo">
-              <option value="">Seleccione una opción</option>
-              <option>Opción 1</option>
-              <option>Opción 2</option>
-              <option>Opción 3</option>
-            </select>
-          </div>
-
-          <p className="form-helper">
-            Esto nos permitirá derivar su consulta eficientemente.
-          </p>
-
-          {/* MENSAJE */}
-          <div className="form-group">
-            <label htmlFor="mensaje">Mensaje</label>
-
-            <textarea
-              id="mensaje"
-              value={mensaje}
-              onChange={handleMessage}
-              placeholder="Escriba su mensaje..."
-            />
-
-            <div className="char-counter">
-              Caracteres restantes: {maxChars - mensaje.length}
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Adjuntar archivo</label>
-
-            <div
-              className={`upload-box ${dragActive ? "drag" : ""}`}
-              onDrop={handleDrop}
-              onDragOver={handleDrag}
-              onDragLeave={handleLeave}
-            >
-              {fileName ? (
-                <p>Archivo seleccionado: {fileName}</p>
-              ) : (
-                <p>Arrastre un archivo aquí o haga clic para subirlo</p>
-              )}
-
+            <div className="form-group">
+              <label>Nombre y apellido</label>
               <input
-                type="file"
-                onChange={(e) => handleFile(e.target.files[0])}
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Dirección de correo</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
               />
             </div>
 
           </div>
 
-          {/* CAPTCHA */}
           <div className="form-group">
-            <label htmlFor="captcha"></label>
-            <input
-              
-            />
+            <label>Categoría de usuario</label>
+
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+            >
+              <option value="">Seleccione una categoría</option>
+              <option>Ciudadano</option>
+              <option>Investigador</option>
+              <option>Institución pública</option>
+              <option>Empresa</option>
+            </select>
           </div>
 
-        </section>
+        </div>
+
+        {/* PASO 2 */}
+
+        <div className="step-container">
+
+          <div className="step-header">
+
+            <div className="step-number">2</div>
+
+            <div>
+              <h2>Paso 2</h2>
+              <p>Detalle de su consulta</p>
+            </div>
+
+          </div>
+
+          <div className="form-group">
+
+            <label>Motivo de consulta</label>
+
+            <select
+              name="reason"
+              value={form.reason}
+              onChange={handleChange}
+            >
+              <option value="">Seleccione un motivo</option>
+              <option>Solicitud de información</option>
+              <option>Problema con datos</option>
+              <option>Consulta técnica</option>
+              <option>Sugerencias</option>
+              <option>Otro</option>
+            </select>
+
+            <small>
+              Esto nos permitirá derivar su consulta al área correspondiente.
+            </small>
+
+          </div>
+
+          <div className="form-group">
+
+            <label>Mensaje</label>
+
+            <textarea
+              name="message"
+              rows="6"
+              maxLength="3000"
+              value={form.message}
+              onChange={handleChange}
+            />
+
+            <div className="char-counter">
+              {3000 - form.message.length} caracteres restantes
+            </div>
+
+          </div>
+
+          <div className="form-group">
+
+            <label>Adjuntar archivo</label>
+
+            <div
+              className={`file-dropzone ${dragActive ? "active" : ""}`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+
+              <input
+                type="file"
+                id="fileUpload"
+                className="file-input"
+                onChange={handleChange}
+              />
+
+              {!form.file ? (
+                <label htmlFor="fileUpload" className="file-label">
+                  <div className="file-icon">📎</div>
+                  <span>Arrastre su archivo aquí</span>
+                  <p>o haga clic para seleccionarlo</p>
+                </label>
+              ) : (
+                <div className="file-preview">
+                  <span>{form.file.name}</span>
+
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, file: null })}
+                  >
+                    eliminar
+                  </button>
+                </div>
+              )}
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* BOTONES */}
 
         <div className="form-buttons">
 
-        <button
-          type="reset"
-          className="btn-secondary"
-        >
-          Limpiar formulario
-        </button>
+          <button
+            type="button"
+            className="clear-btn"
+            onClick={clearForm}
+          >
+            Limpiar formulario
+          </button>
 
-        <button
-          type="submit"
-          className="btn-primary"
-        >
-          Enviar formulario
-        </button>
+          <button
+            type="submit"
+            className="submit-btn"
+          >
+            Enviar
+          </button>
 
-      </div>
+        </div>
 
       </form>
 
-    </main>
+    </div>
   );
 }
 

@@ -1,10 +1,13 @@
 import AppRoutes from "./Routes/AppRoutes";
 import { AccessibilityProvider } from "./Context/AccessibilityContext";
+import { AuthProvider } from "./Context/AuthContext";
 
 function App() {
   return (
     <AccessibilityProvider>
-      <AppRoutes />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </AccessibilityProvider>
   );
 }

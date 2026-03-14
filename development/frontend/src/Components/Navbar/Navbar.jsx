@@ -7,6 +7,7 @@ import AccessibilityTools from "../AccessibilityTools";
 import DropdownMenu from "./DropdownMenu";
 
 import "../../styles/Component_styles/Navbar.css";
+import { useAuth } from "../../Context/AuthContext";
 
 /* LINKS PRINCIPALES */
 const navLinks = [
@@ -21,18 +22,20 @@ const navLinks = [
 
 /* LINKS DEL DROPDOWN */
 const aboutLinks = [
-  { label: "Quiénes somos", path: "/quienes-somos" },
-  { label: "Objetivos estratégicos", path: "/objetivos" },
-  { label: "Misión y visión", path: "/mision-vision" },
-  { label: "Principios", path: "/principios" },
-  { label: "Metodología", path: "/metodologia" },
+  { label: "Quiénes somos", path: "/nosotros/quienes-somos" },
+  { label: "Objetivos estratégicos", path: "/nosotros/objetivos" },
+  { label: "Misión y visión", path: "/nosotros/mision-vision" },
+  { label: "Principios", path: "/nosotros/principios" },
+  { label: "Metodología", path: "/nosotros/metodologia" },
+  { label: "Equipo", path: "/nosotros/equipo" },
 ];
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
-
+  const { user, logout } = useAuth();
+  
   useEffect(() => {
     let lastScrollY = window.scrollY;
     const handleScroll = () => {
@@ -84,18 +87,32 @@ function Navbar() {
           <AccessibilityTools />
 
           <div className="navbar-auth">
+          {!user ? (
+            <>
+              <Link to="/login" className="btn">
+                <FaUser />
+                <span>Iniciar sesión</span>
+              </Link>
 
-            <Link to="/login" className="btn">
-              <FaUser />
-              <span>Iniciar sesión</span>
-            </Link>
+              <Link to="/register" className="btn">
+                <FaPenToSquare />
+                <span>Registrarse</span>
+              </Link>
+            </>
+          ) : (
+            <>
+              <span className="navbar-user">
+                <FaUser />
+                <span>{user.name}</span>
+              </span>
 
-            <Link to="/register" className="btn">
-              <FaPenToSquare />
-              <span>Registrarse</span>
-            </Link>
+              <button className="btn logout-btn" onClick={logout}>
+                Cerrar sesión
+              </button>
+            </>
+          )}
 
-          </div>
+        </div>
 
         </div>
 

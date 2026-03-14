@@ -1,0 +1,138 @@
+/* Datos.css */
+
+/* Contenedor general */
+.datos-page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem 1rem;
+}
+
+/* Contenedor principal: izquierdo/derecho */
+.datos-container {
+  display: flex;
+  gap: 20px;
+}
+
+/* ===========================
+   Contenedor izquierdo: filtros
+   =========================== */
+.datos-filters {
+  flex: 0 0 250px; /* ancho fijo para los filtros */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Acordeones individuales */
+.datos-filters .accordion {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+.datos-filters .accordion-content {
+  margin-top: 5px;
+  padding-left: 10px;
+}
+
+/* Acordeón de fecha específico */
+.datos-filters .accordion.date-filter {
+  background-color: #e0f7fa;
+}
+
+/* ===========================
+   Contenedor derecho: main
+   =========================== */
+.datos-main {
+  flex: 1; /* ocupa todo el espacio restante */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Buscador */
+.datos-main .search-bar {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 10px;
+}
+
+/* Título y cantidad */
+.datos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.datos-header h1 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.datos-header p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Separadores */
+.datos-separator {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 10px 0;
+}
+
+/* Filtros aplicados */
+.applied-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chip {
+  background-color: #1976d2;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+/* Listado de datasets */
+.datasets-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 15px;
+}
+
+/* Tarjeta individual de dataset */
+.dataset-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #fff;
+  transition: box-shadow 0.2s;
+}
+
+.dataset-card:hover {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.dataset-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.dataset-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Paginador */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}

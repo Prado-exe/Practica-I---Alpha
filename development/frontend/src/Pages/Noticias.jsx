@@ -1,160 +1,235 @@
 import "../Styles/Pages_styles/Noticias.css";
+import Breadcrumb from "../Components/Common/Breadcrumb";
+import SearchBarAdvanced from "../Components/Common/SearchBarAdvanced";
+import Pagination from "../Components/Common/Pagination";
+import { noticias } from "../data/noticias";
+import { useState } from "react";
 
 function Noticias() {
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedYears, setSelectedYears] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const newsPerPage = 7;
+
+  const handleSearch = (query) => {
+    setSearchQuery(query.toLowerCase());
+    setCurrentPage(1);
+  };
+
+  const toggleCategory = (category) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+    setCurrentPage(1);
+  };
+
+  const toggleYear = (year) => {
+    setSelectedYears((prev) =>
+      prev.includes(year)
+        ? prev.filter((y) => y !== year)
+        : [...prev, year]
+    );
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedYears([]);
+    setSearchQuery("");
+    setCurrentPage(1);
+  };
+
+  const filteredNews = noticias.filter((news) => {
+
+    const matchesSearch =
+      news.title.toLowerCase().includes(searchQuery) ||
+      news.description.toLowerCase().includes(searchQuery);
+
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(news.category);
+
+    const newsYear = new Date(news.date).getFullYear().toString();
+
+    const matchesYear =
+      selectedYears.length === 0 ||
+      selectedYears.includes(newsYear);
+
+    return matchesSearch && matchesCategory && matchesYear;
+
+  });
+
+  const totalPages = Math.ceil(filteredNews.length / newsPerPage);
+
+  const startIndex = (currentPage - 1) * newsPerPage;
+  const endIndex = startIndex + newsPerPage;
+
+  const currentNews = filteredNews.slice(startIndex, endIndex);
+
+  const searchFilters = [
+    { label: "Categoría", options: ["Tecnología", "Sociedad", "Medio Ambiente"] }
+  ];
+
   return (
     <main className="news-page">
 
-      {/* Breadcrumb */}
-      <div className="breadcrumb">
-        <span>Home</span>
-        <span className="separator"> &gt; </span>
-        <span className="current">Noticias</span>
-      </div>
+      <Breadcrumb />
 
       <div className="news-container">
 
-        {/* FILTROS */}
+        {/* PANEL FILTROS */}
         <aside className="filters-panel">
 
-          <details open>
+          <h3 className="filters-title">Filtros</h3>
+
+          <details className="filter-group" open>
             <summary>Categorías</summary>
+
             <div className="filter-content">
-              <label><input type="checkbox" /> Tecnología</label>
-              <label><input type="checkbox" /> Sociedad</label>
-              <label><input type="checkbox" /> Medio Ambiente</label>
+
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.includes("Tecnología")}
+                  onChange={() => toggleCategory("Tecnología")}
+                />
+                Tecnología
+              </label>
+
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.includes("Sociedad")}
+                  onChange={() => toggleCategory("Sociedad")}
+                />
+                Sociedad
+              </label>
+
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.includes("Medio Ambiente")}
+                  onChange={() => toggleCategory("Medio Ambiente")}
+                />
+                Medio Ambiente
+              </label>
+
             </div>
           </details>
 
-          <details>
+          <details className="filter-group">
             <summary>Año</summary>
+
             <div className="filter-content">
-              <label><input type="checkbox" /> 2024</label>
-              <label><input type="checkbox" /> 2023</label>
-              <label><input type="checkbox" /> 2022</label>
+
+              {["2025","2024","2023","2022"].map((year) => (
+                <label key={year}>
+                  <input
+                    type="checkbox"
+                    checked={selectedYears.includes(year)}
+                    onChange={() => toggleYear(year)}
+                  />
+                  {year}
+                </label>
+              ))}
+
             </div>
           </details>
+
+          <div className="filters-actions">
+            <button
+              className="clear-filters-btn"
+              onClick={clearFilters}
+            >
+              Limpiar filtros
+            </button>
+          </div>
 
         </aside>
-
 
         {/* RESULTADOS */}
         <section className="news-results">
 
-          {/* Barra superior */}
-          <div className="news-topbar">
+          <SearchBarAdvanced
+            placeholder="Buscar noticias..."
+            onSearch={handleSearch}
+            filters={searchFilters}
+          />
 
-            <input
-              type="text"
-              placeholder="Buscar noticias..."
-              className="news-search"
-            />
-
-            <select className="news-sort">
-              <option>Más recientes</option>
-              <option>Más antiguas</option>
-              <option>Alfabético</option>
-            </select>
-
-          </div>
-
-          {/* contador */}
           <p className="news-count">
-            Mostrando <strong>6</strong> noticias
+            Mostrando{" "}
+            <strong>
+              {filteredNews.length === 0
+                ? 0
+                : startIndex + 1}-{Math.min(endIndex, filteredNews.length)}
+            </strong>{" "}
+            de <strong>{filteredNews.length}</strong> noticias
           </p>
 
-
-          {/* LISTADO */}
           <div className="news-list">
 
-            {/* NOTICIA 1 */}
-            <div className="news-card">
+            {currentNews.map((news) => (
 
-              <img
-                src="/img/noticia1.jpg"
-                alt="Imagen noticia"
-                className="news-image"
-              />
+              <article key={news.id} className="news-card">
 
-              <div className="news-content">
+                <img
+                  src={news.image}
+                  alt={news.title}
+                  className="news-image"
+                />
 
-                <h3>Nuevo portal de datos abiertos mejora acceso ciudadano</h3>
+                <div className="news-content">
 
-                <p className="news-date">
-                  Publicado: <strong>12 Marzo 2024</strong>
-                </p>
+                  <h3>{news.title}</h3>
 
-                <p>
-                  El nuevo portal facilita la consulta de conjuntos de datos
-                  públicos, permitiendo a ciudadanos e investigadores acceder
-                  a información de manera más rápida y transparente.
-                </p>
+                  <p className="news-date">
+                    {new Date(news.date).toLocaleDateString()}
+                  </p>
 
-                <div className="news-meta">
-                  <span className="tag">Gobierno</span>
-                  <span className="tag">Tecnología</span>
+                  <p>{news.description}</p>
+
+                  <div className="news-meta">
+
+                    <span className="tag">
+                      {news.category}
+                    </span>
+
+                    {news.tags.map((tag, i) => (
+                      <span key={i} className="tag">
+                        {tag}
+                      </span>
+                    ))}
+
+                  </div>
+
+                  <div className="news-footer">
+                    <button className="news-btn">
+                      Leer más
+                    </button>
+                  </div>
+
                 </div>
 
-                <div className="news-footer">
-                  <button className="news-btn">Leer noticia</button>
-                </div>
+              </article>
 
-              </div>
-            </div>
-
-
-            {/* NOTICIA 2 */}
-            <div className="news-card">
-
-              <img
-                src="/img/noticia2.jpg"
-                alt="Imagen noticia"
-                className="news-image"
-              />
-
-              <div className="news-content">
-
-                <h3>Investigación revela avances en sostenibilidad urbana</h3>
-
-                <p className="news-date">
-                  Publicado: <strong>5 Enero 2024</strong>
-                </p>
-
-                <p>
-                  Un estudio reciente muestra cómo las ciudades pueden mejorar
-                  su sostenibilidad mediante políticas públicas basadas en
-                  datos abiertos y participación ciudadana.
-                </p>
-
-                <div className="news-meta">
-                  <span className="tag">Investigación</span>
-                  <span className="tag">Medio Ambiente</span>
-                </div>
-
-                <div className="news-footer">
-                  <button className="news-btn">Leer noticia</button>
-                </div>
-
-              </div>
-            </div>
+            ))}
 
           </div>
 
-
-          {/* PAGINACIÓN */}
-          <div className="news-pagination">
-
-            <button>Anterior</button>
-            <button className="active">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>Siguiente</button>
-
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
 
         </section>
 
       </div>
-
     </main>
   );
 }

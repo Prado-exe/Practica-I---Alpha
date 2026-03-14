@@ -1,44 +1,25 @@
-import { useState } from "react";
-import Carrusel_home from "../Components/Carrusel_home";
-import Expositor_PopularData from "../Components/Expositor_PopularData"
-import Expositor_LastPost from "../Components/expositor_LastPost";
+import Carrusel_home from "../Components/Home/Carrusel";
+import SearchBar from "../Components/Home/SearchBar";
+import Expositor_PopularData from "../Components/Home/PopularData";
+import Expositor_LastPost from "../Components/Home/LastPost";
 
-
-import "../Styles/Pages_styles/Home.css";  
+import "../Styles/Pages_styles/Home.css";
 
 function Home() {
-  const [search, setSearch] = useState("");
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    console.log("Buscando:", search);
-
-  };
-
   return (
     <main className="home" role="main">
-      {/* carrusel */}
+      {/* Carrusel */}
       <Carrusel_home />
       {/* Buscador */}
-      <section className="search-container" aria-labelledby="search-heading">
-        <form role="search" aria-label="Buscador del sitio">
-          <div className="search-bar">
-            <span className="search-icon">🔍</span>
-            <input
-              id="home-search"
-              type="search"
-              placeholder="Buscar..."
-              className="search-input"
-            />
-          </div>
-        </form>
-      </section>
-      {/* exp datos populares */}
+      <SearchBar/>
+      {/* Datos populares */}
       <Expositor_PopularData />
-      {/* exp datos populares */}
+      {/* Últimas publicaciones */}
       <Expositor_LastPost />
+
     </main>
   );
 }
 
 export default Home;
+
