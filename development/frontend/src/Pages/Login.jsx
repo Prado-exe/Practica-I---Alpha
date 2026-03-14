@@ -9,7 +9,7 @@ function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [captchaToken, setCaptchaToken] = useState(null);
+  //const [captchaToken, setCaptchaToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
@@ -86,7 +86,7 @@ const handleLogin = async (e) => {
           required
         />
 
-        <Captcha onVerify={setCaptchaToken} />
+       
 
         <button className="login-btn" disabled={loading}>
           {loading ? "Validando..." : "Iniciar sesión"}

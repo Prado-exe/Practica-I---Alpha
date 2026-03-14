@@ -8,10 +8,9 @@ function Register() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [institution, setInstitution] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [captchaToken, setCaptchaToken] = useState(null);
+  //const [captchaToken, setCaptchaToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -19,10 +18,10 @@ function Register() {
 
     e.preventDefault();
 
-    if (!captchaToken) {
-      alert("Debes completar el captcha");
-      return;
-    }
+    //if (!captchaToken) {
+    //  alert("Debes completar el captcha");
+    //  return;
+    //}
 
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden");
@@ -44,9 +43,8 @@ function Register() {
         body: JSON.stringify({
           name,
           email,
-          institution,
           password,
-          captchaToken
+          //captchaToken
         })
 
       });
@@ -108,18 +106,6 @@ function Register() {
           required
         />
 
-        <label htmlFor="institution">
-          Institución u organización (opcional)
-        </label>
-        <input
-          id="institution"
-          type="text"
-          placeholder="Universidad / Empresa"
-          className="login-input"
-          value={institution}
-          onChange={(e)=>setInstitution(e.target.value)}
-        />
-
         <label htmlFor="password">Contraseña</label>
         <input
           id="password"
@@ -142,7 +128,7 @@ function Register() {
           required
         />
 
-        <Captcha onVerify={setCaptchaToken} />
+        
 
         <button className="login-btn" disabled={loading}>
           {loading ? "Registrando..." : "Registrarse"}

@@ -1,5 +1,15 @@
 import { createContext, useState, useEffect } from "react";
-export const AccessibilityContext = createContext();
+
+export const AccessibilityContext = createContext({
+  fontScale: 1,
+  highContrast: false,
+  reducedMotion: false,
+  increaseFont: () => {},
+  decreaseFont: () => {},
+  toggleContrast: () => {},
+  toggleReducedMotion: () => {},
+});
+
 export default AccessibilityContext;
 
 export function AccessibilityProvider({ children }) {
@@ -15,6 +25,10 @@ export function AccessibilityProvider({ children }) {
     return localStorage.getItem("highContrast") === "true";
   });
 
+  const [reducedMotion, setReducedMotion] = useState(() => {
+    return localStorage.getItem("reducedMotion") === "true";
+  });
+
   useEffect(() => {
     document.documentElement.style.setProperty("--font-scale", fontScale);
     localStorage.setItem("fontScale", fontScale);
@@ -25,12 +39,37 @@ export function AccessibilityProvider({ children }) {
     localStorage.setItem("highContrast", highContrast);
   }, [highContrast]);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("reduced-motion", reducedMotion);
+    localStorage.setItem("reducedMotion", reducedMotion);
+  }, [reducedMotion]);
+
+  const increaseFont = () => {
+    setFontScale((prev) => Math.min(MAX_FONT_SCALE, prev + FONT_STEP));
+  };
+
+  const decreaseFont = () => {
+    setFontScale((prev) => Math.max(MIN_FONT_SCALE, prev - FONT_STEP));
+  };
+
+  const toggleContrast = () => {
+    setHighContrast((prev) => !prev);
+  };
+
+  const toggleReducedMotion = () => {
+    setReducedMotion((prev) => !prev);
+  };
+
   return (
     <AccessibilityContext.Provider
       value={{
-        increaseFont: () => setFontScale(prev => Math.min(MAX_FONT_SCALE, prev + FONT_STEP)),
-        decreaseFont: () => setFontScale(prev => Math.max(MIN_FONT_SCALE, prev - FONT_STEP)),
-        toggleContrast: () => setHighContrast(prev => !prev)
+        fontScale,
+        highContrast,
+        reducedMotion,
+        increaseFont,
+        decreaseFont,
+        toggleContrast,
+        toggleReducedMotion,
       }}
     >
       {children}
