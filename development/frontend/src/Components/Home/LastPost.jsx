@@ -1,5 +1,5 @@
 import {lastPosts} from "../../data/LastPosts.js";
-import "../../styles/component_styles/LastPost.css";
+import "../../Styles/ComponentStyle/Home/LastPost.css";
 
 function LastPost() {
   return (

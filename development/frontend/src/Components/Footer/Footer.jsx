@@ -1,4 +1,8 @@
-import "../../Styles/Component_styles/Footer.css";
+import "../../Styles/ComponentStyle/Footer/Footer.css"
+
+//import de imagenes
+import logoContent from "../../assets/content.png";
+import logoUls from "../../assets/uls_logo.png";
 
 function Footer() {
   return (
@@ -10,14 +14,16 @@ function Footer() {
           {/* Logos */}
           <div className="footer-logos">
             <img
-              src="/src/assets/content.png"
+              src={logoContent}
               alt="Logo del proyecto Content"
+              loading="lazy"
               className="logo-main"
             />
 
             <img
-              src="/src/assets/uls_logo.png"
+              src={logoUls}
               alt="Logo Universidad de La Serena"
+              loading="lazy"
               className="logo-uls"
             />
           </div>
@@ -83,3 +89,5 @@ function Footer() {
 }
 
 export default Footer;
+
+

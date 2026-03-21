@@ -1,26 +1,28 @@
 import { FaUser, FaBars, FaTimes } from "react-icons/fa";
 import { FaPenToSquare } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import AccessibilityTools from "../AccessibilityTools";
 import DropdownMenu from "./DropdownMenu";
+import UserDropdown from "../Common/UserDropdown";
 
-import "../../styles/Component_styles/Navbar.css";
 import { useAuth } from "../../Context/AuthContext";
+import logo from "../../assets/Ico_obs_datos2.png";
 
-/* LINKS PRINCIPALES */
+import "../../styles/ComponentStyle/Navbar/Navbar.css"
+
 const navLinks = [
   { label: "Inicio", path: "/" },
   { label: "Datos", path: "/conjuntodatos" },
   { label: "Instituciones", path: "/instituciones" },
   { label: "Indicadores", path: "/indicadores" },
   { label: "Publicaciones", path: "/publicaciones" },
-  { label: "Noticias", path: "/noticias" },
+  { label: "Noticias", path: "/noticias" }, 
   { label: "Contacto", path: "/formulario" },
 ];
 
-/* LINKS DEL DROPDOWN */
 const aboutLinks = [
   { label: "Quiénes somos", path: "/nosotros/quienes-somos" },
   { label: "Objetivos estratégicos", path: "/nosotros/objetivos" },
@@ -34,113 +36,114 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
+
   const { user, logout } = useAuth();
-  
+
+  // seccion para estar en modo debug, 
+  const DEBUG_AUTH = import.meta.env.VITE_DEBUG_AUTH == "true";
+  const effectiveUser = DEBUG_AUTH
+    ? { name: "Admin", role: "admin" }
+    : user;
+
+  /* SCROLL OPTIMIZADO */
   useEffect(() => {
     let lastScrollY = window.scrollY;
+    let ticking = false;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setScrolled(currentScrollY > 15);
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // bajando
-        setHidden(true);
-      } else {
-        // subiendo
-        setHidden(false);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const current = window.scrollY;
+
+          setScrolled(current > 15);
+          setHidden(current > lastScrollY && current > 100);
+
+          lastScrollY = current;
+          ticking = false;
+        });
+
+        ticking = true;
       }
-      lastScrollY = currentScrollY;
     };
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <header
-      className={`navbar 
-        ${scrolled ? "navbar-scrolled" : ""} 
-        ${hidden ? "navbar-hidden" : ""}`}
-      role="banner"
-    >
-      {/* TOP */}
-      <div className="navbar-top">
-
-        <button
-          className="hamburger-btn"
-          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? <FaTimes /> : <FaBars />}
-        </button>
-
-        <div className="navbar-logo">
-          <Link to="/" aria-label="Ir al inicio">
-            <img
-              src="/src/assets/Ico_obs_datos2.png"
-              alt="Observatorio de Datos"
-            />
-          </Link>
-        </div>
-
-        <div className="navbar-tools">
-
-          <AccessibilityTools />
-
-          <div className="navbar-auth">
-          {!user ? (
-            <>
-              <Link to="/login" className="btn">
-                <FaUser />
-                <span>Iniciar sesión</span>
-              </Link>
-
-              <Link to="/register" className="btn">
-                <FaPenToSquare />
-                <span>Registrarse</span>
-              </Link>
-            </>
-          ) : (
-            <>
-              <span className="navbar-user">
-                <FaUser />
-                <span>{user.name}</span>
-              </span>
-
-              <button className="btn logout-btn" onClick={logout}>
-                Cerrar sesión
-              </button>
-            </>
-          )}
-
-        </div>
-
-        </div>
-
-      </div>
-
-      {/* BOTTOM */}
-      <nav
-        className={`navbar-bottom ${menuOpen ? "open" : ""}`}
-        aria-label="Navegación principal"
+    <>
+     <header
+        className={`navbar 
+          ${scrolled ? "navbar-scrolled" : "navbar-top-transparent"} 
+          ${hidden ? "navbar-hidden" : ""}
+          `}
       >
+        {/* TOP */}
+        <div className="navbar-top">
+          <button
+            className="hamburger-btn"
+            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={menuOpen}
+            aria-controls="main-menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <FaTimes /> : <FaBars />}
+          </button>
 
-        {/* LINKS PRINCIPALES */}
-        <ul className="nav-links">
-          {navLinks.map((link) => (
-            <li key={link.path}>
-              <Link to={link.path} className="nav-btn">
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+          <div className="navbar-logo">
+            <Link to="/" aria-label="Ir al inicio">
+              <img src={logo} alt="Observatorio de Datos" />
+            </Link>
+          </div>
 
-        {/* DROPDOWN */}
-        <DropdownMenu links={aboutLinks} />
+          <div className="navbar-tools">
+            <AccessibilityTools />
 
-      </nav>
+            <div className="navbar-auth">
+              {!effectiveUser ? (
+                <>
+                  <Link to="/login" className="btn">
+                    <FaUser />
+                    <span>Iniciar sesión</span>
+                  </Link>
 
-    </header>
+                  <Link to="/register" className="btn">
+                    <FaPenToSquare />
+                    <span>Registrarse</span>
+                  </Link>
+                </>
+              ) : (
+                <UserDropdown user={effectiveUser} logout={logout} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* NAV */}
+        <nav
+          id="main-menu"
+          className={`navbar-bottom ${menuOpen ? "open" : ""}`}
+          aria-label="Navegación principal"
+        >
+          <ul className="nav-links">
+            {navLinks.map((link) => (
+              <li key={link.path}>
+                <NavLink
+                  to={link.path}
+                  className={({ isActive }) =>
+                    `nav-btn ${isActive ? "active" : ""}`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          <DropdownMenu links={aboutLinks} />
+        </nav>
+      </header>
+    </>
   );
 }
 

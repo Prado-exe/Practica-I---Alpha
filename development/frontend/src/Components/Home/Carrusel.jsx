@@ -1,8 +1,8 @@
 import { useRef, useState, useContext, useEffect } from "react";
-import { AccessibilityContext } from "../../context/AccessibilityContext";
+import { AccessibilityContext } from "../../Context/AccessibilityContext";
 import { homeSlides } from "../../Data/HomeSlides";
 
-import "../../styles/Component_styles/Carrusel.css";
+import "../../Styles/ComponentStyle/Home/Carrusel.css";
 
 function Carrusel() {
 

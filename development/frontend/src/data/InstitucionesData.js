@@ -138,5 +138,145 @@ export const instituciones = [
     descripcion: "Datos sobre patrimonio cultural, actividades artísticas y financiamiento.",
     datasets: 4,
     logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 21,
+    nombre: "Comisión Nacional de Energía",
+    descripcion: "Regulación y estadísticas del sector energético.",
+    datasets: 10,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 22,
+    nombre: "Superintendencia de Salud",
+    descripcion: "Fiscalización y datos sobre aseguradoras y hospitales.",
+    datasets: 8,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 23,
+    nombre: "Dirección General de Aguas",
+    descripcion: "Información sobre recursos hídricos y abastecimiento de agua.",
+    datasets: 9,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 24,
+    nombre: "Servicio Nacional del Patrimonio Cultural",
+    descripcion: "Datos sobre patrimonio histórico, museos y sitios culturales.",
+    datasets: 5,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 25,
+    nombre: "Comisión Nacional de Investigación Científica",
+    descripcion: "Datos sobre proyectos y financiamiento de investigación.",
+    datasets: 6,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 26,
+    nombre: "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
+    descripcion: "Información sobre innovación, ciencia aplicada y tecnología.",
+    datasets: 7,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 27,
+    nombre: "Servicio Nacional de Capacitación y Empleo",
+    descripcion: "Datos sobre programas de formación y empleo.",
+    datasets: 8,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 28,
+    nombre: "Dirección General de Aeronáutica Civil",
+    descripcion: "Información sobre vuelos, aeropuertos y transporte aéreo.",
+    datasets: 6,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 29,
+    nombre: "Superintendencia de Pensiones",
+    descripcion: "Datos sobre fondos de pensiones y cobertura previsional.",
+    datasets: 9,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 30,
+    nombre: "Consejo Nacional de Innovación para el Desarrollo",
+    descripcion: "Indicadores y políticas de innovación y desarrollo tecnológico.",
+    datasets: 4,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 31,
+    nombre: "Instituto de Seguridad Laboral",
+    descripcion: "Información sobre riesgos laborales y accidentes en el trabajo.",
+    datasets: 7,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 32,
+    nombre: "Servicio de Impuestos Internos",
+    descripcion: "Datos sobre recaudación, impuestos y cumplimiento fiscal.",
+    datasets: 10,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 33,
+    nombre: "Comisión Nacional de Riego",
+    descripcion: "Información sobre proyectos de riego y agricultura sustentable.",
+    datasets: 5,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 34,
+    nombre: "Ministerio de Justicia",
+    descripcion: "Datos sobre tribunales, cárceles y acceso a la justicia.",
+    datasets: 6,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 35,
+    nombre: "Dirección de Bibliotecas, Archivos y Museos",
+    descripcion: "Información sobre bibliotecas, archivos históricos y museos.",
+    datasets: 4,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 36,
+    nombre: "Superintendencia de Servicios Sanitarios",
+    descripcion: "Fiscalización de servicios de agua potable y saneamiento.",
+    datasets: 7,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 37,
+    nombre: "Instituto de Estudios Urbanos",
+    descripcion: "Datos sobre planificación urbana y desarrollo de ciudades.",
+    datasets: 5,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 38,
+    nombre: "Servicio Agrícola y Ganadero",
+    descripcion: "Datos sobre sanidad animal y vegetal, control fitosanitario.",
+    datasets: 8,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 39,
+    nombre: "Comisión Nacional de Pesca",
+    descripcion: "Regulación y estadísticas de la pesca y acuicultura.",
+    datasets: 6,
+    logo: "https://via.placeholder.com/80"
+  },
+  {
+    id: 40,
+    nombre: "Ministerio de Interior y Seguridad Pública",
+    descripcion: "Datos sobre seguridad, policía y gestión de emergencias.",
+    datasets: 12,
+    logo: "https://via.placeholder.com/80"
   }
 ];

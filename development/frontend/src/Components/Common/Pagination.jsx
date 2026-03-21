@@ -1,5 +1,6 @@
-import { useMemo } from "react";
-import "../../styles/component_styles/Pagination.css";
+import { useMemo, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import "../../styles/ComponentStyle/Common/Pagination.css"
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
 
@@ -37,62 +38,83 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
   }, [currentPage, totalPages]);
 
-  const handlePage = (page) => {
-    if (page === "...") return;
+  const handlePage = useCallback((page) => {
+    if (page === "..." || page === currentPage) return;
+
     onPageChange(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }, [currentPage, onPageChange]);
 
   return (
     <nav className="pagination" aria-label="Paginación">
 
-      {/* BLOQUE IZQUIERDO */}
       <div className="pagination-main">
 
+        {/* Anterior */}
         <button
           className="page-btn"
           onClick={() => handlePage(currentPage - 1)}
           disabled={currentPage === 1}
-          aria-label="Ir a la página anterior"
+          aria-label="Página anterior"
         >
-          ← Anterior
+          <ChevronLeft size={16} />
         </button>
 
-        <div className="page-numbers">
+        {/* Números */}
+        <ul className="page-numbers">
 
-          {pages.map((page, index) =>
-            page === "..." ? (
-              <span key={index} className="dots">…</span>
-            ) : (
-              <button
-                key={page}
-                className={`page-number ${page === currentPage ? "active" : ""}`}
-                onClick={() => handlePage(page)}
-                aria-current={page === currentPage ? "page" : undefined}
-                aria-label={`Ir a la página ${page}`}
-              >
-                {page}
-              </button>
-            )
-          )}
+          {pages.map((page, index) => (
+            <li key={`${page}-${index}`}>
 
-        </div>
+              {page === "..." ? (
+                <span
+                  className="dots"
+                  aria-hidden="true"
+                >
+                  …
+                </span>
+              ) : (
+                <button
+                  className={`page-number ${page === currentPage ? "active" : ""}`}
+                  onClick={() => handlePage(page)}
+                  aria-current={page === currentPage ? "page" : undefined}
+                  aria-label={
+                    page === currentPage
+                      ? `Página actual, ${page}`
+                      : `Ir a la página ${page}`
+                  }
+                >
+                  {page}
+                </button>
+              )}
 
+            </li>
+          ))}
+
+        </ul>
+
+        {/* Siguiente */}
         <button
           className="page-btn"
           onClick={() => handlePage(currentPage + 1)}
           disabled={currentPage === totalPages}
-          aria-label="Ir a la página siguiente"
+          aria-label="Página siguiente"
         >
-          Siguiente →
+          <ChevronRight size={16} />
         </button>
 
       </div>
 
-      {/* BLOQUE DERECHO */}
+      {/* Selector */}
       <div className="page-select">
 
-        <label htmlFor="goto-page">Mostrar</label>
+        <label htmlFor="goto-page" className="visually-hidden">
+          Ir a página
+        </label>
 
         <select
           id="goto-page"
@@ -101,7 +123,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
         >
           {Array.from({ length: totalPages }, (_, i) => (
             <option key={i + 1} value={i + 1}>
-              {i + 1}
+              Página {i + 1}
             </option>
           ))}
         </select>

@@ -7,7 +7,6 @@ export const datasets = [
     tags: ["CSV", "Estadísticas", "ODS 10"],
     updated: "2024",
   },
-
   {
     title: "Infraestructura pública",
     description:
@@ -15,7 +14,6 @@ export const datasets = [
     tags: ["JSON", "Infraestructura"],
     updated: "2023",
   },
-
   {
     title: "Calidad del aire urbano",
     description:
@@ -23,7 +21,6 @@ export const datasets = [
     tags: ["CSV", "Medioambiente", "ODS 11"],
     updated: "2024",
   },
-
   {
     title: "Red de transporte público",
     description:
@@ -31,7 +28,6 @@ export const datasets = [
     tags: ["JSON", "Transporte", "Movilidad"],
     updated: "2023",
   },
-
   {
     title: "Consumo energético residencial",
     description:
@@ -39,7 +35,6 @@ export const datasets = [
     tags: ["CSV", "Energía", "ODS 7"],
     updated: "2024",
   },
-
   {
     title: "Cobertura de internet",
     description:
@@ -47,7 +42,6 @@ export const datasets = [
     tags: ["CSV", "Conectividad"],
     updated: "2023",
   },
-
   {
     title: "Centros de salud públicos",
     description:
@@ -55,7 +49,6 @@ export const datasets = [
     tags: ["JSON", "Salud", "Infraestructura"],
     updated: "2024",
   },
-
   {
     title: "Índice de desempleo regional",
     description:
@@ -63,7 +56,6 @@ export const datasets = [
     tags: ["CSV", "Economía", "ODS 8"],
     updated: "2024",
   },
-
   {
     title: "Producción agrícola anual",
     description:
@@ -71,7 +63,6 @@ export const datasets = [
     tags: ["CSV", "Agricultura"],
     updated: "2023",
   },
-
   {
     title: "Establecimientos educacionales",
     description:
@@ -79,7 +70,6 @@ export const datasets = [
     tags: ["JSON", "Educación", "ODS 4"],
     updated: "2024",
   },
-
   {
     title: "Accidentes de tránsito",
     description:
@@ -87,7 +77,6 @@ export const datasets = [
     tags: ["CSV", "Seguridad", "Transporte"],
     updated: "2023",
   },
-
   {
     title: "Áreas verdes urbanas",
     description:
@@ -95,7 +84,6 @@ export const datasets = [
     tags: ["JSON", "Medioambiente", "Urbanismo"],
     updated: "2024",
   },
-
   {
     title: "Uso de suelo urbano",
     description:
@@ -103,7 +91,6 @@ export const datasets = [
     tags: ["CSV", "Urbanismo"],
     updated: "2022",
   },
-
   {
     title: "Consumo de agua potable",
     description:
@@ -111,7 +98,6 @@ export const datasets = [
     tags: ["CSV", "Recursos Hídricos", "ODS 6"],
     updated: "2024",
   },
-
   {
     title: "Bibliotecas públicas",
     description:
@@ -119,7 +105,6 @@ export const datasets = [
     tags: ["JSON", "Cultura"],
     updated: "2023",
   },
-
   {
     title: "Proyectos de inversión pública",
     description:
@@ -127,7 +112,6 @@ export const datasets = [
     tags: ["CSV", "Economía", "Gobierno"],
     updated: "2024",
   },
-
   {
     title: "Rutas ciclistas",
     description:
@@ -135,7 +119,6 @@ export const datasets = [
     tags: ["JSON", "Movilidad", "Transporte"],
     updated: "2023",
   },
-
   {
     title: "Residuos sólidos municipales",
     description:
@@ -143,7 +126,6 @@ export const datasets = [
     tags: ["CSV", "Medioambiente", "ODS 12"],
     updated: "2024",
   },
-
   {
     title: "Turismo regional",
     description:
@@ -151,7 +133,6 @@ export const datasets = [
     tags: ["CSV", "Turismo"],
     updated: "2023",
   },
-
   {
     title: "Eventos climáticos extremos",
     description:
@@ -159,13 +140,155 @@ export const datasets = [
     tags: ["JSON", "Clima", "Medioambiente"],
     updated: "2024",
   },
-
   {
     title: "Delitos denunciados",
     description:
       "Estadísticas de delitos denunciados clasificadas por tipo y región.",
     tags: ["CSV", "Seguridad Pública"],
     updated: "2023",
+  },
+
+  // NUEVOS (22 → 40)
+
+  {
+    title: "Índice de pobreza por comuna",
+    description:
+      "Datos sobre niveles de pobreza multidimensional por comuna.",
+    tags: ["CSV", "Estadísticas", "ODS 1"],
+    updated: "2024",
+  },
+  {
+    title: "Acceso a agua rural",
+    description:
+      "Cobertura de agua potable en sectores rurales.",
+    tags: ["CSV", "Recursos Hídricos"],
+    updated: "2023",
+  },
+  {
+    title: "Hospitalizaciones por causa",
+    description:
+      "Datos de hospitalizaciones clasificadas por tipo de enfermedad.",
+    tags: ["CSV", "Salud"],
+    updated: "2024",
+  },
+  {
+    title: "Vacunación nacional",
+    description:
+      "Cobertura de vacunación por edad y región.",
+    tags: ["CSV", "Salud", "ODS 3"],
+    updated: "2024",
+  },
+  {
+    title: "Consumo de combustible",
+    description:
+      "Estadísticas de consumo de combustibles por región.",
+    tags: ["CSV", "Energía"],
+    updated: "2023",
+  },
+  {
+    title: "Energías renovables",
+    description:
+      "Producción energética proveniente de fuentes renovables.",
+    tags: ["CSV", "Energía", "ODS 7"],
+    updated: "2024",
+  },
+  {
+    title: "Infraestructura deportiva",
+    description:
+      "Listado de recintos deportivos públicos.",
+    tags: ["JSON", "Deporte"],
+    updated: "2023",
+  },
+  {
+    title: "Índice de criminalidad",
+    description:
+      "Indicadores de criminalidad por región.",
+    tags: ["CSV", "Seguridad"],
+    updated: "2024",
+  },
+  {
+    title: "Transporte interurbano",
+    description:
+      "Rutas y frecuencias del transporte entre ciudades.",
+    tags: ["JSON", "Transporte"],
+    updated: "2023",
+  },
+  {
+    title: "Puertos y logística",
+    description:
+      "Infraestructura portuaria y movimiento de carga.",
+    tags: ["CSV", "Logística"],
+    updated: "2024",
+  },
+  {
+    title: "Aeropuertos nacionales",
+    description:
+      "Información de aeropuertos y tráfico aéreo.",
+    tags: ["JSON", "Transporte"],
+    updated: "2023",
+  },
+  {
+    title: "Exportaciones por sector",
+    description:
+      "Datos de exportaciones por industria.",
+    tags: ["CSV", "Economía"],
+    updated: "2024",
+  },
+  {
+    title: "Importaciones por sector",
+    description:
+      "Datos de importaciones por industria.",
+    tags: ["CSV", "Economía"],
+    updated: "2024",
+  },
+  {
+    title: "Índice de calidad de vida",
+    description:
+      "Indicadores de bienestar y calidad de vida.",
+    tags: ["CSV", "Social"],
+    updated: "2024",
+  },
+  {
+    title: "Acceso a educación superior",
+    description:
+      "Datos de matrícula en educación superior.",
+    tags: ["CSV", "Educación"],
+    updated: "2023",
+  },
+  {
+    title: "Tasa de alfabetización",
+    description:
+      "Porcentaje de población alfabetizada.",
+    tags: ["CSV", "Educación"],
+    updated: "2024",
+  },
+  {
+    title: "Producción minera",
+    description:
+      "Datos de producción minera por región.",
+    tags: ["CSV", "Minería"],
+    updated: "2023",
+  },
+  {
+    title: "Consumo cultural",
+    description:
+      "Participación en actividades culturales.",
+    tags: ["CSV", "Cultura"],
+    updated: "2024",
+  },
+  {
+    title: "Parques nacionales",
+    description:
+      "Listado de parques y reservas naturales.",
+    tags: ["JSON", "Medioambiente"],
+    updated: "2023",
+  },
+  {
+    title: "Uso de transporte sostenible",
+    description:
+      "Indicadores de uso de transporte no contaminante.",
+    tags: ["CSV", "Movilidad", "ODS 11"],
+    updated: "2024",
   }
 
 ];

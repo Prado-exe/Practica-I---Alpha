@@ -1,15 +1,14 @@
 function InstitucionCard({ institucion }) {
-
   return (
     <article
       className="institucion-card"
       aria-labelledby={`inst-${institucion.id}`}
     >
-
       <div className="card-header">
         <img
           src={institucion.logo}
           alt={`Logo de ${institucion.nombre}`}
+          loading="lazy"
         />
 
         <h3 id={`inst-${institucion.id}`}>
@@ -22,23 +21,14 @@ function InstitucionCard({ institucion }) {
       </p>
 
       <div className="card-footer">
-
-        <span
-          className="dataset-count"
-          aria-label={`${institucion.datasets} conjuntos de datos`}
-        >
+        <span className="dataset-count">
           {institucion.datasets} datasets
         </span>
 
-        <button
-          className="ver-btn"
-          aria-label={`Ver datasets de ${institucion.nombre}`}
-        >
+        <button className="ver-btn">
           Ver institución
         </button>
-
       </div>
-
     </article>
   );
 }

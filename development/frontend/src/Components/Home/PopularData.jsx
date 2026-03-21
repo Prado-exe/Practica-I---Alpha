@@ -1,5 +1,5 @@
 import { popularData } from "../../data/popularData";
-import "../../styles/Component_styles/PopularData.css";
+import "../../Styles/ComponentStyle/Home/PopularData.css";
 
 function PopularData() {
   return (

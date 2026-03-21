@@ -1,50 +1,63 @@
 import { Link, useLocation } from "react-router-dom";
-import "../../styles/component_styles/Breadcrumb.css";
+import { useMemo } from "react";
+import { Home } from "lucide-react"; // icono minimalista
+import "../../styles/ComponentStyle/Common/breadcrumb.css"
+function formatLabel(value) {
+  return value
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 function Breadcrumb() {
-
   const location = useLocation();
-  const pathnames = location.pathname.split("/").filter(Boolean);
+
+  const breadcrumbs = useMemo(() => {
+    const pathnames = location.pathname.split("/").filter(Boolean);
+
+    return pathnames.map((value, index) => {
+      return {
+        label: formatLabel(value),
+        to: "/" + pathnames.slice(0, index + 1).join("/"),
+        isLast: index === pathnames.length - 1,
+      };
+    });
+  }, [location.pathname]);
 
   return (
-    <nav className="breadcrumb" aria-label="Breadcrumb">
+    <nav className="breadcrumb" aria-label="Ruta de navegación">
       <ol className="breadcrumb-list">
 
+        {/* Inicio */}
         <li className="breadcrumb-item">
           <Link to="/" className="breadcrumb-link">
-            <span className="home-icon">🏠</span> Inicio
+            <Home size={16} aria-hidden="true" />
+            <span className="visually-hidden">Inicio</span>
           </Link>
         </li>
 
-        {pathnames.map((value, index) => {
+        {breadcrumbs.map((crumb) => (
+          <li key={crumb.to} className="breadcrumb-item">
 
-          const to = "/" + pathnames.slice(0, index + 1).join("/");
-          const isLast = index === pathnames.length - 1;
+            {/* Separador accesible */}
+            <span className="breadcrumb-separator" aria-hidden="true">
+              /
+            </span>
 
-          const label =
-            value.charAt(0).toUpperCase() + value.slice(1);
+            {crumb.isLast ? (
+              <span
+                className="breadcrumb-current"
+                aria-current="page"
+              >
+                {crumb.label}
+              </span>
+            ) : (
+              <Link to={crumb.to} className="breadcrumb-link">
+                {crumb.label}
+              </Link>
+            )}
 
-          return (
-            <li key={to} className="breadcrumb-item">
-
-              <span className="breadcrumb-separator">›</span>
-
-              {isLast ? (
-                <span
-                  className="breadcrumb-current"
-                  aria-current="page"
-                >
-                  {label}
-                </span>
-              ) : (
-                <Link to={to} className="breadcrumb-link">
-                  {label}
-                </Link>
-              )}
-
-            </li>
-          );
-        })}
+          </li>
+        ))}
 
       </ol>
     </nav>
