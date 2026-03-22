@@ -8,11 +8,16 @@ function RecuperarContrasena() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
+  // 👇 Declaramos la variable para no tener "localhost" quemado
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3000/api/Recuperar-Contraseña", {
+      
+      // 👇 Usamos la URL correcta SIN la "ñ"
+      const response = await fetch(`${API_URL}/api/recuperar-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })

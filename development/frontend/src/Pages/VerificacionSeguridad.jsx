@@ -3,6 +3,9 @@ import { useState } from "react";
 import "../styles/pages_styles/VerificacionSeguridad.css";
 import logo from "../assets/content.png";
 
+// AGREGA ESTA LÍNEA
+const API_URL = import.meta.env.VITE_API_URL || "";
+
 function Verificacion_de_seguridad() {
 
   const location = useLocation();
@@ -14,15 +17,14 @@ function Verificacion_de_seguridad() {
   const [error,setError] = useState("");
 
   const verificarCodigo = async (e) => {
-
     e.preventDefault();
 
-    try{
-
-      const response = await fetch("http://localhost:3000/api/verificar",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
+    try {
+      // REEMPLAZA EL FETCH DURO POR LA VARIABLE
+      const response = await fetch(`${API_URL}/api/verificar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           email,
@@ -32,16 +34,18 @@ function Verificacion_de_seguridad() {
 
       const data = await response.json();
 
-      if(data.valid){
-        navigate("/home");
-      }else{
-        setError("El código ingresado es incorrecto");
+      // ASEGURARNOS DE LEER LA RESPUESTA ESTÁNDAR DE TU BACKEND (data.ok)
+      if (response.ok && data.ok) {
+        alert("Cuenta verificada con éxito. Por favor, inicia sesión.");
+        navigate("/login"); 
+      } else {
+        setError(data.message || "El código ingresado es incorrecto");
       }
 
-    }catch(err){
+    } catch(err) {
       console.error(err);
+      setError("Error de conexión con el servidor");
     }
-
   };
 
   return (

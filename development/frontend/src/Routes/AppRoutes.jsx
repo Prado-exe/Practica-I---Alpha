@@ -12,13 +12,17 @@ import Noticias from "../Pages/Noticias";
 import VerificacionSeguridad from "../Pages/Verificacionseguridad";
 import RecuperarContrasena from "../Pages/RecuperarContrasena";
 import ResetPassword from "../Pages/ResetPassword";
+import SessionExpiryManager from "../Components/SessionExpiryManager";
 //import NotFound from "../Pages/NotFound";
 //{/* Ruta 404 */}
 //<Route path="*" element={<NotFound />} />
 
 function AppRoutes() {
   return (
+    <>
+    <SessionExpiryManager />
     <Routes>
+
       {/* Rutas con layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
@@ -27,7 +31,7 @@ function AppRoutes() {
         <Route path="/conjuntodatos" element={<ConjuntoDatos />} />
         <Route path="/publicaciones" element={<Publicaciones />} />
         <Route path="/instituciones" element={<Instituciones />} />
-        <Route path="/noticias" element={<Noticias />} />
+        
         
       </Route>
 
@@ -38,6 +42,7 @@ function AppRoutes() {
         <Route path="/recuperar-password" element={<RecuperarContrasena />} />
         <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
+    </>
   );
 }
 
