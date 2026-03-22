@@ -1,5 +1,6 @@
 # Sustainable Data Observatory
-An interactive university dashboard for the visualization and analysis of environmental sustainability indicators. Allows exploration of real-time data on ecological metrics, facilitating informed decision-making in academic and institutional contexts.
+The Sustainable Data Observatory is a web-based system that centralizes the collection, organization, management, analysis, visualization, and publication of datasets related to sustainability and other areas of institutional interest.
+
 
 ## Tech Stack
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
