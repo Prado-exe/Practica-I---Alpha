@@ -1,0 +1,63 @@
+/* DropdownMenu.css */
+
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-btn {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  background: none;
+  color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-radius: 1rem;
+  transition: background 0.2s;
+}
+
+.dropdown-btn:hover,
+.dropdown-btn:focus-visible {
+  background: #0D47A1;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #0B5ED7;
+  border-radius: 0 0 1rem 1rem;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+
+  transition: all 0.25s ease;
+  pointer-events: none;
+}
+
+.dropdown.open .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 0.7rem;
+  margin: 0.25rem;
+  border-radius: 0.6rem;
+  color: white;
+  text-decoration: none;
+
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus-visible {
+  background: #0D47A1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}

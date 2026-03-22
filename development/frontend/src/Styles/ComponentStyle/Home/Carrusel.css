@@ -1,0 +1,310 @@
+/* ===================== */
+
+/* Wrapper */
+.carousel-wrapper {
+  position: relative;
+  margin: 0.7rem 5rem 2rem;
+  font-size: 1rem; /* escalable vía fontSize */
+  background: rgba(255, 255, 255, 0.637);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 24px rgba(122, 122, 122, 0.7),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.carousel-wrapper.hc {
+  background: #000;
+  box-shadow: none;
+  border: 2px solid #fff;
+}
+
+.carousel-wrapper.hc img {
+  filter: grayscale(100%) contrast(120%);
+}
+.carousel-title {
+  font-size: clamp(1.4rem, calc(2.5rem * var(--font-scale)), 3rem);
+}
+
+.carousel-subtitle {
+  font-size: clamp(1rem, calc(1.7rem * var(--font-scale)), 2rem);
+}
+
+.carousel-description {
+  font-size: clamp(0.9rem, calc(1rem * var(--font-scale)), 1.3rem);
+}
+
+/* ===================== */
+/* Carrusel */
+.carousel {
+  display: flex;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  min-height: 300px;
+  position: relative;
+
+  -ms-overflow-style: none; 
+  scrollbar-width: none;   
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-item {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: stretch;
+
+  min-height: 420px; /* altura base */
+  height: auto;      /* permite crecer */
+
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* ===================== */
+/* Imagen del slide */
+.carousel-item img {
+  width: 40%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+/* ===================== */
+/* Contenido derecho */
+.carousel-content {
+  width: 60%;
+  padding-left: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.carousel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.carousel-title {
+  margin: 0;
+  font-size: calc(2.5rem * var(--font-scale));
+  font-weight: 600;
+}
+
+.carousel-subtitle {
+  margin: 0;
+  font-size: calc(1.7rem * var(--font-scale));
+  color: #555;
+}
+
+.carousel-description {
+  margin-top: 0.5rem;
+  font-size: calc(1rem * var(--font-scale));
+  line-height: 1.6;
+  color: #333;
+  max-width: 90%;
+}
+
+.carousel-date {
+  font-size: calc(0.9rem * var(--font-scale));
+  color: #666;
+}
+
+.carousel-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+/* ===================== */
+/* Botón del slide */
+.carousel-btn {
+  padding: 0.55rem 1.4rem;
+  border-radius: 20px;
+  border: none;
+  background: #1565c0;
+  color: white;
+  cursor: pointer;
+  font-size: calc(0.9rem * var(--font-scale));
+}
+
+.carousel-btn:hover {
+  background: #0d47a1;
+}
+
+/* ===================== */
+/* Flechas del carrusel */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: calc(1.6rem * var(--font-scale));
+  line-height: 1;
+  cursor: pointer;
+}
+
+.carousel-arrow.left {
+  left: -20px;
+}
+
+.carousel-arrow.right {
+  right: -20px;
+}
+
+.carousel-arrow:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* ===================== */
+/* Dots centrados */
+.carousel-dots {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+  z-index: 20;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background: #ccc;
+  cursor: pointer;
+}
+
+.dot.active {
+  background: #1565c0;
+}
+
+.carousel-wrapper.hc .dot {
+  background: #fff;
+}
+
+.carousel-wrapper.hc .dot.active {
+  background: #ff9800;
+}
+
+/* ===================== */
+/* Alto contraste */
+.carousel-wrapper.hc .carousel-item {
+  background: #000;
+  color: #fff;
+}
+
+.carousel-wrapper.hc .carousel-subtitle,
+.carousel-wrapper.hc .carousel-date {
+  color: #ddd;
+}
+
+.carousel-wrapper.hc .carousel-btn {
+  background: #fff;
+  color: #000;
+}
+
+.carousel-wrapper.hc .carousel-arrow {
+  background: #fff;
+  color: #000000;
+}
+
+/* ===================== */
+/* Focus visible */
+.carousel:focus {
+  outline: 3px solid #1565c0;
+  outline-offset: 4px;
+}
+
+.carousel-arrow:focus,
+.carousel-btn:focus,
+.dot:focus {
+  outline: 3px solid #ff9800;
+  outline-offset: 3px;
+}
+
+/* ===================== */
+/* Responsive: móvil */
+@media (max-width: 768px) {
+  .carousel-item {
+    flex-direction: column;
+    height: auto;
+    padding: 1rem;
+  }
+
+  .carousel-item img {
+    width: 100%;
+    height: 250px;
+    margin-bottom: 1rem;
+  }
+
+  .carousel-content {
+    width: 100%;
+    padding-left: 0;
+  }
+}
+/* ===================== */
+/* Responsive: móvil */
+@media (max-width: 768px) {
+  .carousel-wrapper {
+    margin: 0;              /* quitar márgenes laterales */
+    padding: 0 1rem;        /* opcional: un poco de padding para no pegarse a la pantalla */
+  }
+
+  .carousel-item {
+    flex-direction: column;
+    height: auto;
+    padding: 0;             /* eliminar padding interno */
+  }
+
+  .carousel-item img {
+    width: 100%;            /* ocupar todo el ancho */
+    height: 250px;
+    margin-bottom: 1rem;
+  }
+
+  .carousel-content {
+    width: 100%;
+    padding-left: 0;        /* quitar padding lateral */
+  }
+
+  /* Dots centrados y con más espacio */
+  .carousel-dots {
+    bottom: 10px;
+    gap: 0.5rem;
+  }
+
+  /* Flechas más pequeñas y cercanas */
+  .carousel-arrow {
+    width: 30px;
+    height: 30px;
+    font-size: calc(1.5rem * var(--font-scale));
+  }
+
+  .carousel-arrow.left {
+    left: 5px;
+  }
+
+  .carousel-arrow.right {
+    right: 5px;
+  }
+}

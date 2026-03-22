@@ -68,10 +68,16 @@ p {
   margin-bottom: var(--space-md);
 }
 
-a {
-  color: var(--link-color);
-  text-decoration: underline;
+/* links accesibles */
+a:hover,
+a:focus {
+  text-decoration: none;
 }
+
+a:visited {
+  opacity: 0.8;
+}
+
 
 /* accesibilidad con tab */
 :focus-visible {
@@ -92,15 +98,11 @@ html.high-contrast {
   --card-bg: #000000;
 }
 
-/* modo oscuro automatico (por si esta por defecto en el sistema ) 
-@media (prefers-color-scheme: dark) {
+/* soporte con animaciones reducidas */
 
-  :root {
-    --bg-color: #121212;
-    --text-color: #ffffff;
-    --heading-color: #ffffff;
-    --card-bg: #1e1e1e;
-    --border-color: #333333;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
   }
-
-}*/
+}

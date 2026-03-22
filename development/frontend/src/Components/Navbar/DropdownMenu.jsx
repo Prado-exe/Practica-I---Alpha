@@ -1,43 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import "../../styles/ComponentStyle/Navbar/DropdownMenu.css";
 
 function DropdownMenu({ links }) {
-
   const [open, setOpen] = useState(false);
+  const ref = useRef();
 
-  const toggleMenu = () => {
-    setOpen(!open);
-  };
+  /* CLICK FUERA */
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  /* ESC */
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
 
   return (
-    <div className="dropdown">
-
+    <div
+      className={`dropdown ${open ? "open" : ""}`}
+      ref={ref}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
       <button
         className="dropdown-btn"
-        aria-haspopup="true"
+        aria-haspopup="menu"
         aria-expanded={open}
-        onClick={toggleMenu}
+        onClick={() => setOpen(!open)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen(!open);
+          }
+        }}
       >
         Sobre nosotros ▾
       </button>
 
-      {open && (
-        <div className="dropdown-menu">
-
-          {links.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="dropdown-item"
-              onClick={() => setOpen(true)}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-        </div>
-      )}
-
+      <div className="dropdown-menu" role="menu">
+        {links.map((link) => (
+          <Link
+            key={link.path}
+            to={link.path}
+            role="menuitem"
+            className="dropdown-item"
+            onClick={() => setOpen(false)}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
