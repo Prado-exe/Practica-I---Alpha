@@ -1,7 +1,7 @@
 
 ## Observatorio De Datos Sostenible
 
-Un dashboard interactivo universitario para la visualización y análisis de indicadores de sostenibilidad ambiental. Permite explorar datos en tiempo real sobre métricas ecológicas, facilitando la toma de decisiones informadas en contextos académicos e institucionales.
+El Observatorio de Datos Sustentable es un sistema web que centraliza la recopilación, organización, gestión, análisis, visualización y publicación de conjuntos de datos relacionados con la sustentabilidad y otras áreas de interés institucional.
 
 ## Tech Stack
 
