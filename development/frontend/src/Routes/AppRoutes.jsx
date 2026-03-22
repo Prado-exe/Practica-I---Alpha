@@ -6,6 +6,8 @@ import AdminLayout from "../Layouts/AdminLayout";
 import MainLayout from "../Layouts/MainLayout";
 import ProtectedRoute from "../Pages/Admin/ProtectedRoute";
 
+import SessionExpiryManager from "../Components/SessionExpiryManager";
+
 //public routes
 const Home = lazy(() => import("../Pages/Public/Home"));
 const Formulario = lazy(() => import("../Pages/Public/Formulario"));
@@ -39,6 +41,8 @@ import Loader from "../Components/Common/Loader";
 
 function AppRoutes() {
   return (
+    <>
+    <SessionExpiryManager />
     <Suspense fallback={<Loader />}>
     <Routes>
       {/*Admin routes, Admin Layout */}
@@ -82,6 +86,7 @@ function AppRoutes() {
 
     </Routes>
     </Suspense>
+    </>
   );
 }
 

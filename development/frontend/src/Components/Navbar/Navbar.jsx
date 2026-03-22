@@ -8,6 +8,7 @@ import AccessibilityTools from "../AccessibilityTools";
 import DropdownMenu from "./DropdownMenu";
 import UserDropdown from "../Navbar/UserDropdown";
 
+// 👇 El Navbar solo extrae el usuario y la función de logout del Contexto
 import { useAuth } from "../../Context/AuthContext";
 import logo from "../../assets/Ico_obs_datos2.png";
 
@@ -70,43 +71,6 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const syncAuth = () => {
-      setIsAuthenticated(!!getAuthToken());
-    };
-
-    
-    window.addEventListener("auth-changed", syncAuth);
-
-    return () => {
-      
-      window.removeEventListener("auth-changed", syncAuth);
-    };
-  }, []);
-
-  const handleLogout = async () => {
-  try {
-    const token = getAuthToken();
-
-    if (token) {
-      await fetch(`${API_URL}/api/logout`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-      });
-    }
-  } catch (error) {
-    console.error("Error al cerrar sesión:", error);
-  } finally {
-    clearAllAuthState();
-    window.dispatchEvent(new Event("auth-changed"));
-    setIsAuthenticated(false);
-    navigate("/");
-  }
-};
-
   return (
     <>
      <header
@@ -150,6 +114,7 @@ function Navbar() {
                   </Link>
                 </>
               ) : (
+                // 👇 El Dropdown recibe la función logout que viene del AuthContext
                 <UserDropdown user={effectiveUser} logout={logout} />
               )}
             </div>
