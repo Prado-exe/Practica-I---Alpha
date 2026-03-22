@@ -16,17 +16,17 @@ function Login() {
   const [loading, setLoading] = useState(false);
   
   // 2. Estado para almacenar la respuesta del Captcha
-  const [captchaToken, setCaptchaToken] = useState(null); 
+  //const [captchaToken, setCaptchaToken] = useState(null); 
   
   const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!captchaToken) {
-      alert("Debes completar el captcha");
-      return;
-    }
+   // if (!captchaToken) {
+   //   alert("Debes completar el captcha");
+   //   return;
+   // }
 
     try {
       setLoading(true);
@@ -39,7 +39,7 @@ function Login() {
         body: JSON.stringify({
           email,
           password,
-          captchaToken
+          //captchaToken
         })
       });
 
@@ -108,12 +108,12 @@ function Login() {
           required
         />
 
-        {/* 6. Renderizamos el Captcha para que el usuario pueda validarlo */}
-        {/* Asegúrate de que tu componente Captcha use la prop onChange o setToken */}
+        {/* 6. Renderizamos el Captcha para que el usuario pueda validarlo 
+         Asegúrate de que tu componente Captcha use la prop onChange o setToken 
         <div style={{ margin: "10px 0" }}>
           <Captcha onChange={(token) => setCaptchaToken(token)} />
         </div>
-
+*/}
         <button className="login-btn" disabled={loading}>
           {loading ? "Validando..." : "Iniciar sesión"}
         </button>

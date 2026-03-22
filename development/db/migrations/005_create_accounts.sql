@@ -31,10 +31,10 @@ CREATE TABLE IF NOT EXISTS accounts (
     CONSTRAINT chk_accounts_status
         CHECK (
             account_status IN (
-                'pending_verification',
-                'active',
-                'requires_reverification',
-                'suspended_admin'
+                'active', 
+                'pending_verification', 
+                'suspended', 
+                'pending_revalidation'
             )
         )
 );

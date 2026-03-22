@@ -40,11 +40,7 @@ function Navbar() {
 
   const { user, logout } = useAuth();
 
-  // seccion para estar en modo debug, 
-  const DEBUG_AUTH = import.meta.env.VITE_DEBUG_AUTH == "true";
-  const effectiveUser = DEBUG_AUTH
-    ? { name: "Admin", role: "admin" }
-    : user;
+  const effectiveUser = user;
 
   /* SCROLL OPTIMIZADO */
   useEffect(() => {

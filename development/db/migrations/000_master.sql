@@ -38,6 +38,9 @@ BEGIN;
 \i /migrations/032_create_contact_messages.sql
 \i /migrations/033_create_contact_message_files.sql
 
+\i /migrations/035_seed_categories.sql
+\i /migrations/036_seed_tags.sql
+\i /migrations/037_seed_file_formats.sql
 COMMIT;
 
 \echo 'Migraciones completadas.'

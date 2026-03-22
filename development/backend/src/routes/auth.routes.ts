@@ -283,7 +283,7 @@ authRouter.add("POST", "/api/logout", [], async (req, res) => {
   }
 });
 
-// ENDPOINT 1: Solicitar recuperación de contraseña
+
 authRouter.add("POST", "/api/recuperar-password", [], async (req, res) => {
   try {
     const body = await readJsonBody<{ email: string }>(req);
@@ -293,7 +293,7 @@ authRouter.add("POST", "/api/recuperar-password", [], async (req, res) => {
       return;
     }
 
-    // 👇 Agregamos "as string" para forzar a TypeScript a aceptar el valor
+ 
     const result = await requestPasswordReset(body.email as string);
     
     sendJson(res, 200, { ok: true, message: result.message });
@@ -305,12 +305,11 @@ authRouter.add("POST", "/api/recuperar-password", [], async (req, res) => {
   }
 });
 
-// ENDPOINT 2: Ejecutar el cambio de contraseña
 authRouter.add("POST", "/api/reset-password", [], async (req, res) => {
   try {
     const body = await readJsonBody<{ token: string; password: string }>(req);
     
-    // 👇 Esto calma a TypeScript asegurándole que SÍ o SÍ son strings
+    
     const token = typeof body.token === "string" ? body.token : "";
     const password = typeof body.password === "string" ? body.password : "";
     
@@ -324,7 +323,6 @@ authRouter.add("POST", "/api/reset-password", [], async (req, res) => {
       return;
     }
 
-    // Ya no necesitas ponerle "as string" porque arriba ya lo validamos
     const result = await executePasswordReset(token, password);
     
     sendJson(res, 200, { ok: true, message: result.message });

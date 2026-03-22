@@ -4,9 +4,9 @@ import SearchBarAdvanced from "../../Components/Common/SearchBarAdvanced";
 import Pagination from "../../Components/Common/Pagination";
 import { noticias } from "../../data/noticias";
 import { useState, useEffect } from "react";
-import AccordionFilterNot from "../../Components/Noticias/AccordionFilterNot";
 import NoticiasCard from "../../Components/Noticias/NoticiasCard";
 import { filterNews, paginate } from "../../Services/NoticiasService";
+import AccordionFilterNot from "../../Components/Common/AccordionFilter";
 
 function Noticias() {
 
