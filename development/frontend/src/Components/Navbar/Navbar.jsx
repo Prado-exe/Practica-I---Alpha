@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 
 import AccessibilityTools from "../AccessibilityTools";
 import DropdownMenu from "./DropdownMenu";
-import UserDropdown from "../Common/UserDropdown";
+import UserDropdown from "../Navbar/UserDropdown";
 
 import { useAuth } from "../../Context/AuthContext";
 import logo from "../../assets/Ico_obs_datos2.png";

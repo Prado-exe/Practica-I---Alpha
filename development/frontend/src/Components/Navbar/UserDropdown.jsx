@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 
-import "../../styles/Component_styles/UserDropdown.css";
+import "../../styles/ComponentStyle/Navbar/UserDropdown.css";
 
 function UserDropdown({ user, logout }) {
     if (!user) return null;

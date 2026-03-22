@@ -1,7 +1,7 @@
 import Sidebar from "../Components/Admin/Sidebar";
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import "../Styles/Component_styles/AdminLayout.css";
+import "../Styles/Layout/AdminLayout.css";
 import Breadcrumb from "../Components/Common/Breadcrumb";
 
 function AdminLayout() {

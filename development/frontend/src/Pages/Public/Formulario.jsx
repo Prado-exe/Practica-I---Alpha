@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import "../Styles/Pages_styles/Public/Formulario.css";
+import "../../Styles/Pages_styles/Public/Formulario.css"
 import Breadcrumb from "../../Components/Common/Breadcrumb"
 
 function Formulario() {

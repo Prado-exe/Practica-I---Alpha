@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import Breadcrumb from "../../Components/Common/Breadcrumb";
 import Pagination from "../../Components/Common/Pagination";
-import AccordionFilter from "../../Components/Datos/AccordionFilter";
+import AccordionFilter from "../../Components/Common/AccordionFilter";
 import DatasetCard from "../../Components/Datos/DatasetCard";
 import SearchBarAdvanced from "../../Components/Common/SearchBarAdvanced";
 import { getDatasets } from "../../Services/DatasetService";
-import "../../Styles/Pages_styles/Public/Datos.css"
+import "../../Styles/Pages_styles/Public/Datos.css";
 
 function Datos() {
+
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,7 +19,27 @@ function Datos() {
   const [totalResults, setTotalResults] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // 🔥 debounce
+  // 🔧 CONFIGURACIÓN DE FILTROS
+  const filtersConfig = [
+    {
+      key: "categoria",
+      title: "Categoría",
+      options: ["Salud", "Educación", "Economía"],
+      defaultOpen: true
+    },
+    {
+      key: "region",
+      title: "Región",
+      options: ["Norte", "Centro", "Sur"]
+    },
+    {
+      key: "fecha",
+      title: "Fecha",
+      options: ["2025", "2024", "2023"]
+    }
+  ];
+
+  // 🔥 debounce búsqueda
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -27,10 +48,22 @@ function Datos() {
     return () => clearTimeout(timeout);
   }, [searchTerm]);
 
-  // 🔥 reset página
+  // 🔥 reset página cuando cambian filtros o búsqueda
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearch, appliedFilters]);
+
+  // 🔥 handler filtros
+  const handleFilterChange = (key, values) => {
+    setAppliedFilters(prev => ({
+      ...prev,
+      [key]: values
+    }));
+  };
+
+  const clearFilters = () => {
+    setAppliedFilters({});
+  };
 
   // 🔥 fetch API
   useEffect(() => {
@@ -38,9 +71,14 @@ function Datos() {
       setLoading(true);
 
       try {
+        // opcional: transformar arrays a string
+        const formattedFilters = Object.fromEntries(
+          Object.entries(appliedFilters).map(([k, v]) => [k, v.join(",")])
+        );
+
         const res = await getDatasets({
           search: debouncedSearch,
-          filters: appliedFilters,
+          filters: formattedFilters,
           page: currentPage,
           limit: 7
         });
@@ -61,40 +99,22 @@ function Datos() {
 
   return (
     <div className="datos-page">
+
       <Breadcrumb paths={["Inicio", "Datos"]} />
 
       <div className="datos-container">
 
-        {/* FILTROS */}
+        {/* 🔹 FILTROS */}
         <aside className="datos-filters" aria-label="Filtros">
-
           <AccordionFilter
-            title="Categoría"
-            options={["Salud", "Educación", "Economía"]}
-            onChange={(value) =>
-              setAppliedFilters(prev => ({ ...prev, categoria: value }))
-            }
+            filters={filtersConfig}
+            selectedFilters={appliedFilters}
+            onChange={handleFilterChange}
+            onClear={clearFilters}
           />
-
-          <AccordionFilter
-            title="Región"
-            options={["Norte", "Centro", "Sur"]}
-            onChange={(value) =>
-              setAppliedFilters(prev => ({ ...prev, region: value }))
-            }
-          />
-
-          <AccordionFilter
-            title="Fecha"
-            isDateFilter
-            onChange={(value) =>
-              setAppliedFilters(prev => ({ ...prev, fecha: value }))
-            }
-          />
-
         </aside>
 
-        {/* MAIN */}
+        {/* 🔹 MAIN */}
         <main className="datos-main" role="main">
 
           <SearchBarAdvanced
@@ -109,13 +129,13 @@ function Datos() {
 
           <hr className="datos-separator" />
 
-          {/* Chips */}
+          {/* 🔹 Chips de filtros */}
           <div className="applied-filters">
             {Object.entries(appliedFilters).length > 0 ? (
-              Object.entries(appliedFilters).map(([key, value]) => (
-                value && (
+              Object.entries(appliedFilters).map(([key, values]) => (
+                values.length > 0 && (
                   <span key={key} className="filter-chip">
-                    {key}: {value}
+                    {key}: {values.join(", ")}
                     <button
                       onClick={() =>
                         setAppliedFilters(prev => {
@@ -136,7 +156,7 @@ function Datos() {
             )}
           </div>
 
-          {/* LISTADO */}
+          {/* 🔹 LISTADO */}
           {loading ? (
             <p className="loading">Cargando datasets...</p>
           ) : datasets.length === 0 ? (
@@ -151,6 +171,7 @@ function Datos() {
 
           <hr className="datos-separator" />
 
+          {/* 🔹 PAGINACIÓN */}
           {totalPages > 1 && (
             <Pagination
               currentPage={currentPage}
