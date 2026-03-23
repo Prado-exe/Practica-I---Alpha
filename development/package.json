@@ -4,7 +4,11 @@
   "description": "Este directorio contiene el entorno de desarrollo local, configurado para facilitar el Hot Reloading y la sincronización entre el código fuente y los contenedores Docker.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node-dev src/server.ts",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "keywords": [],
   "author": "",

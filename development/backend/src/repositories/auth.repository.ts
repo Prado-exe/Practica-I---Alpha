@@ -1,4 +1,5 @@
 import { pool } from "../config/db";
+import { AppError } from "../types/app-error";
 import type {
   Account,
   AuthSession,
@@ -156,17 +157,29 @@ export async function createVerificationCode(
 export async function findAccountLoginByEmail(email: string): Promise<LoginAccount | null> {
   const query = `
     SELECT
-      account_id,
-      username,
-      email,
-      password_hash,
-      full_name,
-      account_status,
-      email_verified,
-      failed_login_count,
-      locked_until
-    FROM accounts
-    WHERE email = $1
+      a.account_id,
+      a.username,
+      a.email,
+      a.password_hash,
+      a.full_name,
+      a.account_status,
+      a.email_verified,
+      a.failed_login_count,
+      a.locked_until,
+      r.code AS role_code,
+      COALESCE(
+        json_agg(p.code) FILTER (WHERE p.code IS NOT NULL), 
+        '[]'
+      ) AS permissions
+    FROM accounts a
+    JOIN roles r ON a.role_id = r.role_id
+    LEFT JOIN role_permissions rp ON r.role_id = rp.role_id
+    LEFT JOIN permissions p ON rp.permission_id = p.permission_id AND p.is_active = TRUE
+    WHERE a.email = $1
+    GROUP BY 
+      a.account_id,
+      r.role_id,
+      r.code
     LIMIT 1
   `;
 
@@ -372,7 +385,7 @@ export async function createAuthSession(input: CreateAuthSessionInput): Promise<
   return rows[0];
 }
 
-export async function findAuthSessionById(sessionId: number): Promise<AuthSession | null> {
+export async function findAuthSessionById(sessionId: number | string): Promise<AuthSession | null> {
   const query = `
     SELECT
       session_id,
@@ -397,7 +410,7 @@ export async function findAuthSessionById(sessionId: number): Promise<AuthSessio
 }
 
 export async function revokeAuthSession(
-  sessionId: number,
+  sessionId: number | string,
   reason = "logout"
 ): Promise<void> {
   const query = `
@@ -425,22 +438,36 @@ export async function updateAuthSessionLastUsed(sessionId: number): Promise<void
   await pool.query(query, [sessionId]);
 }
 
-export async function findAccountByIdForSession(accountId: number): Promise<BasicAccount | null> {
+export async function findAccountByIdForSession(accountId: number | string): Promise<LoginAccount | null> {
   const query = `
     SELECT
-      account_id,
-      role_id,
-      username,
-      email,
-      full_name,
-      account_status,
-      email_verified
-    FROM accounts
-    WHERE account_id = $1
+      a.account_id,
+      a.username,
+      a.email,
+      a.password_hash,
+      a.full_name,
+      a.account_status,
+      a.email_verified,
+      a.failed_login_count,
+      a.locked_until,
+      r.code AS role_code,
+      COALESCE(
+        json_agg(p.code) FILTER (WHERE p.code IS NOT NULL), 
+        '[]'
+      ) AS permissions
+    FROM accounts a
+    JOIN roles r ON a.role_id = r.role_id
+    LEFT JOIN role_permissions rp ON r.role_id = rp.role_id
+    LEFT JOIN permissions p ON rp.permission_id = p.permission_id AND p.is_active = TRUE
+    WHERE a.account_id = $1
+    GROUP BY 
+      a.account_id,
+      r.role_id,
+      r.code
     LIMIT 1
   `;
 
-  const { rows } = await pool.query<BasicAccount>(query, [accountId]);
+  const { rows } = await pool.query<LoginAccount>(query, [accountId]);
   return rows[0] ?? null;
 }
 
@@ -642,4 +669,48 @@ export async function consumePasswordResetToken(
     WHERE password_reset_token_id = $1
   `;
   await pool.query(query, [tokenId]);
+}
+
+export async function fetchAllUsersFromDb() {
+  const query = `
+    SELECT 
+      a.account_id AS id, 
+      a.full_name AS nombre, 
+      a.email, 
+      a.account_status AS estado, 
+      r.code AS rol
+    FROM accounts a
+    JOIN roles r ON a.role_id = r.role_id
+    ORDER BY a.account_id DESC
+  `;
+  const { rows } = await pool.query(query);
+  return rows;
+}
+
+export async function updateUserStatusInDb(userId: string | number, newStatus: string) {
+  const query = `
+    UPDATE accounts 
+    SET account_status = $1 
+    WHERE account_id = $2 
+    RETURNING account_id
+  `;
+  const { rowCount } = await pool.query(query, [newStatus, userId]);
+  return rowCount ?? 0; // Solo devolvemos cuántas filas se afectaron
+}
+
+export async function getUserRoleCodeById(userId: string | number) {
+  const query = `
+    SELECT r.code 
+    FROM accounts a 
+    JOIN roles r ON a.role_id = r.role_id 
+    WHERE a.account_id = $1
+  `;
+  const { rows } = await pool.query(query, [userId]);
+  return rows.length > 0 ? rows[0].code : null;
+}
+
+export async function deleteUserFromDb(userId: string | number) {
+  const query = "DELETE FROM accounts WHERE account_id = $1";
+  const { rowCount } = await pool.query(query, [userId]);
+  return rowCount ?? 0;
 }

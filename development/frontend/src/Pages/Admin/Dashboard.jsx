@@ -5,6 +5,7 @@ import {
 } from "recharts";
 
 import "../../Styles/Pages_styles/Admin/Dashboard.css";
+import CanView from "../../Components/Common/CanView";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -87,9 +88,12 @@ function Dashboard() {
         </div>
 
         <div className="section-header">
-          <button onClick={() => navigate("/administracion/actividad")}>
-            Ver todo
-          </button>
+          {/* 👇 Exigimos permiso para leer el historial de actividad */}
+          <CanView requiredPermission="activity_log.read">
+            <button onClick={() => navigate("/administracion/actividad")}>
+              Ver todo
+            </button>
+          </CanView>
         </div>
 
         <div className="table-container">
@@ -160,9 +164,12 @@ function Dashboard() {
         </div>
 
         <div className="section-header">
-          <button onClick={() => navigate("/administracion/validaciones")}>
-            Revisar
-          </button>
+          {/* 👇 Exigimos permiso de ejecución de validación */}
+          <CanView requiredPermission="data_validation.execute">
+            <button onClick={() => navigate("/administracion/validaciones")}>
+              Revisar
+            </button>
+          </CanView>
         </div>
 
         <div className="table-container">
@@ -225,9 +232,12 @@ function Dashboard() {
         </div>
 
         <div className="section-header">
-          <button onClick={() => navigate("/administracion/datasets")}>
-            Ver todos
-          </button>
+          {/* 👇 Exigimos permiso para leer datasets */}
+          <CanView requiredPermission="data_management.read">
+            <button onClick={() => navigate("/administracion/datasets")}>
+              Ver todos
+            </button>
+          </CanView>
         </div>
 
         <div className="table-container">

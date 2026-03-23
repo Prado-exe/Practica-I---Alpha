@@ -7,6 +7,7 @@ import type {
   LoginMeta,
   RegisterInput,
   VerifyEmailCodeInput,
+  PublicAccount,
 } from "../types/auth";
 import {
   activateAccount,
@@ -40,6 +41,10 @@ import {
   createPasswordResetToken,
   findValidPasswordResetToken,
   consumePasswordResetToken,
+  fetchAllUsersFromDb, 
+  updateUserStatusInDb, 
+  getUserRoleCodeById, 
+  deleteUserFromDb
 } from "../repositories/auth.repository";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/mailer";
@@ -83,14 +88,16 @@ async function buildUniqueUsername(baseUsername: string): Promise<string> {
   }
 }
 
-function mapPublicAccount(account: BasicAccount) {
+export function mapPublicAccount(account: any): PublicAccount {
   return {
     account_id: account.account_id,
-    username: account.username,
+    username: account.username,         
     email: account.email,
     full_name: account.full_name,
-    account_status: account.account_status,
-    email_verified: account.email_verified,
+    account_status: account.account_status, 
+    email_verified: account.email_verified, 
+    role: account.role_code || "registered_user",
+    permissions: account.permissions || []
   };
 }
 
@@ -275,6 +282,8 @@ export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
     sub: account.account_id,
     email: account.email,
     sessionId: session.session_id,
+    permissions: account.permissions || [], 
+    role: account.role_code || "registered_user"
   });
 
   return {
@@ -380,7 +389,7 @@ export async function verifyEmailCode(payload: VerifyEmailCodeInput) {
   };
 }
 
-export async function logoutUser(sessionId: number) {
+export async function logoutUser(sessionId: number | string) {
   const session = await findAuthSessionById(sessionId);
 
   if (!session) {
@@ -480,6 +489,8 @@ export async function refreshUserSession(refreshToken: string, meta: LoginMeta =
     sub: account.account_id,
     email: account.email,
     sessionId: currentSession.session_id,
+    permissions: account.permissions || [], 
+    role: account.role_code || "registered_user"
   });
 
   return {
@@ -610,4 +621,49 @@ export async function executePasswordReset(token: string, newPassword: string) {
   await revokeAllActiveSessionsByAccountId(record.account_id, "password_reset");
 
   return { message: "Contraseña actualizada con éxito." };
+}
+
+
+// --- 1. OBTENER TODOS LOS USUARIOS ---
+export async function getAllUsers() {
+  const users = await fetchAllUsersFromDb();
+  return users;
+}
+
+// --- 2. ACTUALIZAR ESTADO DEL USUARIO ---
+export async function updateUserStatus(userId: string | number, newStatus: string) {
+  // Lógica de negocio: Validar estados permitidos
+  const validStatuses = ["active", "inactive", "pending_verification", "suspended"];
+  if (!validStatuses.includes(newStatus)) {
+    throw new AppError("Estado de cuenta no válido", 400);
+  }
+
+  // Llamada al repositorio
+  const affectedRows = await updateUserStatusInDb(userId, newStatus);
+
+  // Lógica de negocio: Verificar si realmente se actualizó algo
+  if (affectedRows === 0) {
+    throw new AppError("Usuario no encontrado", 404);
+  }
+
+  return { message: "Estado actualizado exitosamente" };
+}
+
+// --- 3. ELIMINAR USUARIO ---
+export async function deleteUser(userId: string | number) {
+  // Lógica de negocio: Verificar el rol antes de borrar
+  const roleCode = await getUserRoleCodeById(userId);
+  
+  if (roleCode === 'super_admin') {
+    throw new AppError("Acción denegada: No puedes eliminar a un Super Administrador", 403);
+  }
+
+  // Llamada al repositorio
+  const affectedRows = await deleteUserFromDb(userId);
+
+  if (affectedRows === 0) {
+    throw new AppError("Usuario no encontrado", 404);
+  }
+
+  return { message: "Usuario eliminado correctamente" };
 }

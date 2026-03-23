@@ -56,11 +56,7 @@ function Login() {
       // 5. LOGIN NORMAL EXITOSO
       if (response.ok && data.ok) {
         // Le pasamos los datos completos a tu nuevo AuthContext
-        login({
-          token: data.token,
-          user: data.account,
-          expiresAt: data.expiresAt
-        });
+        login(data);
 
         // Disparamos el evento para que el SessionExpiryManager lo detecte
         window.dispatchEvent(new Event("auth-changed"));

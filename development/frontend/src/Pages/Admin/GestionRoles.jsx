@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "../../Styles/Pages_styles/Admin/GestionRoles.css";
+import CanView from "../../Components/Common/CanView";
 
 function GestionRoles() {
 
@@ -27,7 +28,9 @@ function GestionRoles() {
 
       <div className="roles-header">
         <h1>Gestión de Roles</h1>
-        <button className="btn-crear">+ Crear Rol</button>
+        <CanView requiredPermission="roles_permissions.write">
+          <button className="btn-crear">+ Crear Rol</button>
+        </CanView>
       </div>
 
       <div className="roles-tabla">
@@ -46,14 +49,15 @@ function GestionRoles() {
             <span>{rol.usuarios}</span>
 
             <div className="acciones">
-              <button onClick={() => handleEditar(rol.id)}>Editar</button>
-              <button onClick={() => handleEliminar(rol.id)} className="eliminar">
-                Eliminar
-              </button>
+              <CanView requiredPermission="roles_permissions.write">
+                <button onClick={() => handleEditar(rol.id)}>Editar</button>
+                <button onClick={() => handleEliminar(rol.id)} className="eliminar">
+                  Eliminar
+                </button>
+              </CanView>
             </div>
           </div>
         ))}
-
       </div>
     </div>
   );

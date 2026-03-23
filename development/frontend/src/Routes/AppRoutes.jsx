@@ -49,18 +49,52 @@ function AppRoutes() {
       <Route
         path="/administracion"
         element={
+          // El guardia principal: Solo usuarios logueados pueden entrar al Layout
           <ProtectedRoute>
             <AdminLayout /> 
           </ProtectedRoute>
         }
       >
+        {/* El Dashboard queda abierto a cualquier usuario logueado en el panel */}
         <Route index element={<Dashboard />} />
-        <Route path="usuarios" element={<GestionUsuarios />} />
-        <Route path="publicaciones" element={<PublicacionesAdmin />} />
-        <Route path="configuracion" element={<Configuracion />} />
-        <Route path="datasets" element={<GestionDatasets />} />
-        <Route path="instituciones" element={<GestionInstituciones />} />
-        <Route path="roles" element={<GestionRoles />} />
+        
+        {/* 👇 Seguridad granular en cada subpanel */}
+        <Route path="usuarios" element={
+          <ProtectedRoute requiredPermission="user_management.read">
+            <GestionUsuarios />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="publicaciones" element={
+          <ProtectedRoute requiredPermission="catalog.write">
+            <PublicacionesAdmin />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="configuracion" element={
+          <ProtectedRoute requiredPermission="admin_general.manage">
+            <Configuracion />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="datasets" element={
+          <ProtectedRoute requiredPermission="data_management.read">
+            <GestionDatasets />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="instituciones" element={
+          <ProtectedRoute requiredPermission="admin_general.manage">
+            <GestionInstituciones />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="roles" element={
+          <ProtectedRoute requiredPermission="roles_permissions.read">
+            <GestionRoles />
+          </ProtectedRoute>
+        } />
+        
         <Route path="*" element={<Error404 />} />
       </Route>
 

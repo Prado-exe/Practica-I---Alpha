@@ -5,6 +5,7 @@ import { authRouter } from "./routes/auth.routes";
 import { testDbConnection } from "./config/db";
 import { warmupMailer } from "./utils/mailer";
 import { applySecurityHeaders } from "./utils/security-headers";
+import { defineConfig } from 'vitest/config';
 
 const server = http.createServer(async (req, res) => {
   applySecurityHeaders(res);
@@ -41,5 +42,14 @@ async function bootstrap(): Promise<void> {
     process.exit(1);
   }
 }
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    setupFiles: ['./src/tests/setup.ts'], // Archivo que se ejecuta antes de todas las pruebas
+    include: ['src/**/*.test.ts'],
+  },
+});
 
 void bootstrap();

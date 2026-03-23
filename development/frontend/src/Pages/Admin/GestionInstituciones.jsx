@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../../Styles/Pages_styles/Admin/GestionInstituciones.css";
+import CanView from "../../Components/Common/CanView";
 
 function GestionInstituciones() {
 
@@ -71,9 +72,11 @@ function GestionInstituciones() {
           onChange={handleChange}
         />
 
-        <button onClick={agregarInstitucion}>
-          Agregar
-        </button>
+        <CanView requiredPermission="admin_general.manage">
+          <button onClick={agregarInstitucion}>
+              Agregar
+            </button>
+          </CanView>
       </div>
 
       {/* TABLA */}
@@ -94,9 +97,11 @@ function GestionInstituciones() {
               <td>{inst.direccion}</td>
               <td>{inst.telefono}</td>
               <td>
-                <button className="btn-eliminar" onClick={() => eliminarInstitucion(inst.id)}>
-                  Eliminar
-                </button>
+                <CanView requiredPermission="admin_general.manage">
+                  <button className="btn-eliminar" onClick={() => eliminarInstitucion(inst.id)}>
+                    Eliminar
+                  </button>
+                </CanView>
               </td>
             </tr>
           ))}

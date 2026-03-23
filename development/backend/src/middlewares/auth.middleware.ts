@@ -18,3 +18,24 @@ export async function authMiddleware(req: HttpRequest, res: HttpResponse): Promi
     return true; 
   }
 }
+
+export function requirePermission(requiredPermission: string) {
+  return async (req: HttpRequest, res: HttpResponse): Promise<boolean | void> => {
+    
+    const isUnauthorized = await authMiddleware(req, res);
+    
+    if (isUnauthorized) return true; 
+
+    const userPermissions: string[] = req.user?.permissions || [];
+
+    if (!userPermissions.includes(requiredPermission)) {
+      sendJson(res, 403, { 
+        ok: false, 
+        message: "Acceso denegado: Permisos insuficientes." 
+      });
+      return true; 
+    }
+    
+    return; 
+  };
+}
