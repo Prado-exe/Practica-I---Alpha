@@ -29,5 +29,5 @@ INSERT INTO file_formats (format_code, format_name, mime_type) VALUES
     ('xlsx', 'Microsoft Excel (XLSX)', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
     ('xml', 'XML', 'application/xml'),
     ('zip', 'Archivo Comprimido ZIP', 'application/zip'),
-    ('png', 'Imagen PNG', 'image/png'),
+    ('png', 'Imagen PNG', 'image/png')
 ON CONFLICT (format_code) DO NOTHING;
