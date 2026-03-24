@@ -18,7 +18,7 @@ import { verifyEmailAction, resendVerificationAction } from "./verify.routes";
 import { refreshAction } from "./refresh.routes";
 import { requestPasswordResetAction, resetPasswordAction } from "./password.routes";
 import { getUsuariosAction, toggleEstadoAction, deleteUsuarioAction, editUsuarioAction, getRolesAction } from "./usuarios-admin.routes";
-
+import { generateUploadUrlAction } from "./upload.routes";
 import { 
   getRolesDetailsAction, 
   getPermisosAction, 
@@ -26,6 +26,13 @@ import {
   updateRoleAction, 
   deleteRoleAction 
 } from "./roles.routes";
+
+import { 
+  getInstitucionesAction, 
+  createInstitucionAction, 
+  updateInstitucionAction, 
+  deleteInstitucionAction 
+} from "./instituciones.routes";
 
 // --- FUNCIONES DE AYUDA (Exportadas) ---
 export function getSessionIdFromRequest(req: HttpRequest): number | string | null {
@@ -58,7 +65,7 @@ export function getErrorMessage(error: unknown): any {
 
 // --- EL ENRUTADOR PRINCIPAL ---
 export const authRouter = new Router();
-
+authRouter.add("POST", "/api/upload/presigned-url", [], generateUploadUrlAction);
 authRouter.add("POST", "/api/login", [], loginAction);
 authRouter.add("POST", "/api/logout", [], logoutAction);
 authRouter.add("POST", "/api/register", [], registerAction);
@@ -82,3 +89,9 @@ authRouter.add("GET", "/api/permisos", [requirePermission("roles_permissions.rea
 authRouter.add("POST", "/api/roles", [requirePermission("roles_permissions.write")], createRoleAction);
 authRouter.add("PUT", "/api/roles/:id", [requirePermission("roles_permissions.write")], updateRoleAction);
 authRouter.add("DELETE", "/api/roles/:id", [requirePermission("roles_permissions.write")], deleteRoleAction);
+
+// --- RUTAS DE INSTITUCIONES ---
+authRouter.add("GET", "/api/instituciones", [requirePermission("admin_general.manage")], getInstitucionesAction);
+authRouter.add("POST", "/api/instituciones", [requirePermission("admin_general.manage")], createInstitucionAction);
+authRouter.add("PUT", "/api/instituciones/:id", [requirePermission("admin_general.manage")], updateInstitucionAction);
+authRouter.add("DELETE", "/api/instituciones/:id", [requirePermission("admin_general.manage")], deleteInstitucionAction);

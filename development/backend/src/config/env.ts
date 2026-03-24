@@ -54,4 +54,12 @@ export const env = {
 
   ACCESS_TOKEN_EXPIRES_IN_MS: getNumberEnv("ACCESS_TOKEN_EXPIRES_IN_MS", 15 * 60 * 1000),
   REFRESH_TOKEN_EXPIRES_IN_MS: getNumberEnv("REFRESH_TOKEN_EXPIRES_IN_MS", 7 * 24 * 60 * 60 * 1000),
+
+  S3_ENDPOINT: getEnv("S3_ENDPOINT", "http://localhost:9000"),
+  S3_REGION: getEnv("S3_REGION", "us-east-1"),
+  S3_ACCESS_KEY: getEnv("S3_ACCESS_KEY"),
+  S3_SECRET_KEY: getEnv("S3_SECRET_KEY"),
+  S3_BUCKET_NAME: getEnv("S3_BUCKET_NAME"),
+
+  
 } as const;
