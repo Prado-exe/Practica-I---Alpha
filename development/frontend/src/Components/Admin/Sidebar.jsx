@@ -1,24 +1,33 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import "../../Styles/ComponentStyle/Admin/Sidebar.css"
+import "../../Styles/ComponentStyle/Admin/Sidebar.css";
+
+// Importamos las herramientas reales de seguridad
+import { useAuth } from "../../Context/AuthContext";
+import CanView from "../Common/CanView"; 
 
 function Sidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
-  const user = {
-    name: "Admin",
-    role: "Administrador"
-  };
+  // Obtenemos el usuario real y la función de logout del contexto
+  const { user: authUser, logout } = useAuth();
 
+  // 👇 CORRECCIÓN: El usuario ya está aplanado, sacamos los datos directo de la raíz
+  const userName = authUser?.full_name || "Usuario";
+  const userRole = authUser?.role || "Sin Rol";
+
+  // Agregamos el "requiredPermission" a cada opción del menú
   const menu = [
-    { name: "Dashboard", path: "/administracion", icon: "📊" },
-    { name: "Datasets", path: "/administracion/datasets", icon: "📁" },
-    { name: "Publicaciones", path: "/administracion/publicaciones", icon: "📰" },
-    { name: "Usuarios", path: "/administracion/usuarios", icon: "👥" },
-    { name: "Roles", path: "/administracion/roles", icon: "🔐" },
-    { name: "Instituciones", path: "/administracion/instituciones", icon: "🏢" },
-    { name: "Configuración", path: "/administracion/configuracion", icon: "⚙️" }
+    // El Dashboard no tiene requiredPermission, por lo que CanView lo dejará pasar siempre
+    { name: "Dashboard", path: "/administracion", icon: "📊" }, 
+    
+    { name: "Datasets", path: "/administracion/datasets", icon: "📁", requiredPermission: "data_management.read" },
+    { name: "Publicaciones", path: "/administracion/publicaciones", icon: "📰", requiredPermission: "catalog.write" },
+    { name: "Usuarios", path: "/administracion/usuarios", icon: "👥", requiredPermission: "user_management.read" },
+    { name: "Roles", path: "/administracion/roles", icon: "🔐", requiredPermission: "roles_permissions.read" },
+    { name: "Instituciones", path: "/administracion/instituciones", icon: "🏢", requiredPermission: "admin_general.manage" },
+    { name: "Configuración", path: "/administracion/configuracion", icon: "⚙️", requiredPermission: "admin_general.manage" }
   ];
 
   const isActive = (path) => {
@@ -26,11 +35,6 @@ function Sidebar() {
       return location.pathname === path;
     }
     return location.pathname.startsWith(path);
-  };
-
-  const handleLogout = () => {
-    console.log("Cerrar sesión");
-    // aquí luego conectas con auth
   };
 
   return (
@@ -44,36 +48,38 @@ function Sidebar() {
         </button>
       </div>
 
-      {/* USUARIO */}
+      {/* USUARIO REAL */}
       <div className="sidebar-user">
-        <div className="avatar">{user.name.charAt(0)}</div>
+        <div className="avatar">{userName.charAt(0).toUpperCase()}</div>
         {!collapsed && (
           <div className="user-info">
-            <span className="name">{user.name}</span>
-            <span className="role">{user.role}</span>
+            <span className="name">{userName}</span>
+            <span className="role">{userRole.replace("_", " ")}</span>
           </div>
         )}
       </div>
 
-      {/* NAV */}
+      {/* NAV CON PERMISOS */}
       <nav className="sidebar-nav">
         {menu.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`sidebar-link ${isActive(item.path) ? "active" : ""}`}
-          >
-            <span className="icon">{item.icon}</span>
-            {!collapsed && <span>{item.name}</span>}
-          </Link>
+          /* Envolvemos cada iteración con CanView para ocultar lo no autorizado */
+          <CanView key={item.path} requiredPermission={item.requiredPermission}>
+            <Link
+              to={item.path}
+              className={`sidebar-link ${isActive(item.path) ? "active" : ""}`}
+            >
+              <span className="icon">{item.icon}</span>
+              {!collapsed && <span>{item.name}</span>}
+            </Link>
+          </CanView>
         ))}
       </nav>
 
       {/* ESPACIADOR */}
       <div className="sidebar-spacer" />
 
-      {/* LOGOUT */}
-      <button className="sidebar-logout" onClick={handleLogout}>
+      {/* LOGOUT REAL */}
+      <button className="sidebar-logout" onClick={logout}>
         <span className="icon">🚪</span>
         {!collapsed && <span>Salir</span>}
       </button>

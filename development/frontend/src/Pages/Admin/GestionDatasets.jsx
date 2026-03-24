@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../../styles/pages_styles/Admin/GestionDatasets.css";
+import CanView from "../../Components/Common/CanView";
 
 function GestionDatasets() {
 
@@ -134,14 +135,21 @@ function GestionDatasets() {
                   </span>
                 </td>
                 <td className="acciones">
-                  <button className="btn-edit">Editar</button>
-                  <button className="btn-view">Revisar</button>
-                  <button className="btn-delete">Eliminar</button>
+                  <CanView requiredPermission="data_management.write">
+                    <button className="btn-edit">Editar</button>
+                  </CanView>
+
+                  <CanView requiredPermission="data_validation.execute">
+                    <button className="btn-view">Revisar</button>
+                  </CanView>
+
+                  <CanView requiredPermission="data_management.delete">
+                    <button className="btn-delete">Eliminar</button>
+                  </CanView>
                 </td>
               </tr>
             ))}
           </tbody>
-
         </table>
       </div>
 

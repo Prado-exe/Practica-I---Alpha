@@ -73,18 +73,27 @@ export function verifyAccessToken(token: string): JwtAccessPayload {
     throw new AppError("Token inválido", 401);
   }
 
+  // 1. Convertimos los IDs a números, sin importar si vienen como string o number
+  const sub = Number(decoded.sub);
+  const sessionId = Number(decoded.sessionId);
+
+  // 2. Validamos que sean números válidos y exista el email
   if (
-    typeof decoded.sub !== "number" ||
-    typeof decoded.email !== "string" ||
-    typeof decoded.sessionId !== "number"
+    isNaN(sub) ||
+    isNaN(sessionId) ||
+    typeof decoded.email !== "string"
   ) {
     throw new AppError("Payload de access token inválido", 401);
   }
 
+  // 3. RETORNAMOS TODO EL PAYLOAD (¡Especialmente los permisos!)
   return {
-    sub: decoded.sub,
+    sub,
     email: decoded.email,
-    sessionId: decoded.sessionId,
+    sessionId,
+    role: decoded.role || "registered_user",
+    // Aseguramos que los permisos siempre sean un arreglo
+    permissions: Array.isArray(decoded.permissions) ? decoded.permissions : [],
   };
 }
 

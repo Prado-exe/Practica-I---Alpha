@@ -29,6 +29,8 @@ export interface LoginAccount extends BasicAccount {
   password_hash: string;
   failed_login_count?: number;
   locked_until?: string | Date | null;
+  role_code?: string;
+  permissions?: string[];
 }
 
 export interface VerificationCodeRecord {
@@ -73,6 +75,8 @@ export interface PublicAccount {
   full_name: string;
   account_status: string;
   email_verified: boolean;
+  role: string;
+  permissions: string[];
 }
 
 export interface RegisterInput {
@@ -97,9 +101,11 @@ export interface LoginMeta {
 }
 
 export interface JwtAccessPayload {
-  sub: number;
+  sub: number | string;
   email: string;
-  sessionId: number;
+  sessionId: number | string;
+  role: string;
+  permissions: string[];
 }
 
 export interface JwtRefreshPayload {

@@ -49,6 +49,24 @@ services:
     networks:
       - dev-net
 
+  minio:
+    image: minio/minio
+    container_name: minio-dev
+    ports:
+      - "9000:9000" # Puerto de la API (S3)
+      - "9001:9001" # Puerto del Panel de Administración Web
+    environment:
+      MINIO_ROOT_USER: "admin_minio"
+      MINIO_ROOT_PASSWORD: "password123"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+# Al final de tu archivo, asegúrate de declarar el volumen (junto al de postgres)
+volumes:
+  minio_data:
+ 
+
 networks:
   dev-net:
     driver: bridge

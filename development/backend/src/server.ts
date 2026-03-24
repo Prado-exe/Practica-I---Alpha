@@ -6,25 +6,38 @@ import { testDbConnection } from "./config/db";
 import { warmupMailer } from "./utils/mailer";
 import { applySecurityHeaders } from "./utils/security-headers";
 
+
 const server = http.createServer(async (req, res) => {
-  applySecurityHeaders(res);
+  // 1. Envolvemos TODO en un try/catch maestro
+  try {
+    applySecurityHeaders(res);
 
-  res.setHeader("Access-Control-Allow-Origin", env.FRONTEND_ORIGIN);
-  res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Origin", env.FRONTEND_ORIGIN);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-  if (req.method === "OPTIONS") {
-    res.writeHead(204);
-    res.end();
-    return;
+    if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    const handled = await authRouter.handle(req, res);
+    if (handled) return; 
+
+    sendJson(res, 404, { ok: false, message: "Ruta no encontrada" });
+
+  } catch (error) {
+    // 2. Si cualquier ruta explota, lo atrapamos aquí y evitamos que el servidor muera
+    console.error("🔥 Error CRÍTICO no capturado en el servidor:", error);
+    
+    // Si la conexión no se ha cerrado, enviamos un 500
+    if (!res.headersSent) {
+      sendJson(res, 500, { ok: false, message: "Error interno del servidor" });
+    }
   }
-
-  const handled = await authRouter.handle(req, res);
-  if (handled) return; 
-
-  sendJson(res, 404, { ok: false, message: "Ruta no encontrada" });
 });
 
 async function bootstrap(): Promise<void> {
@@ -41,5 +54,6 @@ async function bootstrap(): Promise<void> {
     process.exit(1);
   }
 }
+
 
 void bootstrap();
