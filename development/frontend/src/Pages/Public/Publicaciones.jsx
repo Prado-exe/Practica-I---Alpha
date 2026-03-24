@@ -1,27 +1,29 @@
 // src/Pages/Publicaciones.jsx
-import { useState, useEffect } from "react";
 import Breadcrumb from "../../Components/Common/Breadcrumb";
 import SearchBarAdvanced from "../../Components/Common/SearchBarAdvanced";
 import Pagination from "../../Components/Common/Pagination";
-import PublicationCard from "../../Components/Publicaciones/PublicationCard";
 import AccordionFilter from "../../Components/Common/AccordionFilter";
+import PublicationCard from "../../Components/Cards/PublicationCard";
 import { getPublications } from "../../Services/PublicacionesService";
+import { useFetchList } from "../../Components/Hooks/useFetchList";
 import "../../Styles/Pages_styles/Public/Publicaciones.css";
 
 function Publicaciones() {
+  // 🔹 hook genérico
+  const {
+    search,
+    setSearch,
+    filters,
+    setFilters,
+    page,
+    setPage,
+    data: publications,
+    totalPages,
+    totalResults,
+    loading
+  } = useFetchList(getPublications, { limit: 7 });
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [appliedFilters, setAppliedFilters] = useState({});
-  const [publicationsData, setPublicationsData] = useState({
-    data: [],
-    total: 0,
-    totalPages: 1
-  });
-
-  const publicationsPerPage = 7;
-
-  // 🔧 CONFIGURACIÓN DE FILTROS
+  // 🔧 Configuración de filtros
   const filtersConfig = [
     {
       key: "type",
@@ -36,57 +38,18 @@ function Publicaciones() {
     }
   ];
 
-  // 🔁 reset página
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, appliedFilters]);
-
-  // 🎯 filtros
   const handleFilterChange = (key, values) => {
-    setAppliedFilters(prev => ({
-      ...prev,
-      [key]: values
-    }));
+    setFilters(prev => ({ ...prev, [key]: values }));
   };
 
   const clearFilters = () => {
-    setAppliedFilters({});
-    setSearchQuery("");
+    setFilters({});
+    setSearch("");
   };
-
-  // 📡 fetch
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const formattedFilters = Object.fromEntries(
-          Object.entries(appliedFilters).map(([k, v]) => [k, v.join(",")])
-        );
-
-        const res = await getPublications({
-          search: searchQuery,
-          filters: formattedFilters,
-          page: currentPage,
-          limit: publicationsPerPage
-        });
-
-        if (currentPage > res.totalPages && res.totalPages > 0) {
-          setCurrentPage(1);
-        } else {
-          setPublicationsData(res);
-        }
-
-      } catch (err) {
-        console.error("Error cargando publicaciones", err);
-      }
-    };
-
-    fetchData();
-  }, [searchQuery, appliedFilters, currentPage]);
 
   return (
     <main className="publications-page">
-
-      <Breadcrumb />
+      <Breadcrumb paths={["Inicio", "Publicaciones"]} />
 
       <div className="publications-container">
 
@@ -94,7 +57,7 @@ function Publicaciones() {
         <aside className="publications-filters">
           <AccordionFilter
             filters={filtersConfig}
-            selectedFilters={appliedFilters}
+            selectedFilters={filters}
             onChange={handleFilterChange}
             onClear={clearFilters}
           />
@@ -104,36 +67,46 @@ function Publicaciones() {
         <section className="publications-results">
 
           <SearchBarAdvanced
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar publicaciones..."
-            onSearch={(query) => setSearchQuery(query)}
           />
+          
+          {/* HEADER */}
+          <header className="instituciones-header">
+            <h1>Instituciones</h1>
+            <span>{totalResults} encontradas</span>
+          </header>
 
+          {/* contador */}
           <p className="publications-count">
             Mostrando <strong>
-              {publicationsData.total === 0
+              {totalResults === 0
                 ? 0
-                : (currentPage - 1) * publicationsPerPage + 1}-
-              {Math.min(currentPage * publicationsPerPage, publicationsData.total)}
-            </strong> de <strong>{publicationsData.total}</strong> publicaciones
+                : (page - 1) * 7 + 1}-
+              {Math.min(page * 7, totalResults)}
+            </strong> de <strong>{totalResults}</strong> publicaciones
           </p>
 
-          {/* 🔹 LISTADO */}
+          {/* LISTADO */}
           <div className="publications-list">
-            {publicationsData.data.length === 0 ? (
+            {loading ? (
+              <p>Cargando publicaciones...</p>
+            ) : publications.length === 0 ? (
               <p>No se encontraron publicaciones</p>
             ) : (
-              publicationsData.data.map(pub => (
+              publications.map(pub => (
                 <PublicationCard key={pub.id} publication={pub} />
               ))
             )}
           </div>
 
-          {/* 🔹 PAGINACIÓN */}
-          {publicationsData.totalPages > 1 && (
+          {/* PAGINACIÓN */}
+          {totalPages > 1 && (
             <Pagination
-              currentPage={currentPage}
-              totalPages={publicationsData.totalPages}
-              onPageChange={setCurrentPage}
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
             />
           )}
 

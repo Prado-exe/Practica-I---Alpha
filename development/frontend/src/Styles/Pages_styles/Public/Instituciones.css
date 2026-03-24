@@ -1,48 +1,159 @@
+/* ===============================
+   CONTENEDOR GENERAL
+   =============================== */
 .instituciones-page {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
 }
 
-/* header */
-
-.instituciones-header h1 {
-  font-size: 2rem;
-  margin-bottom: 0.3rem;
-  color: #222;
-}
-
-.instituciones-header p {
-  font-size: 0.95rem;
-  color: #555;
-  margin-bottom: 1rem;
-}
-
-.instituciones-count {
-  font-weight: 500;
-  color: #1565C0;
-}
-
-/* separador */
-
-.searchbar-separator {
-  border: none;
-  border-top: 1px solid #ddd;
-  margin: 1rem 0 2rem 0;
+/* BUSCADOR FULL WIDTH */
+.instituciones-page .search-bar-advanced {
   width: 100%;
 }
 
-/* grid */
-
-.instituciones-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.6rem;
-  margin-top: 1rem;
+/* ===============================
+   HEADER
+   =============================== */
+.instituciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
-/* responsive */
+.instituciones-header h1 {
+  font-size: 26px;
+  margin: 0;
+}
 
+.instituciones-header span {
+  font-size: 14px;
+  color: #666;
+}
+
+/* ===============================
+   SEPARADOR
+   =============================== */
+.instituciones-separator {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 10px 0;
+}
+
+/* ===============================
+   GRID 3x3 🔥
+   =============================== */
+.instituciones-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 🔥 clave */
+  gap: 1.6rem;
+  align-items: stretch;
+}
+
+/* ===============================
+   CARDS
+   =============================== */
+.institucion-card {
+  height: 100%; /* 🔥 todas iguales */
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  border: 1px solid #e0e0e0;
+  transition: all 0.25s ease;
+}
+
+.institucion-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* HEADER CARD */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-header img {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.card-header h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* DESCRIPCIÓN */
+.descripcion {
+  font-size: 0.9rem;
+  color: #666;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* FOOTER */
+.card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dataset-count {
+  font-size: 0.85rem;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.ver-btn {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ver-btn:hover {
+  background: #125ea2;
+}
+
+/* ===============================
+   ESTADOS
+   =============================== */
+.loading-state,
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 0;
+  color: #666;
+}
+
+/* ===============================
+   PAGINACIÓN
+   =============================== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
 @media (max-width: 900px) {
   .instituciones-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -55,123 +166,9 @@
   }
 }
 
-/* card */
-
-.institucion-card {
-  background: white;
-  border-radius: 14px;
-  padding: 1.4rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: all 0.25s ease;
-  border: 1px solid transparent;
-}
-
-.institucion-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-  border-color: #e3f2fd;
-}
-
-/* header card */
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 0.8rem;
-}
-
-.card-header img {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.card-header h3 {
-  font-size: 1.05rem;
-}
-
-/* descripción */
-
-.descripcion {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 1.2rem;
-}
-
-/* footer */
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dataset-count {
-  font-size: 0.85rem;
-  color: #1565C0;
-  font-weight: 600;
-}
-
-/* botón */
-
-.ver-btn {
-  background: #1565C0;
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: 0.2s;
-}
-
-.ver-btn:hover {
-  background: #0d47a1;
-}
-
-/* estado vacío */
-
-.no-results {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: #777;
-  font-size: 0.95rem;
-  padding: 2rem 0;
-}
-
-/* paginador */
-
-.paginador {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-  gap: 6px;
-}
-
-.page-btn {
-  border: none;
-  background: #eee;
-  padding: 6px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.page-btn.active {
-  background: #1565C0;
-  color: white;
-}
-
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* pantallas grandes */
+/* ===============================
+   PANTALLAS GRANDES
+   =============================== */
 @media (min-width: 1400px) {
   .instituciones-page {
     max-width: calc(100% - 300px);

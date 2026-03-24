@@ -14,6 +14,7 @@ const Formulario = lazy(() => import("../Pages/Public/Formulario"));
 const Datos = lazy(() => import("../Pages/Public/Datos"));
 const Publicaciones = lazy(() => import("../Pages/Public/Publicaciones"));
 const Instituciones = lazy(() => import("../Pages/Public/Instituciones"));
+const InstitucionDetalle = lazy(() => import("../Pages/Public/InstitucionDetalle.jsx"));
 const Noticias = lazy(() => import("../Pages/Public/Noticias"));
 const Nosotros = lazy(() => import("../Pages/Public/Nosotros"));
 
@@ -72,6 +73,7 @@ function AppRoutes() {
         <Route path="/conjuntodatos" element={<Datos />} />
         <Route path="/publicaciones" element={<Publicaciones />} />
         <Route path="/instituciones" element={<Instituciones />} />
+        <Route path="/instituciones/:id" element={<InstitucionDetalle />} />
         <Route path="/nosotros/:section" element={<Nosotros />} />
         <Route path="*" element={<Error404 />} />
       </Route>

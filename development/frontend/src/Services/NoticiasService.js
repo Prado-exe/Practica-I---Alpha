@@ -1,3 +1,4 @@
+// 🔍 FILTRAR
 export function filterNews(noticias, { searchQuery, selectedCategories, selectedYears }) {
   return noticias.filter((news) => {
     const matchesSearch =
@@ -16,6 +17,7 @@ export function filterNews(noticias, { searchQuery, selectedCategories, selected
   });
 }
 
+// 📄 PAGINAR (ya no lo usará el componente directamente)
 export function paginate(array, currentPage, itemsPerPage) {
   const totalPages = Math.ceil(array.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -25,5 +27,47 @@ export function paginate(array, currentPage, itemsPerPage) {
     totalPages,
     startIndex,
     endIndex
+  };
+}
+
+// 🔥 👉 NUEVA FUNCIÓN PARA EL HOOK
+export async function getNoticias({
+  search = "",
+  filters = {},
+  page = 1,
+  limit = 7
+}) {
+
+  // simula API
+  await new Promise(res => setTimeout(res, 200));
+
+  const { noticias } = await import("../data/noticias");
+
+  // 🔹 adaptar filtros del hook
+  const selectedCategories = filters.category
+    ? filters.category.split(",")
+    : [];
+
+  const selectedYears = filters.year
+    ? filters.year.split(",")
+    : [];
+
+  // 🔹 reutilizas tu lógica existente
+  const filtered = filterNews(noticias, {
+    searchQuery: search,
+    selectedCategories,
+    selectedYears
+  });
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / limit);
+
+  const start = (page - 1) * limit;
+  const data = filtered.slice(start, start + limit);
+
+  return {
+    data,
+    total,
+    totalPages
   };
 }

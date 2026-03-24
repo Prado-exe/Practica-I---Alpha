@@ -1,51 +1,56 @@
-/* Datos.css */
+/* ===============================
+   Datos.css
+   =============================== */
 
 /* Contenedor general */
 .datos-page {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 20px;
+  font-family: "Inter", sans-serif;
+  color: #333;
 }
 
-/* Contenedor principal: izquierdo/derecho */
-.datos-container {
+/* Layout principal: sidebar + main */
+.datos-layout {
   display: flex;
+  flex-direction: row;
   gap: 40px;
 }
 
-/* ===========================
-   Contenedor izquierdo: filtros
-   =========================== */
-.datos-filters {
-  flex: 0 0 250px; /* ancho fijo para los filtros */
+/* ===============================
+   SIDEBAR / filtros
+   =============================== */
+.datos-sidebar {
+  flex: 0 0 250px; /* ancho fijo */
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-/* Acordeones individuales */
-.datos-filters .accordion {
+/* AccordionFilter interno */
+.datos-sidebar .accordion {
   background-color: #f5f5f5;
   border-radius: 8px;
   padding: 10px;
-  cursor: pointer;
   border: 1px solid #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-.datos-filters .accordion-content {
+.datos-sidebar .accordion:hover {
+  background-color: #e0f0ff;
+}
+
+.datos-sidebar .accordion-content {
   margin-top: 5px;
   padding-left: 10px;
 }
 
-/* Acordeón de fecha específico */
-.datos-filters .accordion.date-filter {
-  background-color: #e0f7fa;
-}
-
-/* ===========================
-   Contenedor derecho: main
-   =========================== */
-.datos-main {
+/* ===============================
+   MAIN / contenido
+   =============================== */
+.datos-content {
   flex: 1; /* ocupa todo el espacio restante */
   display: flex;
   flex-direction: column;
@@ -53,13 +58,13 @@
 }
 
 /* Buscador */
-.datos-main .search-bar {
+/* Asegurar que el buscador ocupe todo el ancho del main */
+.datos-content .search-bar-advanced {
   width: 100%;
-  max-width: 600px;
-  margin-bottom: 10px;
+  max-width: 100%; /* eliminar limitación anterior */
+  box-sizing: border-box; /* incluye padding en el ancho */
 }
-
-/* Título y cantidad */
+/* Header principal */
 .datos-header {
   display: flex;
   justify-content: space-between;
@@ -68,57 +73,93 @@
 
 .datos-header h1 {
   font-size: 28px;
+  font-weight: 600;
   margin: 0;
 }
 
-.datos-header p {
+.datos-header span {
   font-size: 14px;
   color: #666;
-  margin: 0;
 }
 
-/* Separadores */
-.datos-separator {
+/* ===============================
+   Chips de filtros
+   =============================== */
+.filters-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.filters-chips .chip {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filters-chips .chip:hover {
+  background-color: #125ea6;
+}
+
+/* ===============================
+   Grid / listado de datasets
+   =============================== */
+.datasets-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+/* Estados: loading / vacío */
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 50px 0;
+  font-size: 16px;
+  color: #555;
+}
+
+/* Separador opcional */
+.datos-content hr {
   border: none;
   border-top: 1px solid #ccc;
   margin: 10px 0;
 }
 
-/* Filtros aplicados */
-.applied-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.filter-chip {
-  background-color: #1976d2;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 13px;
-}
-
-/* Listado de datasets */
-.datasets-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-
-/* Paginador */
+/* ===============================
+   PAGINACIÓN
+   =============================== */
 .pagination {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 1024px) {
+  .datos-layout {
+    flex-direction: column;
+  }
 
-/* pantallas grandes */
+  .datos-sidebar {
+    order: 2; /* sidebar abajo */
+    flex: 1;
+  }
+
+  .datos-content {
+    order: 1;
+  }
+}
+
 @media (min-width: 1400px) {
   .datos-page {
-    max-width: calc(100% - 300px);
-    padding: 2rem 0;
+    padding: 2rem 40px;
   }
 }

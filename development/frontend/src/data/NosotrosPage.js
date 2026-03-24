@@ -78,7 +78,7 @@ export const nosotrosPages = [
     { type: "text", value: `Nuestra Mision
                             La mision del observatorio de datos sustentable es facilitar el acceso abierto, organizado y confiable a informacion relevatne sobre sustentabilidad, territorio y desarrollo, mediante\
                             la recopilacio, gestion y difusion de conjuntos de datos provenientes de fuentes publicas, academicas e institucionales
-                            
+                          
                             A travez de esta plataforma se busca fortalecer la transparencia, promover la reutilizacion de datos y apoyar la toma de desiciones basada en evidencia, poniendo a disposicion de la comunidad \
                             datasets estructurados, metadatos estandarizados y herramientas de visualizacion que permitan comprender mejor los desafios ambientales, sociales y economicos del territorio. Asi mismo, el observatorio\
                              tiene como proposito fomentar la investigacion, la innovacion y la colaboracion entre instituciones, constribuyendo al desarrollo de soluciones sostenibles y al fortaleciiento de una cultura de datos abiertos en la sociedad` }
@@ -87,14 +87,35 @@ export const nosotrosPages = [
   {
     id: "principios",
     title: "Principios",
-    content:
-      "Transparencia, colaboración, acceso abierto, participación ciudadana e innovación."
-  },
-  {
-    id: "metodologia",
-    title: "Metodología",
-    content:
-      "Trabajamos mediante recopilación de datos, análisis, colaboración institucional y publicación de información abierta."
+    content:[
+    { type: "text", value: `El observatorio de Datos Sustentable se fundamente en un conjunto de principios orientados a garantizar la calidad, transparencia y utilidad de la informacion publicada. Estos principios guian\
+                            la gestion de los datos, la forma en que se presentan a los usuarios y el impacto que se busca generar en la comunidad                    
+                            ` },
+    { type: "text", value: `Transparencia
+                            El observatorio promueve el acceso abierto a la informacion, facilitando la disponibilidad de datos relevantes para la ciudadania, investigadores, instituciones publicas y organizaciones sociales.\
+                            La transparencia en la gestion de los datos contribuye a fortalecer la confianza y la participacion informada.
+                            ` },           
+    { type: "text", value: `Calidad de la informacion
+                            Los datasets publicados en la plataforma se someten a procesos de validacion y revision que buscan asegurar su consistencia, integridad y confiabilidad. la calidad de los datos es fudnamental para que\
+                            puedan ser utilizados en analisis, investigaciones y procesos de toma de desiciones.
+                            ` },              
+    { type: "text", value: `Accesibilidad
+                            El observatorio procura que la informacion sea accesible para distintos tipos de usuarios, proporcionando datos en formatos abiertos y reutilizables, asi como interfaces de consulta claras y comprensibles\
+                            que faciliten su exploracion y uso
+                            ` },
+    { type: "text", value: `interoperabilidad
+                            La plataforma utiliza estandares abiertos de emtadatos y formatos de datos que permiten la integracion con otros sistemas y plataformas de informacion. Esto favorece la reutilizacion de los datos y su integracion\
+                            en diferentes contextos tecnologicos
+                            ` },                   
+    { type: "text", value: `Reutilizacion de datos
+                            Los datos publicados estan orientados a ser reutilizados en investigaciones, analisis, proyectos tecnologicos, politicas publicas e iniciativas de innovacion. El observatorio fomenta el uso responsbale de la inforamcion \
+                            para generar conocimiento y valor publico
+                            ` },                                     
+    { type: "text", value: `Enfoque en el usuario
+                            El diseño y funcionamiento del observatorio consideran la necesidad de distintos publicos, incluyendo investigadores, estudiantes, organismos publicos y ciudadania. Se busca que la plataforma facilite la comprension de la \
+                            informacion mediante herramientas de visualizacion y consultas intuitivas.
+                            ` },                        
+                          ]
   },
   {
     id: "equipo",
@@ -102,4 +123,5 @@ export const nosotrosPages = [
     content:
       "Nuestro equipo está compuesto por profesionales en datos, desarrollo web, investigación social y gestión pública."
   }
+  
 ];

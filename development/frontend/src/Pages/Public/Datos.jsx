@@ -1,25 +1,29 @@
-import { useState, useEffect } from "react";
 import Breadcrumb from "../../Components/Common/Breadcrumb";
 import Pagination from "../../Components/Common/Pagination";
 import AccordionFilter from "../../Components/Common/AccordionFilter";
-import DatasetCard from "../../Components/Datos/DatasetCard";
+import DatasetCard from "../../Components/Cards/DatasetCard";
 import SearchBarAdvanced from "../../Components/Common/SearchBarAdvanced";
+
+import { useFetchList } from "../../Components/Hooks/useFetchList";
 import { getDatasets } from "../../Services/DatasetService";
+
 import "../../Styles/Pages_styles/Public/Datos.css";
 
 function Datos() {
+  const {
+    search,
+    setSearch,
+    filters,
+    setFilters,
+    page,
+    setPage,
+    data,
+    totalPages,
+    totalResults,
+    loading
+  } = useFetchList(getDatasets, { limit: 7 });
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [appliedFilters, setAppliedFilters] = useState({});
-
-  const [datasets, setDatasets] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
-  const [loading, setLoading] = useState(false);
-
-  // 🔧 CONFIGURACIÓN DE FILTROS
+  // 🔧 Config filtros
   const filtersConfig = [
     {
       key: "categoria",
@@ -39,144 +43,99 @@ function Datos() {
     }
   ];
 
-  // 🔥 debounce búsqueda
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [searchTerm]);
-
-  // 🔥 reset página cuando cambian filtros o búsqueda
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearch, appliedFilters]);
-
-  // 🔥 handler filtros
+  // 🔹 manejar filtros
   const handleFilterChange = (key, values) => {
-    setAppliedFilters(prev => ({
+    setFilters(prev => ({
       ...prev,
       [key]: values
     }));
   };
 
-  const clearFilters = () => {
-    setAppliedFilters({});
+  // 🔹 eliminar filtro individual
+  const removeFilter = (key) => {
+    setFilters(prev => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
   };
-
-  // 🔥 fetch API
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-
-      try {
-        // opcional: transformar arrays a string
-        const formattedFilters = Object.fromEntries(
-          Object.entries(appliedFilters).map(([k, v]) => [k, v.join(",")])
-        );
-
-        const res = await getDatasets({
-          search: debouncedSearch,
-          filters: formattedFilters,
-          page: currentPage,
-          limit: 7
-        });
-
-        setDatasets(res.data);
-        setTotalPages(res.totalPages);
-        setTotalResults(res.total);
-
-      } catch (err) {
-        console.error("Error cargando datasets", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [debouncedSearch, appliedFilters, currentPage]);
 
   return (
     <div className="datos-page">
 
-      <Breadcrumb paths={["Inicio", "Datos"]} />
+      <Breadcrumb paths={["Inicio", "Datasets"]} />
 
-      <div className="datos-container">
+      <div className="datos-layout">
 
-        {/* 🔹 FILTROS */}
-        <aside className="datos-filters" aria-label="Filtros">
+        {/* 🔹 SIDEBAR */}
+        <aside className="datos-sidebar">
           <AccordionFilter
             filters={filtersConfig}
-            selectedFilters={appliedFilters}
+            selectedFilters={filters}
             onChange={handleFilterChange}
-            onClear={clearFilters}
+            onClear={() => setFilters({})}
           />
         </aside>
 
         {/* 🔹 MAIN */}
-        <main className="datos-main" role="main">
+        <main className="datos-content">
 
+          {/* 🔎 BUSCADOR */}
           <SearchBarAdvanced
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
 
+          {/* 🔹 HEADER */}
           <div className="datos-header">
             <h1>Datasets</h1>
-            <p aria-live="polite">{totalResults} encontrados</p>
+            <span>{totalResults} resultados</span>
           </div>
 
+          {/* 🔹 CHIPS DE FILTROS */}
+          {Object.keys(filters).length > 0 && (
+            <div className="filters-chips">
+              {Object.entries(filters).map(([key, values]) => (
+                values.length > 0 && (
+                  <button
+                    key={key}
+                    className="chip"
+                    onClick={() => removeFilter(key)}
+                  >
+                    {key}: {values.join(", ")} ✕
+                  </button>
+                )
+              ))}
+            </div>
+          )}
+    
+          {/* 🔹 SEPARADOR ANTES DE LOS DATASETS */}
           <hr className="datos-separator" />
 
-          {/* 🔹 Chips de filtros */}
-          <div className="applied-filters">
-            {Object.entries(appliedFilters).length > 0 ? (
-              Object.entries(appliedFilters).map(([key, values]) => (
-                values.length > 0 && (
-                  <span key={key} className="filter-chip">
-                    {key}: {values.join(", ")}
-                    <button
-                      onClick={() =>
-                        setAppliedFilters(prev => {
-                          const updated = { ...prev };
-                          delete updated[key];
-                          return updated;
-                        })
-                      }
-                      aria-label={`Eliminar filtro ${key}`}
-                    >
-                      ✕
-                    </button>
-                  </span>
-                )
-              ))
-            ) : (
-              <p>No hay filtros aplicados</p>
-            )}
-          </div>
-
-          {/* 🔹 LISTADO */}
+          {/* 🔹 CONTENIDO */}
           {loading ? (
-            <p className="loading">Cargando datasets...</p>
-          ) : datasets.length === 0 ? (
-            <p className="no-results">No se encontraron datasets</p>
+            <div className="loading-state">
+              Cargando datasets...
+            </div>
+          ) : data.length === 0 ? (
+            <div className="empty-state">
+              <h3>No se encontraron resultados</h3>
+              <p>Intenta cambiar los filtros o búsqueda</p>
+            </div>
           ) : (
-            <div className="datasets-list">
-              {datasets.map(ds => (
+            <div className="datasets-grid">
+              {data.map(ds => (
                 <DatasetCard key={ds.id} dataset={ds} />
               ))}
             </div>
           )}
 
-          <hr className="datos-separator" />
-
           {/* 🔹 PAGINACIÓN */}
           {totalPages > 1 && (
             <Pagination
-              currentPage={currentPage}
+              currentPage={page}
               totalPages={totalPages}
-              onPageChange={setCurrentPage}
+              onPageChange={setPage}
             />
           )}
 

@@ -5,35 +5,53 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-md);
+
+  background: transparent; /* ✅ importante */
 }
 
-/* Spinner */
+/* ❌ puedes eliminar spinner si usarás logo */
 .spinner {
-  width: 3rem;
-  height: 3rem;
-  border: 0.3rem solid var(--border-color);
-  border-top: 0.3rem solid var(--link-color);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  display: none;
+}
+
+/* Logo girando */
+.loader-logo {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 5px;
+
+  animation: spin 1.2s linear infinite;
 }
 
 /* Texto */
 .loader-container p {
   font-size: 0.9rem;
-  color: var(--text-color);
+  color: var(--text-color); /* usa tu sistema */
   opacity: 0.8;
+
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Animación */
+/* Animación principal (unificada) */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Accesibilidad: reducir animaciones */
+/* Animación texto */
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Accesibilidad */
 @media (prefers-reduced-motion: reduce) {
-  .spinner {
+  .loader-logo {
+    animation: none;
+  }
+
+  .loader-container p {
     animation: none;
   }
 }

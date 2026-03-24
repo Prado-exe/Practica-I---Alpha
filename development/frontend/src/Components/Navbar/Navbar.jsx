@@ -8,7 +8,6 @@ import AccessibilityTools from "../AccessibilityTools";
 import DropdownMenu from "./DropdownMenu";
 import UserDropdown from "../Navbar/UserDropdown";
 
-// 👇 El Navbar solo extrae el usuario y la función de logout del Contexto
 import { useAuth } from "../../Context/AuthContext";
 import logo from "../../assets/Ico_obs_datos2.png";
 
