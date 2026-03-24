@@ -19,6 +19,14 @@ import { refreshAction } from "./refresh.routes";
 import { requestPasswordResetAction, resetPasswordAction } from "./password.routes";
 import { getUsuariosAction, toggleEstadoAction, deleteUsuarioAction, editUsuarioAction, getRolesAction } from "./usuarios-admin.routes";
 
+import { 
+  getRolesDetailsAction, 
+  getPermisosAction, 
+  createRoleAction, 
+  updateRoleAction, 
+  deleteRoleAction 
+} from "./roles.routes";
+
 // --- FUNCIONES DE AYUDA (Exportadas) ---
 export function getSessionIdFromRequest(req: HttpRequest): number | string | null {
   const accessPayload = tryGetAuthPayload(req);
@@ -68,3 +76,9 @@ authRouter.add("PATCH", "/api/usuarios/:id/estado", [requirePermission("user_man
 authRouter.add("DELETE", "/api/usuarios/:id", [requirePermission("user_management.delete")], deleteUsuarioAction);
 authRouter.add("PUT", "/api/usuarios/:id", [requirePermission("user_management.write")], editUsuarioAction);
 authRouter.add("GET", "/api/roles", [requirePermission("user_management.read")], getRolesAction);
+// --- RUTAS DE GESTIÓN DE ROLES Y PERMISOS ---
+authRouter.add("GET", "/api/roles/detalles", [requirePermission("roles_permissions.read")], getRolesDetailsAction);
+authRouter.add("GET", "/api/permisos", [requirePermission("roles_permissions.read")], getPermisosAction);
+authRouter.add("POST", "/api/roles", [requirePermission("roles_permissions.write")], createRoleAction);
+authRouter.add("PUT", "/api/roles/:id", [requirePermission("roles_permissions.write")], updateRoleAction);
+authRouter.add("DELETE", "/api/roles/:id", [requirePermission("roles_permissions.write")], deleteRoleAction);
