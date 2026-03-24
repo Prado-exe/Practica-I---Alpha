@@ -44,7 +44,9 @@ import {
   fetchAllUsersFromDb, 
   updateUserStatusInDb, 
   getUserRoleCodeById, 
-  deleteUserFromDb
+  deleteUserFromDb,
+  updateUserAdminInDb,
+  fetchActiveRolesFromDb
 } from "../repositories/auth.repository";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/mailer";
@@ -632,16 +634,14 @@ export async function getAllUsers() {
 
 // --- 2. ACTUALIZAR ESTADO DEL USUARIO ---
 export async function updateUserStatus(userId: string | number, newStatus: string) {
-  // Lógica de negocio: Validar estados permitidos
-  const validStatuses = ["active", "inactive", "pending_verification", "suspended"];
+  // Lógica de negocio: Validar estados permitidos según la BD
+  const validStatuses = ["active", "suspended", "pending_verification", "pending_revalidation"];
   if (!validStatuses.includes(newStatus)) {
     throw new AppError("Estado de cuenta no válido", 400);
   }
 
-  // Llamada al repositorio
   const affectedRows = await updateUserStatusInDb(userId, newStatus);
 
-  // Lógica de negocio: Verificar si realmente se actualizó algo
   if (affectedRows === 0) {
     throw new AppError("Usuario no encontrado", 404);
   }
@@ -666,4 +666,32 @@ export async function deleteUser(userId: string | number) {
   }
 
   return { message: "Usuario eliminado correctamente" };
+}
+
+// --- 4. EDITAR USUARIO DESDE EL PANEL ADMIN ---
+export async function editUserAdmin(userId: string | number, fullName: string, email: string, roleCode: string, newPassword?: string) {
+  let newPasswordHash;
+  
+  if (newPassword && newPassword.trim() !== "") {
+    newPasswordHash = await hashPassword(newPassword);
+  }
+
+  // Buscamos el ID numérico del rol seleccionado
+  const roleId = await findRoleIdByCode(roleCode);
+  if (!roleId) {
+    throw new AppError("El rol seleccionado no es válido", 400);
+  }
+
+  const affectedRows = await updateUserAdminInDb(userId, fullName, email, roleId, newPasswordHash);
+
+  if (affectedRows === 0) {
+    throw new AppError("Usuario no encontrado", 404);
+  }
+
+  return { message: "Usuario actualizado correctamente" };
+}
+
+export async function getActiveRoles() {
+  const roles = await fetchActiveRolesFromDb();
+  return roles;
 }

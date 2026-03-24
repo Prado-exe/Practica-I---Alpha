@@ -22,7 +22,14 @@ function ProtectedRoute({ children, requiredPermission }) {
   // 3. Verificación de Permisos Dinámicos (Estilo OWASP)
   if (requiredPermission) {
 
+    console.log("🔍 [ProtectedRoute] Evaluando acceso...");
+    console.log("👉 1. Permiso que pide la ruta:", requiredPermission);
+    console.log("👉 2. Objeto 'user' completo que llegó al Contexto:", user);
     const userPermissions = user.permissions || [];
+
+    console.log("👉 3. Permisos extraídos (Array final):", userPermissions);
+    console.log("👉 4. ¿Pasa la prueba del includes?:", userPermissions.includes(requiredPermission));
+    
 
     if (!userPermissions.includes(requiredPermission)) {
       console.warn(

@@ -3,20 +3,28 @@ import { useAuth } from "../../Context/AuthContext";
 function CanView({ requiredPermission, children }) {
   const { user } = useAuth();
   
-  // Extraemos los permisos basándonos en tu AuthContext
-  const userPermissions = user?.user?.permissions || [];
+  // 1. Si no hay usuario logueado, ocultamos
+  if (!user) return null;
 
-  // Si no se exige un permiso específico, renderizamos normalmente
+  // 2. Si no se exige un permiso específico, renderizamos normalmente
   if (!requiredPermission) {
     return children;
   }
 
-  // Si el usuario no tiene el permiso en su arreglo, devolvemos null (oculta el elemento)
+  // 3. ✨ PODER ABSOLUTO: Si el usuario es Super Admin, ve todo por defecto
+  if (user.role === "super_admin" || user.role_code === "super_admin") {
+    return children;
+  }
+
+  // 4. Extraemos los permisos correctamente de la RAÍZ del objeto
+  const userPermissions = user.permissions || [];
+
+  // 5. Si el usuario no tiene el permiso en su arreglo, ocultamos el elemento
   if (!userPermissions.includes(requiredPermission)) {
     return null;
   }
 
-  // Si tiene el permiso, dibujamos el contenido original
+  // 6. Si tiene el permiso (o es superadmin), dibujamos el contenido original
   return children;
 }
 

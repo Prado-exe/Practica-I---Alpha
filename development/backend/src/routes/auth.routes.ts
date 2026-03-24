@@ -17,7 +17,7 @@ import { registerAction } from "./register.routes";
 import { verifyEmailAction, resendVerificationAction } from "./verify.routes";
 import { refreshAction } from "./refresh.routes";
 import { requestPasswordResetAction, resetPasswordAction } from "./password.routes";
-import { getUsuariosAction, toggleEstadoAction, deleteUsuarioAction } from "./usuarios-admin.routes";
+import { getUsuariosAction, toggleEstadoAction, deleteUsuarioAction, editUsuarioAction, getRolesAction } from "./usuarios-admin.routes";
 
 // --- FUNCIONES DE AYUDA (Exportadas) ---
 export function getSessionIdFromRequest(req: HttpRequest): number | string | null {
@@ -66,3 +66,5 @@ authRouter.add("POST", "/api/reset-password", [], resetPasswordAction);
 authRouter.add("GET", "/api/usuarios", [requirePermission("user_management.read")], getUsuariosAction);
 authRouter.add("PATCH", "/api/usuarios/:id/estado", [requirePermission("user_management.write")], toggleEstadoAction);
 authRouter.add("DELETE", "/api/usuarios/:id", [requirePermission("user_management.delete")], deleteUsuarioAction);
+authRouter.add("PUT", "/api/usuarios/:id", [requirePermission("user_management.write")], editUsuarioAction);
+authRouter.add("GET", "/api/roles", [requirePermission("user_management.read")], getRolesAction);

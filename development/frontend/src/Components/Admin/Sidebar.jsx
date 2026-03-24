@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import "../../Styles/ComponentStyle/Admin/Sidebar.css";
 
-// 👇 1. Importamos las herramientas reales de seguridad
+// Importamos las herramientas reales de seguridad
 import { useAuth } from "../../Context/AuthContext";
 import CanView from "../Common/CanView"; 
 
@@ -10,14 +10,14 @@ function Sidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
-  // 👇 2. Obtenemos el usuario real y la función de logout del contexto
+  // Obtenemos el usuario real y la función de logout del contexto
   const { user: authUser, logout } = useAuth();
 
-  // Dependiendo de tu AuthContext, los datos pueden estar en authUser.user o authUser.account
-  const userName = authUser?.user?.full_name || authUser?.account?.full_name || "Usuario";
-  const userRole = authUser?.user?.role || authUser?.account?.role || "Sin Rol";
+  // 👇 CORRECCIÓN: El usuario ya está aplanado, sacamos los datos directo de la raíz
+  const userName = authUser?.full_name || "Usuario";
+  const userRole = authUser?.role || "Sin Rol";
 
-  // 👇 3. Agregamos el "requiredPermission" a cada opción del menú
+  // Agregamos el "requiredPermission" a cada opción del menú
   const menu = [
     // El Dashboard no tiene requiredPermission, por lo que CanView lo dejará pasar siempre
     { name: "Dashboard", path: "/administracion", icon: "📊" }, 
@@ -62,7 +62,7 @@ function Sidebar() {
       {/* NAV CON PERMISOS */}
       <nav className="sidebar-nav">
         {menu.map((item) => (
-          /* 👇 4. Envolvemos cada iteración con CanView. La key se pone aquí */
+          /* Envolvemos cada iteración con CanView para ocultar lo no autorizado */
           <CanView key={item.path} requiredPermission={item.requiredPermission}>
             <Link
               to={item.path}

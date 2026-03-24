@@ -18,10 +18,14 @@ export function AuthProvider({ children }) {
           credentials: "include", 
         });
 
+        // Si el backend falla catastróficamente, no intentamos parsear JSON
+        if (!response.ok && response.status !== 401) {
+          throw new Error(`Error del servidor: ${response.status}`);
+        }
+
         const data = await response.json();
 
         if (response.ok && (data.ok || data.accessToken || data.token)) {
-          // 🛡️ Búsqueda inteligente: buscamos 'token' o 'accessToken'
           const tokenValid = data.token || data.accessToken;
           const userAccount = data.account || data.user || {};
 
@@ -31,11 +35,15 @@ export function AuthProvider({ children }) {
             expiresAt: data.expiresAt || data.accessExpiresAt
           });
         } else {
-          setUser(null);
+          // Solo borramos el usuario si el backend confirma que expiró (401)
+          if (response.status === 401) {
+            setUser(null);
+          }
         }
       } catch (error) {
-        console.error("Error al recuperar la sesión:", error);
-        setUser(null);
+        console.error("⚠️ Error de red al recuperar la sesión:", error);
+        // 🛡️ IMPORTANTE: NO hacemos setUser(null) aquí.
+        // Si el backend se reinicia, mantenemos la sesión en memoria.
       } finally {
         setLoading(false);
       }
@@ -44,16 +52,10 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  // 👇 Modificamos la función login para que aplane los datos igual que checkAuth
-  const login = (data) => {
-    const tokenValid = data.token || data.accessToken;
-    const userAccount = data.account || data.user || {};
-
-    setUser({
-      ...userAccount,
-      token: tokenValid,
-      expiresAt: data.expiresAt || data.accessExpiresAt
-    });
+  // 👇 FUNCIÓN LOGIN CORREGIDA
+  // Como Login.jsx ya nos entrega el usuario listo, solo lo guardamos
+  const login = (userData) => {
+    setUser(userData);
   };
 
   const logout = async () => {

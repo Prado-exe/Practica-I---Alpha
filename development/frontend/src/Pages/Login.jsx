@@ -55,8 +55,16 @@ function Login() {
 
       // 5. LOGIN NORMAL EXITOSO
       if (response.ok && data.ok) {
-        // Le pasamos los datos completos a tu nuevo AuthContext
-        login(data);
+        
+        // 👇 1. Aplanamos el objeto: sacamos todo lo de 'account' a la raíz
+        const usuarioAplanado = {
+          ...data.account, // Esto extrae email, role, permissions, etc.
+          token: data.token,
+          expiresAt: data.expiresAt
+        };
+
+        // 👇 2. Ahora sí, le pasamos el usuario perfecto al contexto
+        login(usuarioAplanado);
 
         // Disparamos el evento para que el SessionExpiryManager lo detecte
         window.dispatchEvent(new Event("auth-changed"));

@@ -714,3 +714,26 @@ export async function deleteUserFromDb(userId: string | number) {
   const { rowCount } = await pool.query(query, [userId]);
   return rowCount ?? 0;
 }
+
+export async function updateUserAdminInDb(id: string | number, fullName: string, email: string, roleId: number, passwordHash?: string) {
+  if (passwordHash) {
+    const query = `UPDATE accounts SET full_name = $1, email = $2, role_id = $3, password_hash = $4, updated_at = NOW() WHERE account_id = $5 RETURNING account_id`;
+    const { rowCount } = await pool.query(query, [fullName, email, roleId, passwordHash, id]);
+    return rowCount ?? 0;
+  } else {
+    const query = `UPDATE accounts SET full_name = $1, email = $2, role_id = $3, updated_at = NOW() WHERE account_id = $4 RETURNING account_id`;
+    const { rowCount } = await pool.query(query, [fullName, email, roleId, id]);
+    return rowCount ?? 0;
+  }
+}
+
+export async function fetchActiveRolesFromDb() {
+  const query = `
+    SELECT code, name 
+    FROM roles 
+    WHERE is_active = TRUE 
+    ORDER BY role_id ASC
+  `;
+  const { rows } = await pool.query(query);
+  return rows;
+}
