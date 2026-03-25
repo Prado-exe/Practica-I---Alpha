@@ -1,0 +1,96 @@
+/* CARD GENERAL */
+.publication-card {
+  width: 100%; /* ocupa todo el contenedor */
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  transition: all 0.25s ease;
+}
+
+.publication-card:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+/* HEADER: fecha y autor */
+.publication-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* TÍTULO */
+.publication-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+/* DESCRIPCIÓN */
+.publication-description {
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* limita a 3 líneas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* TAGS */
+.publication-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  font-size: 0.75rem;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+/* FOOTER BOTÓN */
+.publication-footer {
+  margin-top: 0.8rem;
+}
+
+.publication-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  background: #1976d2;
+  color: white;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.publication-btn:hover {
+  background: #125ea2;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .publication-card {
+    padding: 1rem;
+  }
+
+  .publication-title {
+    font-size: 1.1rem;
+  }
+
+  .publication-description {
+    font-size: 0.9rem;
+  }
+}

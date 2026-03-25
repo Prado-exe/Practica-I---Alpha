@@ -1,0 +1,92 @@
+/* ===============================
+   CARD BASE
+   =============================== */
+.institucion-card {
+  width: 100%;
+  height: 100%;
+
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.4rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  border: 1px solid #e0e0e0;
+  transition: all 0.25s ease;
+}
+
+/* Hover */
+.institucion-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* ===============================
+   HEADER
+   =============================== */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-header img {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.card-header h3 {
+  font-size: 1rem;
+  margin: 0;
+  color: #222;
+}
+
+/* ===============================
+   DESCRIPCIÓN
+   =============================== */
+.descripcion {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===============================
+   FOOTER
+   =============================== */
+.card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dataset-count {
+  font-size: 0.85rem;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+/* BOTÓN */
+.ver-btn {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.ver-btn:hover {
+  background: #125ea2;
+}
