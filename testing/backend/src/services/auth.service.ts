@@ -36,7 +36,6 @@ import {
   updateLastLoginAt,
   updateAuthSessionLastUsed,
   createRevalidationCode,
-  findValidVerificationCodeByHash,
   updateAccountPassword,
   createPasswordResetToken,
   findValidPasswordResetToken,

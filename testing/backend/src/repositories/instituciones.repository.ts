@@ -1,9 +1,9 @@
 import { pool } from "../config/db";
 
-// 1. Obtener instituciones junto con la URL de su logo
+// 1. Obtener instituciones junto con la URL de su logo y el storage_key
 export async function fetchInstitutionsFromDb() {
   const query = `
-    SELECT i.*, afr.file_url as logo_url
+    SELECT i.*, afr.file_url as logo_url, afr.storage_key 
     FROM institutions i
     INNER JOIN aws_file_references afr ON i.logo_file_id = afr.aws_file_reference_id
     ORDER BY i.created_at DESC
@@ -149,4 +149,38 @@ export async function deleteInstitutionFromDb(id: number) {
   const query = `DELETE FROM institutions WHERE institution_id = $1`;
   const { rowCount } = await pool.query(query, [id]);
   return rowCount ?? 0;
+}
+
+// Obtiene instituciones públicas con paginación y búsqueda
+export async function fetchPublicInstitutionsPaginated(search: string, limit: number, offset: number) {
+  let baseQuery = `
+    FROM institutions i
+    INNER JOIN aws_file_references afr ON i.logo_file_id = afr.aws_file_reference_id
+    WHERE i.institution_status = 'active' AND i.access_level = 'public'
+  `;
+  
+  const queryParams: any[] = [];
+  
+  if (search) {
+    queryParams.push(`%${search}%`);
+    baseQuery += ` AND (i.legal_name ILIKE $1 OR i.short_name ILIKE $1 OR i.description ILIKE $1)`;
+  }
+
+  // Contar el total para la paginación
+  const countQuery = `SELECT COUNT(*) ${baseQuery}`;
+  const countRes = await pool.query(countQuery, queryParams);
+  const total = parseInt(countRes.rows[0].count, 10);
+
+  // Obtener los datos paginados
+  queryParams.push(limit, offset);
+  const dataQuery = `
+    SELECT i.*, afr.storage_key, afr.file_url as logo_url 
+    ${baseQuery}
+    ORDER BY i.legal_name ASC
+    LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}
+  `;
+  
+  const { rows } = await pool.query(dataQuery, queryParams);
+  
+  return { total, data: rows };
 }

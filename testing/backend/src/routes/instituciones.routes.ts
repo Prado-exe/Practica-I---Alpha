@@ -2,7 +2,7 @@ import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson} from "../utils/json";
 import { readJsonBody } from "../utils/body";
 import { getErrorStatus, getErrorMessage } from "./auth.routes"; 
-import { getInstitutions, addInstitution, editInstitution, removeInstitution } from "../services/instituciones.service";
+import { getInstitutions, addInstitution, editInstitution, removeInstitution, getPublicInstitutions } from "../services/instituciones.service";
 
 // Para obtener el account_id de la persona que está creando la institución
 import { tryGetAuthPayload } from "../utils/auth"; 
@@ -57,6 +57,30 @@ export async function deleteInstitucionAction(req: HttpRequest, res: HttpRespons
 
     const result = await removeInstitution(id);
     sendJson(res, 200, { ok: true, message: result.message });
+  } catch (error) {
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
+// --- RUTA PÚBLICA ---
+export async function getPublicInstitucionesAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    // 1. Extraemos los parámetros de búsqueda y paginación de la URL (ej: ?search=salud&page=2&limit=9)
+    const url = new URL(req.url || "", `http://${req.headers?.host || "localhost"}`);
+    const search = url.searchParams.get("search") || "";
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "9", 10);
+
+    // 2. Llamamos a nuestro nuevo servicio público
+    const result = await getPublicInstitutions(search, page, limit);
+    
+    // 3. Devolvemos los datos con la estructura que espera la paginación
+    sendJson(res, 200, { 
+      ok: true, 
+      total: result.total,
+      totalPages: result.totalPages,
+      data: result.data 
+    });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }

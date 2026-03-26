@@ -2,7 +2,6 @@ import type { HttpRequest, HttpResponse } from "../types/http";
 import { logoutUser } from "../services/auth.service";
 import { clearRefreshTokenCookie } from "../utils/cookies";
 import { sendJson } from "../utils/json";
-// 👇 Importamos la función desde tu auth.routes.ts
 import { getSessionIdFromRequest } from "./auth.routes"; 
 
 export async function logoutAction(req: HttpRequest, res: HttpResponse) {
