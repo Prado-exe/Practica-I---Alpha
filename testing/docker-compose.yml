@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+
+  frontend:
+    build: ./frontend
+    container_name: frontend-qa
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    command: npm run dev -- --host 0.0.0.0
+    networks:
+      - qa-net
+
+  backend:
+    build: ./backend
+    container_name: backend-qa
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - DB_HOST_POSTGRES=postgres
+      - DB_USER=user
+      - DB_PASS=password
+      - DB_NAME=appdb
+    depends_on:
+      - postgres
+    networks:
+      - qa-net
+
+  postgres:
+    image: postgres:16
+    container_name: postgres-qa
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - qa-net
+
+  playwright-qa:
+    image: mcr.microsoft.com/playwright:v1.58.0-jammy
+    container_name: playwright-qa
+    depends_on:
+      - frontend
+    environment:
+      - BASE_URL=http://localhost:5173
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: sleep infinity
+    ports:
+      - "36575:36575"
+    networks:
+      - qa-net
+
+networks:
+  qa-net:
+    driver: bridge
