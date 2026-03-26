@@ -8,9 +8,9 @@ import { AppError } from "../types/app-error";
 import { ZodError } from "zod";
 
 
-import { requirePermission } from "../middlewares/auth.middleware";
+import { requirePermission, requireLogin } from "../middlewares/auth.middleware";
 
-// --- IMPORTAMOS TODAS LAS ACCIONES ---
+
 import { loginAction } from "./login.routes";
 import { logoutAction } from "./logout.routes";
 import { registerAction } from "./register.routes";
@@ -31,8 +31,15 @@ import {
   getInstitucionesAction, 
   createInstitucionAction, 
   updateInstitucionAction, 
-  deleteInstitucionAction 
+  deleteInstitucionAction,
+  getPublicInstitucionesAction 
 } from "./instituciones.routes";
+
+import { getAllCategoriesAction } from "./categories.routes";
+import { getDatasetsAction, createDatasetAction } from "./datasets.routes";
+import { getAllOdsAction } from "./ods.routes";
+import { getAllTagsAction } from "./tags.routes";
+import { getAllLicensesAction} from "./licenses.routes";
 
 // --- FUNCIONES DE AYUDA (Exportadas) ---
 export function getSessionIdFromRequest(req: HttpRequest): number | string | null {
@@ -95,3 +102,14 @@ authRouter.add("GET", "/api/instituciones", [requirePermission("admin_general.ma
 authRouter.add("POST", "/api/instituciones", [requirePermission("admin_general.manage")], createInstitucionAction);
 authRouter.add("PUT", "/api/instituciones/:id", [requirePermission("admin_general.manage")], updateInstitucionAction);
 authRouter.add("DELETE", "/api/instituciones/:id", [requirePermission("admin_general.manage")], deleteInstitucionAction);
+authRouter.add("GET", "/api/public/instituciones", [], getPublicInstitucionesAction);
+
+//---categorias---
+authRouter.add("GET", "/api/categories", [], getAllCategoriesAction); 
+authRouter.add("GET", "/api/tags", [], getAllTagsAction);
+authRouter.add("GET", "/api/licenses", [], getAllLicensesAction);
+
+authRouter.add("GET", "/api/datasets", [requireLogin], getDatasetsAction);
+authRouter.add("POST", "/api/datasets", [requireLogin], createDatasetAction);
+
+

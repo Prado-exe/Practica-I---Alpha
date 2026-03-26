@@ -39,3 +39,11 @@ export function requirePermission(requiredPermission: string) {
     return; 
   };
 }
+
+export async function requireLogin(req: HttpRequest, res: HttpResponse): Promise<boolean | void> {
+  const isUnauthorized = await authMiddleware(req, res);
+  
+  if (isUnauthorized) return true; 
+  
+  return; 
+}

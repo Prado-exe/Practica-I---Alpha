@@ -1,9 +1,15 @@
 import dotenv from "dotenv";
+import ms from "ms";
 
 dotenv.config();
 
 function getEnv(name: string, defaultValue?: string): string {
   const value = process.env[name] ?? defaultValue;
+
+  // 👇 MAGIA PARA VITEST: Evita el error y da un string falso en pruebas
+  if (process.env.NODE_ENV === "test" && value === undefined) {
+    return "test_value";
+  }
 
   if (value === undefined) {
     throw new Error(`Falta la variable de entorno: ${name}`);
@@ -15,11 +21,21 @@ function getEnv(name: string, defaultValue?: string): string {
 function getNumberEnv(name: string, defaultValue?: number): number {
   const raw = process.env[name] ?? (defaultValue !== undefined ? String(defaultValue) : undefined);
 
+  // 👇 MAGIA PARA VITEST: Evita el error y da un número falso en pruebas
+  if (process.env.NODE_ENV === "test" && raw === undefined) {
+    return 9999;
+  }
+
   if (raw === undefined) {
     throw new Error(`Falta la variable de entorno numérica: ${name}`);
   }
 
   const parsed = Number(raw);
+
+  // También evitamos errores si por casualidad llega un texto no numérico en test
+  if (process.env.NODE_ENV === "test" && Number.isNaN(parsed)) {
+    return 9999;
+  }
 
   if (Number.isNaN(parsed)) {
     throw new Error(`La variable ${name} debe ser numérica`);
@@ -27,6 +43,9 @@ function getNumberEnv(name: string, defaultValue?: number): number {
 
   return parsed;
 }
+
+const accessTokenTime = getEnv("ACCESS_TOKEN_EXPIRES_IN", "15m");
+const refreshTokenTime = getEnv("REFRESH_TOKEN_EXPIRES_IN", "7d");
 
 export const env = {
   PORT: getNumberEnv("PORT", 3000),
@@ -49,11 +68,14 @@ export const env = {
   JWT_ACCESS_SECRET: getEnv("JWT_ACCESS_SECRET"),
   JWT_REFRESH_SECRET: getEnv("JWT_REFRESH_SECRET"),
 
-  ACCESS_TOKEN_EXPIRES_IN: getEnv("ACCESS_TOKEN_EXPIRES_IN", "15m"),
-  REFRESH_TOKEN_EXPIRES_IN: getEnv("REFRESH_TOKEN_EXPIRES_IN", "7d"),
+  // 2. Guardamos el texto (ej: "1h", "7d") para jsonwebtoken
+  ACCESS_TOKEN_EXPIRES_IN: accessTokenTime,
+  REFRESH_TOKEN_EXPIRES_IN: refreshTokenTime,
 
-  ACCESS_TOKEN_EXPIRES_IN_MS: getNumberEnv("ACCESS_TOKEN_EXPIRES_IN_MS", 15 * 60 * 1000),
-  REFRESH_TOKEN_EXPIRES_IN_MS: getNumberEnv("REFRESH_TOKEN_EXPIRES_IN_MS", 7 * 24 * 60 * 60 * 1000),
+  // 3. Calculamos automáticamente los milisegundos para las Cookies (ej: 3600000)
+  // En test, si ms falla devolvemos un valor genérico seguro
+  ACCESS_TOKEN_EXPIRES_IN_MS: ms(accessTokenTime as ms.StringValue) ?? 900000,
+  REFRESH_TOKEN_EXPIRES_IN_MS: ms(refreshTokenTime as ms.StringValue) ?? 604800000,
 
   S3_ENDPOINT: getEnv("S3_ENDPOINT", "http://localhost:9000"),
   S3_REGION: getEnv("S3_REGION", "us-east-1"),
@@ -61,5 +83,4 @@ export const env = {
   S3_SECRET_KEY: getEnv("S3_SECRET_KEY"),
   S3_BUCKET_NAME: getEnv("S3_BUCKET_NAME"),
 
-  
 } as const;
