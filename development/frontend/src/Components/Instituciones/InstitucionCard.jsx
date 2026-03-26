@@ -1,35 +1,37 @@
-function InstitucionCard({ institucion }) {
+function InstitucionCard({ institucion, onOpenModal }) {
+  // 🛡️ PROTECCIÓN: Si no hay descripción, usamos un texto por defecto en vez de explotar
+  const descripcionSegura = institucion.description || "Sin descripción disponible.";
+
   return (
-    <article
-      className="institucion-card"
-      aria-labelledby={`inst-${institucion.id}`}
-    >
+    <div className="institucion-card">
+      
       <div className="card-header">
-        <img
-          src={institucion.logo}
-          alt={`Logo de ${institucion.nombre}`}
-          loading="lazy"
+        <img 
+          src={institucion.logo_url} 
+          alt={`Logo de ${institucion.short_name || institucion.legal_name}`} 
         />
-
-        <h3 id={`inst-${institucion.id}`}>
-          {institucion.nombre}
-        </h3>
+        <h3>{institucion.legal_name}</h3>
       </div>
-
+      
       <p className="descripcion">
-        {institucion.descripcion}
+        {descripcionSegura.length > 120 
+          ? descripcionSegura.substring(0, 120) + "..." 
+          : descripcionSegura}
       </p>
-
+      
       <div className="card-footer">
         <span className="dataset-count">
-          {institucion.datasets} datasets
+          <strong>0</strong> datasets
         </span>
-
-        <button className="ver-btn">
+        <button 
+          className="ver-btn" 
+          onClick={() => onOpenModal(institucion)}
+        >
           Ver institución
         </button>
       </div>
-    </article>
+      
+    </div>
   );
 }
 

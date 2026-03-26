@@ -50,7 +50,7 @@ function GestionInstituciones() {
     }
   }, [user?.token]);
 
-  // 1. Obtener Instituciones de PostgreSQL
+
   const fetchInstituciones = async () => {
     setLoading(true);
     try {
@@ -93,9 +93,8 @@ function GestionInstituciones() {
       let finalImageUrl = formData.imageUrlPreview;
       let fileDataPayload = null;
 
-      // PASO A: Si el usuario seleccionó una imagen nueva, subirla a S3/MinIO
+
       if (formData.image instanceof File) {
-        // Pedimos la URL Prefirmada
         const presignedRes = await fetch(`${API_URL}/api/upload/presigned-url`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
@@ -105,7 +104,7 @@ function GestionInstituciones() {
         if (!presignedRes.ok) throw new Error("Error obteniendo autorización para subir archivo.");
         const { uploadUrl, fileUrl, storageKey } = await presignedRes.json();
 
-        // Subimos el archivo físicamente
+ 
         const uploadRes = await fetch(uploadUrl, {
           method: "PUT",
           body: formData.image,

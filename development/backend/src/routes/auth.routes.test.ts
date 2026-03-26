@@ -1,24 +1,36 @@
-import { describe, it } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { getSessionIdFromRequest, getErrorStatus, getErrorMessage } from './auth.routes';
+import { AppError } from '../types/app-error';
+import { ZodError } from 'zod';
+import * as authUtils from '../utils/auth';
+import * as cookieUtils from '../utils/request-cookies';
+import * as jwtUtils from '../utils/jwt';
 
-describe('Auth Endpoints (API HTTP)', () => {
-  describe('POST /api/login', () => {
-    it.todo('debería responder 200 y establecer la cookie HttpOnly con el refreshToken');
-    it.todo('debería responder 401 ante credenciales inválidas');
+vi.mock('../utils/auth');
+vi.mock('../utils/request-cookies');
+vi.mock('../utils/jwt');
+
+describe('Auth Routes Helpers', () => {
+  it('getSessionIdFromRequest debería retornar desde el access payload', () => {
+    vi.mocked(authUtils.tryGetAuthPayload).mockReturnValue({ sessionId: 10 } as any);
+    expect(getSessionIdFromRequest({} as any)).toBe(10);
   });
 
-  describe('GET /api/usuarios (Gestión de Usuarios)', () => {
-    it.todo('debería responder 401 si no se envía el header Authorization');
-    it.todo('debería responder 403 si el token es válido pero no tiene el permiso "user_management.read" (Broken Access Control)');
-    it.todo('debería responder 200 y el array de usuarios si tiene los permisos correctos');
+  it('getSessionIdFromRequest debería retornar desde la cookie si no hay access', () => {
+    vi.mocked(authUtils.tryGetAuthPayload).mockReturnValue(null);
+    vi.mocked(cookieUtils.parseCookies).mockReturnValue({ refreshToken: 'token' });
+    vi.mocked(jwtUtils.verifyRefreshToken).mockReturnValue({ sessionId: 20 } as any);
+    expect(getSessionIdFromRequest({} as any)).toBe(20);
   });
 
-  describe('DELETE /api/usuarios/:id', () => {
-    it.todo('debería responder 403 si el usuario no tiene permiso "user_management.delete"');
-    it.todo('debería responder 403 si el ID a borrar pertenece a un super_admin');
-    it.todo('debería responder 200 al borrar un usuario válido');
+  it('getErrorStatus debería retornar el statusCode correcto', () => {
+    expect(getErrorStatus(new AppError('Test', 404))).toBe(404);
+    expect(getErrorStatus(new ZodError([]))).toBe(400);
+    expect(getErrorStatus(new Error('Critico'))).toBe(500);
   });
 
-  describe('POST /api/recuperar-password', () => {
-    it.todo('debería responder 200 con un mensaje genérico incluso si el correo no existe (OWASP Anti-enumeración)');
+  it('getErrorMessage debería retornar el mensaje correcto', () => {
+    expect(getErrorMessage(new AppError('AppError msg', 400))).toBe('AppError msg');
+    expect(getErrorMessage(new Error('Fatal'))).toBe('Error interno del servidor');
   });
 });
