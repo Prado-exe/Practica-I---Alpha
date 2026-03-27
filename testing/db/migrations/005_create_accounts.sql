@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS accounts (
     account_id BIGSERIAL PRIMARY KEY,
     role_id BIGINT NOT NULL,
+    institution_id BIGINT NULL, 
 
     username VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -41,6 +42,9 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 CREATE INDEX IF NOT EXISTS idx_accounts_role_id
     ON accounts(role_id);
+
+CREATE INDEX IF NOT EXISTS idx_accounts_institution_id
+    ON accounts(institution_id);
 
 CREATE INDEX IF NOT EXISTS idx_accounts_account_status
     ON accounts(account_status);

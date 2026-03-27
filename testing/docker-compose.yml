@@ -4,7 +4,7 @@ services:
 
   frontend:
     build: ./frontend
-    container_name: frontend-qa
+    container_name: frontend-dev
     ports:
       - "5173:5173"
     volumes:
@@ -14,11 +14,11 @@ services:
       - VITE_API_URL=http://localhost:3000
     command: npm run dev -- --host 0.0.0.0
     networks:
-      - qa-net
+      - dev-net
 
   backend:
     build: ./backend
-    container_name: backend-qa
+    container_name: backend-dev
     ports:
       - "3000:3000"
     volumes:
@@ -32,11 +32,11 @@ services:
     depends_on:
       - postgres
     networks:
-      - qa-net
+      - dev-net
 
   postgres:
     image: postgres:16
-    container_name: postgres-qa
+    container_name: postgres-dev
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -45,25 +45,54 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+      - ./db/migrations:/migrations:ro
+      - ./db/init:/docker-entrypoint-initdb.d:ro
     networks:
-      - qa-net
+      - dev-net
 
-  playwright-qa:
-    image: mcr.microsoft.com/playwright:v1.58.0-jammy
-    container_name: playwright-qa
-    depends_on:
-      - frontend
-    environment:
-      - BASE_URL=http://localhost:5173
-    volumes:
-      - .:/app
-    working_dir: /app
-    command: sleep infinity
+  # 1. Tu MinIO principal (Igual que antes)
+  minio:
+    image: minio/minio
+    container_name: minio-dev
     ports:
-      - "36575:36575"
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: "admin_minio"
+      MINIO_ROOT_PASSWORD: "password123"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
     networks:
-      - qa-net
+      - dev-net
+
+  # 2. EL AUTOMATIZADOR (Crea el bucket privado y se apaga)
+  minio-setup:
+    image: minio/mc
+    container_name: minio-setup
+    depends_on:
+      - minio
+    networks:
+      - dev-net
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Esperando a que MinIO inicie...';
+      sleep 5;
+      
+      echo 'Conectando a MinIO...';
+      mc alias set myminio http://minio:9000 admin_minio password123;
+      
+      echo 'Creando bucket privado observatory-files...';
+      mc mb myminio/observatory-files || true;
+      
+      echo 'Configuración terminada. El bucket es seguro y hermético.';
+      exit 0;
+      "
+
+volumes:
+  minio_data:
+ 
 
 networks:
-  qa-net:
+  dev-net:
     driver: bridge
