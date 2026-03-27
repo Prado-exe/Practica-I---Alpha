@@ -7,6 +7,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "../config/s3"; 
 import { env } from "../config/env";
 
+
+
 export async function getInstitutions() {
   const instituciones = await fetchInstitutionsFromDb();
 
@@ -16,7 +18,11 @@ export async function getInstitutions() {
         try {
           const command = new GetObjectCommand({ Bucket: env.S3_BUCKET_NAME, Key: inst.storage_key });
           const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-          return { ...inst, logo_url: presignedUrl }; 
+          
+          // 👇 1. APLICAMOS EL REEMPLAZO AQUÍ 👇
+          const finalUrl = presignedUrl.replace('storage:9000', 'localhost:9000');
+          
+          return { ...inst, logo_url: finalUrl }; // 👈 Usamos finalUrl
         } catch (error) {
           console.error(`Error firmando URL:`, error);
           return inst;
@@ -32,7 +38,6 @@ export async function getInstitutions() {
 export async function getPublicInstitutions(search: string = "", page: number = 1, limit: number = 9) {
   const offset = (page - 1) * limit;
   
-  // Asumiendo que agregaste fetchPublicInstitutionsPaginated a tu repository
   const result = await fetchPublicInstitutionsPaginated(search, limit, offset);
 
   const institucionesFirmadas = await Promise.all(
@@ -41,7 +46,11 @@ export async function getPublicInstitutions(search: string = "", page: number = 
         try {
           const command = new GetObjectCommand({ Bucket: env.S3_BUCKET_NAME, Key: inst.storage_key });
           const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-          return { ...inst, logo_url: presignedUrl }; 
+          
+          // 👇 2. Y TAMBIÉN APLICAMOS EL REEMPLAZO AQUÍ 👇
+          const finalUrl = presignedUrl.replace('storage:9000', 'localhost:9000');
+          
+          return { ...inst, logo_url: finalUrl }; // 👈 Usamos finalUrl
         } catch (error) {
           return inst; 
         }

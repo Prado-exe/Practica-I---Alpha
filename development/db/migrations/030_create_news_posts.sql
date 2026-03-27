@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS news_posts (
         FOREIGN KEY (category_id)
         REFERENCES categories(category_id)
         ON DELETE RESTRICT
-        ON UPDATE CASCADE
+        ON UPDATE CASCADE,
 
     CONSTRAINT fk_news_posts_dataset
         FOREIGN KEY (dataset_id)

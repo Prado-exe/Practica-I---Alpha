@@ -72,7 +72,7 @@ export function getErrorMessage(error: unknown): any {
 
 // --- EL ENRUTADOR PRINCIPAL ---
 export const authRouter = new Router();
-authRouter.add("POST", "/api/upload/presigned-url", [], generateUploadUrlAction);
+authRouter.add("POST", "/api/upload/presigned-url", [requirePermission("data_management.write")], generateUploadUrlAction);
 authRouter.add("POST", "/api/login", [], loginAction);
 authRouter.add("POST", "/api/logout", [], logoutAction);
 authRouter.add("POST", "/api/register", [], registerAction);
@@ -109,7 +109,7 @@ authRouter.add("GET", "/api/categories", [], getAllCategoriesAction);
 authRouter.add("GET", "/api/tags", [], getAllTagsAction);
 authRouter.add("GET", "/api/licenses", [], getAllLicensesAction);
 
-authRouter.add("GET", "/api/datasets", [requireLogin], getDatasetsAction);
-authRouter.add("POST", "/api/datasets", [requireLogin], createDatasetAction);
+authRouter.add("GET", "/api/datasets", [requirePermission("catalog.read")], getDatasetsAction);
+authRouter.add("POST", "/api/datasets", [requirePermission("data_management.write")], createDatasetAction);
 
 

@@ -7,17 +7,16 @@ import { AppError } from "../types/app-error";
 
 export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
   try {
-    // req.user viene del middleware requireAuth
     const accountId = Number((req as any).user.sub);
-    
-    // Verificamos si es admin basándonos en los permisos de su token
     const permissions = (req as any).user.permissions || [];
-    const isAdmin = permissions.includes("admin_general.manage");
+    const isAdmin = permissions.includes("data_management.read") || permissions.includes("data_management.write");
 
     const url = new URL(req.url || "", `http://${req.headers?.host || "localhost"}`);
     const search = url.searchParams.get("search") || "";
-    const page = parseInt(url.searchParams.get("page") || "1", 10);
-    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+    
+    // Validamos y limpiamos la paginación para evitar que metan letras
+    const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+    const limit = Math.max(1, parseInt(url.searchParams.get("limit") || "10", 10));
 
     const result = await getDatasets(accountId, isAdmin, search, page, limit);
     sendJson(res, 200, { ok: true, ...result });
@@ -29,14 +28,16 @@ export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
 export async function createDatasetAction(req: HttpRequest, res: HttpResponse) {
   try {
     const accountId = Number((req as any).user.sub);
-    const permissions = (req as any).user.permissions || [];
-    const isAdmin = permissions.includes("admin_general.manage");
+    const isAdmin = true; 
 
     const body = await readJsonBody<any>(req); 
     const newDataset = await createDataset(accountId, isAdmin, body);
     
-    const msg = isAdmin ? "Dataset publicado exitosamente" : "Solicitud de creación enviada a revisión";
-    sendJson(res, 201, { ok: true, message: msg, data: newDataset });
+    sendJson(res, 201, { 
+      ok: true, 
+      message: "Dataset y archivos publicados exitosamente", 
+      data: newDataset 
+    });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }

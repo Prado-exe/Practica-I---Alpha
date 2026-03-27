@@ -29,12 +29,6 @@ CREATE TABLE IF NOT EXISTS accounts (
         ON DELETE RESTRICT
         ON UPDATE CASCADE,
 
-    CONSTRAINT fk_accounts_institution
-        FOREIGN KEY (institution_id)
-        REFERENCES institutions(institution_id)
-        ON DELETE SET NULL 
-        ON UPDATE CASCADE,
-
     CONSTRAINT chk_accounts_status
         CHECK (
             account_status IN (

@@ -43,6 +43,7 @@ BEGIN;
 \i /migrations/037_seed_file_formats.sql
 \i /migrations/038_seed_ods_objectives.sql
 \i /migrations/039_seed_licenses.sql
+\i /migrations/040_add_foreign_keys.sql
 COMMIT;
 
 \echo 'Migraciones completadas.'

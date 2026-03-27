@@ -45,7 +45,6 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
   return { total, data: rows };
 }
 
-// 2. FUNCIÓN DE CREACIÓN COMPLETA
 export async function createFullDatasetInDb(ownerAccountId: number, isAdmin: boolean, input: any) {
   const client = await pool.connect();
   try {
@@ -54,6 +53,7 @@ export async function createFullDatasetInDb(ownerAccountId: number, isAdmin: boo
     // Si es admin se publica, si no, queda en validación
     const status = isAdmin ? 'published' : 'pending_validation';
 
+    // 1. Insertar el Dataset
     const datasetQuery = `
       INSERT INTO datasets (
         owner_account_id, category_id, institution_id, license_id, ods_objective_id,
@@ -61,7 +61,6 @@ export async function createFullDatasetInDb(ownerAccountId: number, isAdmin: boo
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_DATE)
       RETURNING dataset_id;
     `;
-    
     const datasetRes = await client.query(datasetQuery, [
       ownerAccountId, input.category_id, input.institution_id || null,
       input.license_id, input.ods_objective_id || null,
@@ -70,7 +69,50 @@ export async function createFullDatasetInDb(ownerAccountId: number, isAdmin: boo
     ]);
     const datasetId = datasetRes.rows[0].dataset_id;
 
-    // Si es usuario normal, registramos la solicitud formal
+    // 2. Procesar e insertar CADA archivo del array
+    for (let i = 0; i < input.files.length; i++) {
+      const file = input.files[i];
+
+      // A) Buscar el formato del archivo (file_format_id) según su mime_type
+      const formatRes = await client.query(
+        `SELECT file_format_id FROM file_formats WHERE mime_type = $1 LIMIT 1`, 
+        [file.mime_type]
+      );
+      const fileFormatId = formatRes.rows.length > 0 ? formatRes.rows[0].file_format_id : 1; // 1 como fallback
+
+      // B) Insertar en aws_file_references
+      const awsRefQuery = `
+        INSERT INTO aws_file_references 
+        (storage_key, file_url, file_format_id, file_size_bytes, mime_type, file_category, file_scope, owner_account_id, status)
+        VALUES ($1, $2, $3, $4, $5, 'dataset', 'public', $6, 'active')
+        RETURNING aws_file_reference_id;
+      `;
+      const awsRefRes = await client.query(awsRefQuery, [
+        file.storage_key, file.file_url, fileFormatId, 
+        file.file_size_bytes, file.mime_type, ownerAccountId
+      ]);
+      const newAwsFileRefId = awsRefRes.rows[0].aws_file_reference_id;
+
+      // C) Insertar en la tabla intermedia: dataset_files
+      const dsFileQuery = `
+        INSERT INTO dataset_files
+        (dataset_id, aws_file_reference_id, file_role, display_name, file_format, mime_type, file_size_bytes, is_primary, sort_order)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `;
+      await client.query(dsFileQuery, [
+        datasetId, 
+        newAwsFileRefId, 
+        file.file_role || 'source', 
+        file.display_name,
+        file.file_format || 'csv', 
+        file.mime_type, 
+        file.file_size_bytes, 
+        file.is_primary || false, 
+        i // sort_order
+      ]);
+    }
+
+    // 3. Si no es admin, registrar la solicitud para revisión
     if (!isAdmin) {
       const requestQuery = `
         INSERT INTO dataset_requests (dataset_id, requester_account_id, request_type, request_status)
@@ -80,7 +122,8 @@ export async function createFullDatasetInDb(ownerAccountId: number, isAdmin: boo
     }
 
     await client.query('COMMIT');
-    return { datasetId, title: input.title };
+    return { datasetId, title: input.title, filesUploaded: input.files.length };
+    
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;

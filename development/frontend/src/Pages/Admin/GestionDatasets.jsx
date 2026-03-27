@@ -1,34 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../../styles/pages_styles/Admin/GestionDatasets.css";
 import CanView from "../../Components/Common/CanView";
+import CrearDataset from "./CrearDataset";
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../../Context/AuthContext";
 
 function GestionDatasets() {
+  const navigate = useNavigate();
 
-  const [filters, setFilters] = useState({
-    nombre: "",
-    categoria: "",
-    estado: "",
-    fecha: ""
-  });
+  const { user } = useAuth(); 
 
-  const [datasets, setDatasets] = useState([
-    {
-      id: 1,
-      nombre: "Dataset Salud 2024",
-      categoria: "Salud",
-      institucion: "Ministerio de Salud",
-      fecha: "2024-03-10",
-      estado: "Publicado"
-    },
-    {
-      id: 2,
-      nombre: "Educación Escolar",
-      categoria: "Educación",
-      institucion: "MINEDUC",
-      fecha: "2023-11-22",
-      estado: "Pendiente"
+  const [filters, setFilters] = useState({ nombre: "", categoria: "", estado: "", fecha: "" });
+  const [isCreating, setIsCreating] = useState(false);
+
+  // 3. Empezamos con un arreglo vacío
+  const [datasets, setDatasets] = useState([]);
+
+  // 👇 4. EFECTO PARA TRAER LOS DATOS REALES DE POSTGRESQL 👇
+  useEffect(() => {
+    if (user?.token) {
+      fetchDatasets();
     }
-  ]);
+  }, [user?.token]);
+
+  const fetchDatasets = async () => {
+    try {
+      // Hacemos el GET a la ruta que armamos en tu backend
+      const res = await fetch("http://localhost:3000/api/datasets", {
+        headers: { 
+          "Authorization": `Bearer ${user.token}` 
+        }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        // Tu backend responde con { ok: true, data: [...] }
+        setDatasets(data.data || []); 
+      } else {
+        console.error("Error del backend leyendo datasets");
+      }
+    } catch (error) {
+      console.error("Error de red:", error);
+    }
+  };
 
   const handleChange = (e) => {
     setFilters({
@@ -50,14 +65,33 @@ function GestionDatasets() {
       fecha: ""
     });
   };
+  
+  if (isCreating) {
+    return <CrearDataset onCancel={() => setIsCreating(false)} />;
+  }
 
   return (
     <div className="gestion-datasets">
 
       {/* HEADER */}
-      <div className="header">
-        <h1>Gestión de Conjunto de Datos</h1>
-        <p>Administra, filtra y gestiona los datasets disponibles en el sistema.</p>
+      <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="header-info">
+          <h1>Gestión de Conjunto de Datos</h1>
+          <p>Administra, filtra y gestiona los datasets disponibles en el sistema.</p>
+        </div>
+        
+        <div className="header-actions">
+          <CanView requiredPermission="data_management.write">
+            <button 
+              className="btn-create" 
+              style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+              // 👇 Cambiamos la acción para que navegue a la nueva página
+              onClick={() => setIsCreating(true)}
+            >
+              + Nuevo Dataset
+            </button>
+          </CanView>
+        </div>
       </div>
 
       {/* FILTROS */}
@@ -130,8 +164,10 @@ function GestionDatasets() {
                 <td>{data.institucion}</td>
                 <td>{data.fecha}</td>
                 <td>
-                  <span className={`estado ${data.estado.toLowerCase()}`}>
-                    {data.estado}
+                  <span className={`estado ${(data.dataset_status || 'borrador').toLowerCase()}`}>
+                    {data.dataset_status === 'published' ? 'Publicado' : 
+                     data.dataset_status === 'pending_validation' ? 'En Revisión' : 
+                     data.dataset_status || 'Desconocido'}
                   </span>
                 </td>
                 <td className="acciones">
