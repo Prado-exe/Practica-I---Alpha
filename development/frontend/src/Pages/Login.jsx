@@ -35,7 +35,7 @@ function Login() {
         headers: {
           "Content-Type": "application/json"
         },
-        credentials: "include", // 3. ¡VITAL! Permite que viaje la cookie del Refresh Token
+        credentials: "include", 
         body: JSON.stringify({
           email,
           password,

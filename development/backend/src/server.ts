@@ -6,9 +6,15 @@ import { testDbConnection } from "./config/db";
 import { warmupMailer } from "./utils/mailer";
 import { applySecurityHeaders } from "./utils/security-headers";
 
+import { Router } from './utils/router';
+import { swaggerSpec } from './config/swagger';
+
+// 1️⃣ Creamos un enrutador global/sistema y le montamos Swagger
+const systemRouter = new Router();
+systemRouter.setupSwagger(swaggerSpec);
 
 const server = http.createServer(async (req, res) => {
-  // 1. Envolvemos TODO en un try/catch maestro
+  // Envolvemos TODO en un try/catch maestro
   try {
     applySecurityHeaders(res);
 
@@ -24,13 +30,19 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // 2️⃣ Evaluamos primero las rutas de documentación (/api-docs y /swagger.json)
+    const docsHandled = await systemRouter.handle(req, res);
+    if (docsHandled) return;
+
+    // 3️⃣ Luego evaluamos las rutas de tu API real (Auth)
     const handled = await authRouter.handle(req, res);
     if (handled) return; 
 
+    // Si nadie respondió, lanzamos el 404
     sendJson(res, 404, { ok: false, message: "Ruta no encontrada" });
 
   } catch (error) {
-    // 2. Si cualquier ruta explota, lo atrapamos aquí y evitamos que el servidor muera
+    // Si cualquier ruta explota, lo atrapamos aquí y evitamos que el servidor muera
     console.error("🔥 Error CRÍTICO no capturado en el servidor:", error);
     
     // Si la conexión no se ha cerrado, enviamos un 500
@@ -46,6 +58,7 @@ async function bootstrap(): Promise<void> {
 
     server.listen(env.PORT, () => {
       console.log(`Server listening on port ${env.PORT}`);
+      console.log(`📄 Swagger docs disponibles en: http://localhost:${env.PORT}/api-docs`); // 👈 Un pequeño log extra para encontrarlo rápido
     });
 
     void warmupMailer();
@@ -54,6 +67,5 @@ async function bootstrap(): Promise<void> {
     process.exit(1);
   }
 }
-
 
 void bootstrap();

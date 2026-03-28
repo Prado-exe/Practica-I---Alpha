@@ -59,4 +59,47 @@ export class Router {
 
     return false;
   }
+
+  public setupSwagger(swaggerSpec: any) {
+    // 1. Ruta que expone el JSON crudo generado por swagger-jsdoc
+    this.add("GET", "/swagger.json", [], async (req: HttpRequest, res: HttpResponse) => {
+      // Usamos as any por si tu interfaz HttpResponse no expone explícitamente writeHead/end
+      (res as any).writeHead(200, { "Content-Type": "application/json" });
+      (res as any).end(JSON.stringify(swaggerSpec));
+    });
+
+    // 2. Ruta que sirve la interfaz gráfica cargando Swagger desde un CDN
+    this.add("GET", "/api-docs", [], async (req: HttpRequest, res: HttpResponse) => {
+      const html = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Documentación API</title>
+          <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
+        </head>
+        <body style="margin: 0; padding: 0;">
+          <div id="swagger-ui"></div>
+          <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin></script>
+          <script>
+            window.onload = () => {
+              window.ui = SwaggerUIBundle({
+                url: '/swagger.json', // 👈 Lee automáticamente tu otra ruta
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                  SwaggerUIBundle.presets.apis,
+                  SwaggerUIBundle.SwaggerUIStandalonePreset
+                ],
+              });
+            };
+          </script>
+        </body>
+        </html>
+      `;
+      (res as any).writeHead(200, { "Content-Type": "text/html" });
+      (res as any).end(html);
+    });
+  }
 }

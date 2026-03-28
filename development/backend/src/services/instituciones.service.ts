@@ -1,8 +1,69 @@
-import { fetchInstitutionsFromDb, createInstitutionInDb, updateInstitutionInDb, deleteInstitutionFromDb} from "../repositories/instituciones.repository";
+import { fetchInstitutionsFromDb, createInstitutionInDb, updateInstitutionInDb, deleteInstitutionFromDb, fetchPublicInstitutionsPaginated} from "../repositories/instituciones.repository";
 import { AppError } from "../types/app-error";
 
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+import { s3Client } from "../config/s3"; 
+import { env } from "../config/env";
+
+
+
 export async function getInstitutions() {
-  return await fetchInstitutionsFromDb();
+  const instituciones = await fetchInstitutionsFromDb();
+
+  const institucionesFirmadas = await Promise.all(
+    instituciones.map(async (inst: any) => {
+      if (inst.storage_key) {
+        try {
+          const command = new GetObjectCommand({ Bucket: env.S3_BUCKET_NAME, Key: inst.storage_key });
+          const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+          
+          // 👇 1. APLICAMOS EL REEMPLAZO AQUÍ 👇
+          const finalUrl = presignedUrl.replace('storage:9000', 'localhost:9000');
+          
+          return { ...inst, logo_url: finalUrl }; // 👈 Usamos finalUrl
+        } catch (error) {
+          console.error(`Error firmando URL:`, error);
+          return inst;
+        }
+      }
+      return inst;
+    })
+  );
+
+  return institucionesFirmadas;
+}
+
+export async function getPublicInstitutions(search: string = "", page: number = 1, limit: number = 9) {
+  const offset = (page - 1) * limit;
+  
+  const result = await fetchPublicInstitutionsPaginated(search, limit, offset);
+
+  const institucionesFirmadas = await Promise.all(
+    result.data.map(async (inst: any) => {
+      if (inst.storage_key) {
+        try {
+          const command = new GetObjectCommand({ Bucket: env.S3_BUCKET_NAME, Key: inst.storage_key });
+          const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+          
+          // 👇 2. Y TAMBIÉN APLICAMOS EL REEMPLAZO AQUÍ 👇
+          const finalUrl = presignedUrl.replace('storage:9000', 'localhost:9000');
+          
+          return { ...inst, logo_url: finalUrl }; // 👈 Usamos finalUrl
+        } catch (error) {
+          return inst; 
+        }
+      }
+      return inst;
+    })
+  );
+
+  return {
+    total: result.total,
+    totalPages: Math.ceil(result.total / limit),
+    data: institucionesFirmadas
+  };
 }
 
 export async function addInstitution(instData: any, fileData: any, accountId: number) {
@@ -43,3 +104,4 @@ export async function removeInstitution(id: number) {
   }
   return { message: "Institución eliminada correctamente" };
 }
+
