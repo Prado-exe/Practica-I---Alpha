@@ -1,3 +1,20 @@
+/**
+ * ============================================================================
+ * MÓDULO: Enrutador de Inicio de Sesión (login.routes.ts)
+ * * PROPÓSITO: Gestionar el punto de entrada principal para la autenticación 
+ * de usuarios en el Observatorio.
+ * * RESPONSABILIDAD: Validar credenciales, capturar metadatos de conexión para 
+ * auditoría y establecer la sesión mediante una estrategia de doble token.
+ * * DECISIONES DE DISEÑO / SUPUESTOS:
+ * - Seguridad por Cookies: El Refresh Token se inyecta en una cookie `HttpOnly` 
+ * para mitigar ataques XSS, mientras que el Access Token se entrega en el JSON 
+ * para manejo volátil en memoria del frontend.
+ * - Intercepción de Seguridad: El flujo se interrumpe con un estado 403 si la 
+ * cuenta entra en un estado de "re-validación" (ej. bloqueo por intentos o 
+ * cambio de clave obligatorio), delegando la resolución a una vista secundaria 
+ * en el cliente.
+ * ============================================================================
+ */
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { readJsonBody } from "../utils/body";
 import { sendJson } from "../utils/json";
@@ -7,7 +24,8 @@ import { loginUser } from "../services/auth.service";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 
 /**
- * Controlador para el inicio de sesión de usuarios (Módulo de Autenticación).
+ * Descripción: Controlador que orquesta el flujo de autenticación, validación de esquema y captura de metadatos.
+ * POR QUÉ: Se extraen activamente la IP y el User-Agent (`meta`) antes de llamar al servicio para alimentar el sistema de detección de anomalías y auditoría forense. El uso de `setRefreshTokenCookie` dentro de este controlador asegura que la persistencia de la sesión se gestione a nivel de cabeceras HTTP antes de enviar la respuesta final al cliente.
  * * FLUJO DE EJECUCIÓN:
  * 1. Recepción y Validación: Parsea el body y valida estrictamente con `loginSchema`.
  * 2. Captura de Metadatos: Extrae IP y User-Agent para auditoría de seguridad.
@@ -18,12 +36,6 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * /api/login:
  * post:
  * summary: Iniciar sesión en el Observatorio
- * description: |
- * **Flujo de Inicio de Sesión y Seguridad**
- * * Este endpoint es la puerta de entrada principal. Verifica las credenciales del usuario, captura metadatos (IP, User-Agent) para auditoría, y establece una sesión segura utilizando un sistema de doble token.
- * * - **Access Token:** Se devuelve en el cuerpo de la respuesta para uso temporal en el frontend.
- * - **Refresh Token:** Se inyecta de forma silenciosa en una cookie `HttpOnly` para prevenir ataques XSS.
- * * *Nota:* Si la cuenta requiere acciones adicionales (como un cambio de contraseña obligatorio), el flujo se interrumpirá con un estado `403 Prohibido`.
  * tags:
  * - Autenticación
  * requestBody:
@@ -39,19 +51,18 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * email:
  * type: string
  * format: email
- * example: "usuario@institucion.com"
  * password:
  * type: string
- * example: "MiPasswordSeguro123"
  * responses:
  * 200:
- * description: Inicio de sesión exitoso. Devuelve el Access Token y los datos de la cuenta.
- * 400:
- * description: Error de validación (correo mal formado) o credenciales incorrectas.
+ * description: Inicio de sesión exitoso.
  * 403:
- * description: La cuenta requiere re-validación (ej. contraseña expirada, cuenta inactiva o bloqueada).
+ * description: La cuenta requiere re-validación o está bloqueada.
+ * * @param req {HttpRequest} Petición entrante, incluye cabeceras y socket para metadatos.
+ * @param res {HttpResponse} Respuesta saliente, utilizada para inyectar cookies y JSON.
+ * @return {Promise<void>} 
+ * @throws {Error} Errores de validación de esquema o credenciales incorrectas (mapeados a HTTP 400/401).
  */
-
 export async function loginAction(req: HttpRequest, res: HttpResponse) {
   try {
     const body = await readJsonBody(req);
@@ -64,7 +75,6 @@ export async function loginAction(req: HttpRequest, res: HttpResponse) {
 
     const result = await loginUser(payload, meta);
 
-    // Si tu servicio devuelve requiresRevalidation
     if (result.requiresRevalidation) {
       return sendJson(res, 403, { 
         ok: false, 

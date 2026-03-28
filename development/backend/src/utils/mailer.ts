@@ -1,3 +1,20 @@
+/**
+ * ============================================================================
+ * MÓDULO: Servicio de Mensajería SMTP (mailer.ts)
+ * * PROPÓSITO: Gestionar el envío de correos electrónicos transaccionales 
+ * (verificación, recuperación de cuenta).
+ * * RESPONSABILIDAD: Abstraer la configuración de Nodemailer, gestionar el 
+ * estado de salud de la conexión SMTP y proveer plantillas predefinidas.
+ * * DECISIONES DE DISEÑO / SUPUESTOS:
+ * - Fail-Safe Proactivo: El sistema incluye un mecanismo de "warmup" para 
+ * validar la conectividad con el servidor de correo durante el arranque del 
+ * sistema, evitando que los errores de red se descubran solo cuando un 
+ * usuario intenta registrarse.
+ * - Resiliencia: Antes de cada envío, se verifica la disponibilidad del 
+ * transporte. Si el servicio se cayó tras el inicio, el sistema intentará 
+ * reconectarse una vez antes de fallar la petición del usuario.
+ * ============================================================================
+ */
 import nodemailer from "nodemailer";
 import { env } from "../config/env";
 
@@ -14,6 +31,18 @@ const transporter = nodemailer.createTransport({
 let mailerReady = false;
 let lastMailerError: string | null = null;
 
+/**
+ * Descripción: Realiza una verificación de apretón de manos (handshake) con el servidor SMTP.
+ * POR QUÉ: Se separa de la creación del transporte para permitir que el 
+ * servidor inicie incluso si el SMTP es temporalmente inalcanzable, marcando 
+ * el servicio como no disponible en lugar de bloquear todo el proceso de Node.js.
+ * * FLUJO:
+ * 1. Invoca el método `verify()` de Nodemailer.
+ * 2. Actualiza los flags globales de estado y limpia errores previos si tiene éxito.
+ * 3. Captura y registra la causa técnica exacta del fallo en caso de error.
+ * @return {Promise<void>} 
+ * @throws {Ninguna} Los errores se capturan internamente para gestionar el estado de salud.
+ */
 export async function warmupMailer(): Promise<void> {
   try {
     await transporter.verify();
@@ -28,6 +57,13 @@ export async function warmupMailer(): Promise<void> {
   }
 }
 
+/**
+ * Descripción: Expone el estado actual del servicio de mensajería para monitoreo.
+ * POR QUÉ: Permite que endpoints de "Health Check" o el panel administrativo 
+ * consulten si el sistema puede enviar correos sin intentar un envío real, 
+ * facilitando el diagnóstico preventivo de infraestructura.
+ * @return {{ ready: boolean, lastError: string | null }} Objeto con el estado y el último error registrado.
+ */
 export function getMailerHealth() {
   return {
     ready: mailerReady,
@@ -35,6 +71,15 @@ export function getMailerHealth() {
   };
 }
 
+/**
+ * Descripción: Asegura que existe una conexión activa antes de proceder con un envío.
+ * POR QUÉ: Actúa como un guardián de flujo. Si el servicio no está listo, 
+ * intenta un nuevo "warmup" (reconexión tardía). Esto recupera el servicio 
+ * automáticamente si el servidor SMTP estuvo caído durante el arranque pero 
+ * volvió a estar en línea después.
+ * @return {Promise<void>}
+ * @throws {Error} Si tras el intento de reconexión el servicio sigue fallando.
+ */
 async function ensureMailerReady(): Promise<void> {
   if (mailerReady) {
     return;
@@ -47,6 +92,16 @@ async function ensureMailerReady(): Promise<void> {
   }
 }
 
+/**
+ * Descripción: Envía el código OTP para la validación de cuenta nueva.
+ * POR QUÉ: Utiliza una plantilla minimalista con soporte para texto plano y 
+ * HTML, asegurando que el código sea legible en cualquier cliente de correo, 
+ * incluso aquellos con bloqueos estrictos de contenido enriquecido.
+ * @param to {string} Dirección de correo del destinatario.
+ * @param code {string} Código numérico de 6 dígitos generado por el sistema.
+ * @return {Promise<void>}
+ * @throws {Error} Si el transporte SMTP falla o el destinatario es rechazado.
+ */
 export async function sendVerificationEmail(
   to: string,
   code: string
@@ -62,6 +117,21 @@ export async function sendVerificationEmail(
   });
 }
 
+/**
+ * Descripción: Envía un correo estructurado con un botón de acción para restablecer la contraseña.
+ * POR QUÉ: Incluye un diseño HTML con estilos in-line para garantizar la 
+ * consistencia visual en clientes como Outlook y Gmail. Se añade una 
+ * advertencia explícita sobre la expiración de 15 minutos para gestionar las 
+ * expectativas de seguridad del usuario y reducir tickets de soporte por links caducados.
+ * * FLUJO:
+ * 1. Valida la salud del mailer.
+ * 2. Inyecta el link dinámico en el botón de la plantilla HTML.
+ * 3. Envía el correo utilizando el remitente configurado en las variables de entorno.
+ * @param to {string} Correo del usuario solicitante.
+ * @param resetLink {string} URL completa con el token de seguridad único.
+ * @return {Promise<void>}
+ * @throws {Error} Si la infraestructura de correo no responde.
+ */
 export async function sendPasswordResetEmail(
   to: string,
   resetLink: string

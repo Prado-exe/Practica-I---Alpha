@@ -2,27 +2,31 @@ import { useState, useEffect } from "react";
 import "../../Styles/Pages_styles/Admin/GestionDatasets.css"; 
 import { useAuth } from "../../Context/AuthContext";
 
-// Usamos la misma constante de API de tu archivo de instituciones
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function CrearDataset({ onCancel }) {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // 👇 LA CLAVE DEL ÉXITO: Extraer el objeto 'user'
   const { user } = useAuth(); 
 
   const [categories, setCategories] = useState([]);
   const [licenses, setLicenses] = useState([]);
+  const [instituciones, setInstituciones] = useState([]);
 
   const [formData, setFormData] = useState({
     title: "",
-    description: "",
     summary: "",
+    description: "",
     category_id: "",
     license_id: "",
     institution_id: "", 
-    access_level: "public"
+    access_level: "public",
+    creation_date: new Date().toISOString().split('T')[0], // Fecha de creación (hoy por defecto)
+    temporal_coverage_start: "",
+    temporal_coverage_end: "",
+    geographic_coverage: "",
+    update_frequency: "",
+    source_url: ""
   });
 
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -30,14 +34,34 @@ function CrearDataset({ onCancel }) {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        setCategories([{ id: 1, name: "Demografía" }, { id: 2, name: "Economía" }]);
-        setLicenses([{ id: 1, name: "Creative Commons BY 4.0" }]);
+        // Carga de Categorías
+        const catRes = await fetch(`${API_URL}/api/categories`);
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          setCategories(catData.data || []); 
+        }
+
+        // Carga de Licencias
+        const licRes = await fetch(`${API_URL}/api/licenses`);
+        if (licRes.ok) {
+          const licData = await licRes.json();
+          setLicenses(licData.data || []);
+        }
+
+        // CORRECCIÓN: Carga de Instituciones usando el método de GestionInstituciones
+        const instRes = await fetch(`${API_URL}/api/instituciones`, {
+          headers: { "Authorization": `Bearer ${user.token}` }
+        });
+        if (instRes.ok) {
+          const instData = await instRes.json();
+          setInstituciones(instData.instituciones || []);
+        }
       } catch (error) {
-        console.error("Error cargando opciones", error);
+        console.error("Error cargando opciones:", error);
       }
     };
     fetchOptions();
-  }, []);
+  }, [user.token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,15 +88,12 @@ function CrearDataset({ onCancel }) {
     try {
       const uploadedFilesData = [];
 
-      // PASO A: Subir cada archivo a MinIO (Idéntico a Instituciones)
       for (const file of selectedFiles) {
-        
-        // 1. Pedir URL Prefirmada
         const presignedRes = await fetch(`${API_URL}/api/upload/presigned-url`, {
           method: "POST",
           headers: { 
             "Content-Type": "application/json", 
-            "Authorization": `Bearer ${user.token}` // 👈 Usando user.token
+            "Authorization": `Bearer ${user.token}` 
           },
           body: JSON.stringify({ fileName: file.name, contentType: file.type })
         });
@@ -80,16 +101,14 @@ function CrearDataset({ onCancel }) {
         if (!presignedRes.ok) throw new Error("Error obteniendo URL de subida");
         const { uploadUrl, fileUrl, storageKey } = await presignedRes.json();
 
-        // 2. Subir físicamente a MinIO
         const uploadRes = await fetch(uploadUrl, {
           method: "PUT",
           headers: { "Content-Type": file.type },
           body: file
         });
         
-        if (!uploadRes.ok) throw new Error(`Error subiendo el archivo ${file.name} a MinIO`);
+        if (!uploadRes.ok) throw new Error(`Error subiendo el archivo ${file.name}`);
 
-        // 3. Guardar datos del archivo
         uploadedFilesData.push({
           storage_key: storageKey,
           file_url: fileUrl,
@@ -102,31 +121,49 @@ function CrearDataset({ onCancel }) {
         });
       }
 
-      // PASO B: Guardar todo en PostgreSQL
+      // Preparar Payload final
       const payload = {
         ...formData,
         category_id: Number(formData.category_id),
         license_id: Number(formData.license_id),
         institution_id: formData.institution_id ? Number(formData.institution_id) : null,
-        files: uploadedFilesData
+        
+        // Limpiamos campos opcionales para que Zod no falle con strings vacíos:
+        source_url: formData.source_url?.trim() !== "" ? formData.source_url : null,
+        temporal_coverage_start: formData.temporal_coverage_start !== "" ? formData.temporal_coverage_start : null,
+        temporal_coverage_end: formData.temporal_coverage_end !== "" ? formData.temporal_coverage_end : null,
+        geographic_coverage: formData.geographic_coverage?.trim() !== "" ? formData.geographic_coverage : null,
+        update_frequency: formData.update_frequency !== "" ? formData.update_frequency : null,
+
+        files: uploadedFilesData,
+        dataset_status: 'draft' 
       };
 
       const res = await fetch(`${API_URL}/api/datasets`, { 
         method: "POST", 
         headers: { 
           "Content-Type": "application/json", 
-          "Authorization": `Bearer ${user.token}` // 👈 Usando user.token
+          "Authorization": `Bearer ${user.token}` 
         },
         body: JSON.stringify(payload) 
       });
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.message || "Error del servidor al guardar el dataset");
+        
+        // 👇 2. MEJORA EN EL MANEJO DEL MENSAJE DE ERROR (Para evitar [object Object]) 👇
+        let errorMsg = "Error del servidor al guardar el dataset";
+        if (Array.isArray(err.message)) {
+          // Si es un error de Zod, concatenamos todos los problemas encontrados
+          errorMsg = err.message.map(e => e.message).join(", ");
+        } else if (err.message) {
+          errorMsg = err.message;
+        }
+        throw new Error(errorMsg);
       }
       
-      alert("¡Dataset creado con éxito!");
-      onCancel(); 
+      alert("¡Dataset creado con éxito como borrador!");
+      onCancel();
 
     } catch (error) {
       console.error(error);
@@ -137,14 +174,18 @@ function CrearDataset({ onCancel }) {
   };
 
   return (
-    <div className="gestion-datasets" style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+    <div className="gestion-datasets" style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
       
-      <div className="header" style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
+      <div className="header" style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
         <button type="button" onClick={onCancel} style={{ cursor: 'pointer', padding: '5px 10px' }}>← Volver</button>
         <div>
           <h1>Crear Nuevo Dataset</h1>
           <p>Paso {step} de 2: {step === 1 ? 'Metadatos descriptivos' : 'Subida de archivos'}</p>
         </div>
+      </div>
+
+      <div style={{ background: '#e3f2fd', padding: '10px', borderRadius: '4px', marginBottom: '20px', borderLeft: '5px solid #2196F3' }}>
+        <strong>Estado actual:</strong> <span style={{ color: '#1976d2' }}>Borrador</span> (Se creará como borrador por defecto)
       </div>
 
       <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : handleSubmit}>
@@ -158,18 +199,34 @@ function CrearDataset({ onCancel }) {
 
           <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
             <div style={{ flex: 1 }}>
+              <label>Fecha de Creación de los Datos *</label>
+              <input type="date" name="creation_date" required value={formData.creation_date} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>Frecuencia de Actualización</label>
+              <select name="update_frequency" value={formData.update_frequency} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
+                <option value="">No definida</option>
+                <option value="Anual">Anual</option>
+                <option value="Semestral">Semestral</option>
+                <option value="Trimestral">Trimestral</option>
+                <option value="Mensual">Mensual</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+            <div style={{ flex: 1 }}>
               <label>Categoría *</label>
               <select name="category_id" required value={formData.category_id} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
                 <option value="">Seleccione...</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {categories.map(c => <option key={c.category_id} value={c.category_id}>{c.name}</option>)}
               </select>
             </div>
-            
             <div style={{ flex: 1 }}>
               <label>Licencia *</label>
               <select name="license_id" required value={formData.license_id} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
                 <option value="">Seleccione...</option>
-                {licenses.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                {licenses.map(l => <option key={l.license_id} value={l.license_id}>{l.name}</option>)}
               </select>
             </div>
           </div>
@@ -177,24 +234,47 @@ function CrearDataset({ onCancel }) {
           <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
             <div style={{ flex: 1 }}>
               <label>Institución Responsable</label>
-              <select name="institution_id" disabled value={formData.institution_id} onChange={handleChange} style={{ width: '100%', padding: '8px', backgroundColor: '#f0f0f0' }}>
-                <option value="">No disponible por el momento</option>
+              <select name="institution_id" value={formData.institution_id} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
+                <option value="">Seleccione...</option>
+                {instituciones.map(inst => (
+                  <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name}</option>
+                ))}
               </select>
-              <small style={{ color: '#666' }}>Se habilitará en futuras versiones.</small>
             </div>
-
             <div style={{ flex: 1 }}>
               <label>Nivel de Acceso</label>
               <select name="access_level" value={formData.access_level} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
-                <option value="public">Público (Cualquiera puede verlo)</option>
-                <option value="internal">Interno (Solo usuarios registrados)</option>
+                <option value="public">Público (Cualquiera)</option>
+                <option value="internal">Interno (Registrados)</option>
               </select>
             </div>
           </div>
 
+          <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+            <div style={{ flex: 1 }}>
+              <label>Cobertura Temporal (Inicio)</label>
+              <input type="date" name="temporal_coverage_start" value={formData.temporal_coverage_start} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>Cobertura Temporal (Término)</label>
+              <input type="date" name="temporal_coverage_end" value={formData.temporal_coverage_end} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+            <div style={{ flex: 1 }}>
+              <label>Cobertura Geográfica</label>
+              <input type="text" name="geographic_coverage" placeholder="Ej: Chile, Regional..." value={formData.geographic_coverage} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>URL de la Organización / Fuente</label>
+              <input type="url" name="source_url" placeholder="https://ejemplo.org" value={formData.source_url} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+            </div>
+          </div>
+
           <div style={{ marginBottom: '15px' }}>
-            <label>Resumen Corto (Máx 500 caract.)</label>
-            <textarea name="summary" maxLength="500" value={formData.summary} onChange={handleChange} style={{ width: '100%', padding: '8px', height: '60px' }} />
+            <label>Resumen Corto (Máx 500 caract.) *</label>
+            <textarea name="summary" required maxLength="500" value={formData.summary} onChange={handleChange} style={{ width: '100%', padding: '8px', height: '60px' }} />
           </div>
 
           <div style={{ marginBottom: '25px' }}>
@@ -203,7 +283,7 @@ function CrearDataset({ onCancel }) {
           </div>
 
           <div style={{ textAlign: 'right' }}>
-            <button type="submit" className="btn-primary" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none' }}>
+            <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}>
               Continuar a Archivos →
             </button>
           </div>
@@ -211,17 +291,9 @@ function CrearDataset({ onCancel }) {
 
         {/* PASO 2: ARCHIVOS */}
         <div style={{ display: step === 2 ? 'block' : 'none' }}>
-          
           <div style={{ border: '2px dashed #ccc', padding: '40px', textAlign: 'center', marginBottom: '20px', borderRadius: '8px' }}>
-            <input 
-              type="file" 
-              multiple 
-              onChange={handleFileChange} 
-              id="file-upload" 
-              style={{ display: 'none' }}
-              accept=".csv,.doc,.docx,.dta,.html,.ipynb,.jpeg,.jpg,.json,.kml,.kmz,.ods,.parquet,.pdf,.pbix,.rar,.rdata,.sav,.shp,.txt,.url,.wms,.xls,.xlsx,.xml,.zip,.png"
-            />
-            <label htmlFor="file-upload" style={{ cursor: 'pointer', color: '#2196F3', fontWeight: 'bold', fontSize: '1.2rem' }}>
+            <input type="file" multiple onChange={handleFileChange} id="file-upload" style={{ display: 'none' }} />
+            <label htmlFor="file-upload" style={{ cursor: 'pointer', color: '#2196F3', fontWeight: 'bold' }}>
               📁 Haz clic aquí para seleccionar archivos
             </label>
           </div>
@@ -241,11 +313,9 @@ function CrearDataset({ onCancel }) {
           )}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
-            <button type="button" onClick={() => setStep(1)} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-              ← Atrás
-            </button>
+            <button type="button" onClick={() => setStep(1)} style={{ padding: '10px 20px', cursor: 'pointer' }}>← Atrás</button>
             <button type="submit" disabled={isSubmitting || selectedFiles.length === 0} style={{ padding: '10px 20px', backgroundColor: isSubmitting ? '#ccc' : '#4CAF50', color: 'white', border: 'none', fontWeight: 'bold' }}>
-              {isSubmitting ? 'Subiendo...' : 'Publicar Dataset'}
+              {isSubmitting ? 'Publicando...' : 'Publicar Dataset'}
             </button>
           </div>
         </div>

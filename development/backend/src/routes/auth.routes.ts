@@ -1,4 +1,21 @@
-// src/routes/auth.routes.ts
+/**
+ * ============================================================================
+ * MÓDULO: Enrutador Principal de Autenticación y Gestión (auth.routes.ts)
+ * * PROPÓSITO: Centralizar la definición de rutas de la API, vinculando 
+ * métodos HTTP y rutas con sus respectivos controladores y middlewares de seguridad.
+ * * RESPONSABILIDAD: Actuar como el "Mapa de Tráfico" del sistema, gestionando 
+ * la inyección de seguridad (RBAC) y proveyendo utilidades globales para el 
+ * manejo de errores y sesiones.
+ * * DECISIONES DE DISEÑO / SUPUESTOS:
+ * - Centralización de Errores: Se implementan funciones de ayuda (`getErrorStatus`, 
+ * `getErrorMessage`) para que todos los controladores del sistema respondan 
+ * con un contrato de error idéntico, facilitando la integración del frontend.
+ * - Seguridad por Capas: Se asume el uso de un enrutador personalizado que 
+ * procesa middlewares en cadena. La seguridad se aplica mediante `requirePermission`, 
+ * permitiendo una auditoría visual rápida de quién tiene acceso a qué recurso.
+ * ============================================================================
+ */
+
 import { Router } from "../utils/router";
 import type { HttpRequest } from "../types/http";
 import { tryGetAuthPayload } from "../utils/auth";
@@ -41,7 +58,13 @@ import { getAllOdsAction } from "./ods.routes";
 import { getAllTagsAction } from "./tags.routes";
 import { getAllLicensesAction} from "./licenses.routes";
 
-// --- FUNCIONES DE AYUDA (Exportadas) ---
+/**
+ * Descripción: Extrae el identificador de la sesión activa desde el Access Token o el Refresh Token.
+ * POR QUÉ: Implementa una lógica de extracción de doble fuente. Primero intenta obtener el ID del payload del Access Token (transatómico/rápido). Si falla, recurre al Refresh Token en las cookies para asegurar la trazabilidad de la sesión incluso en flujos de renovación o cierre de sesión donde el token de acceso puede haber expirado o ser inexistente.
+ * @param req {HttpRequest} Objeto de la petición con cabeceras y cookies.
+ * @return {number | string | null} El ID de la sesión encontrada o null si no hay rastro de identidad.
+ * @throws {Ninguna} Los errores de verificación de JWT se capturan internamente para retornar null de forma segura.
+ */
 export function getSessionIdFromRequest(req: HttpRequest): number | string | null {
   const accessPayload = tryGetAuthPayload(req);
   if (accessPayload?.sessionId) return accessPayload.sessionId;
@@ -58,19 +81,39 @@ export function getSessionIdFromRequest(req: HttpRequest): number | string | nul
   }
 }
 
+/**
+ * Descripción: Determina el código de estado HTTP adecuado según la naturaleza del error capturado.
+ * POR QUÉ: Desacopla la lógica de negocio del protocolo de transporte. Clasifica errores conocidos de la aplicación (`AppError`) con sus estados específicos y traduce automáticamente fallos de validación estructural (`ZodError`) a un HTTP 400 (Bad Request), protegiendo el sistema al devolver un 500 genérico ante excepciones desconocidas.
+ * @param error {unknown} El objeto de error capturado en el bloque catch.
+ * @return {number} Código de estado HTTP (200, 400, 403, 404, 500, etc.).
+ * @throws {Ninguna}
+ */
 export function getErrorStatus(error: unknown): number {
   if (error instanceof AppError) return error.statusCode;
   if (error instanceof ZodError) return 400;
   return 500;
 }
 
+/**
+ * Descripción: Extrae o genera un mensaje de error seguro para ser enviado al cliente.
+ * POR QUÉ: Estandariza la respuesta de error. En el caso de `ZodError`, devuelve el array completo de `issues` para permitir al frontend realizar validaciones de campo en tiempo real. Para errores no controlados, anonimiza el mensaje para evitar la filtración de información sensible de la infraestructura (stack traces, nombres de tablas, etc.).
+ * @param error {unknown} Objeto de error capturado.
+ * @return {any} String con el mensaje o array de objetos con detalles de validación.
+ * @throws {Ninguna}
+ */
 export function getErrorMessage(error: unknown): any {
   if (error instanceof AppError) return error.message;
   if (error instanceof ZodError) return error.issues;
   return "Error interno del servidor";
 }
 
-// --- EL ENRUTADOR PRINCIPAL ---
+/**
+ * Descripción: Instancia configurada del enrutador que mapea la superficie de ataque y los recursos de la API.
+ * POR QUÉ: Centraliza la política de Control de Acceso Basado en Roles (RBAC). Al definir aquí los permisos necesarios (ej: `user_management.read`), se crea una capa de gobernanza única donde es sencillo verificar y actualizar los requisitos de seguridad de cada endpoint sin navegar por múltiples archivos de controladores.
+ * * DECISIONES CLAVE:
+ * - Las rutas de autenticación básica (login, register, refresh) son públicas para permitir el acceso inicial.
+ * - Las rutas de gestión (usuarios, roles, instituciones) están estrictamente protegidas por permisos granulares.
+ */
 export const authRouter = new Router();
 authRouter.add("POST", "/api/upload/presigned-url", [requirePermission("data_management.write")], generateUploadUrlAction);
 authRouter.add("POST", "/api/login", [], loginAction);
