@@ -4,6 +4,7 @@ import { sendJson } from "../utils/json";
 import { readJsonBody } from "../utils/body";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 import { AppError } from "../types/app-error";
+import { tryGetAuthPayload } from "../utils/auth";
 
 export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
   try {
@@ -27,18 +28,16 @@ export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
 
 export async function createDatasetAction(req: HttpRequest, res: HttpResponse) {
   try {
-    const accountId = Number((req as any).user.sub);
-    const isAdmin = true; 
+    const payload = tryGetAuthPayload(req);
+    const accountId = Number(payload?.sub);
+    const isAdmin = payload?.role === 'super_admin' || payload?.role === 'data_admin';
 
-    const body = await readJsonBody<any>(req); 
-    const newDataset = await createDataset(accountId, isAdmin, body);
-    
-    sendJson(res, 201, { 
-      ok: true, 
-      message: "Dataset y archivos publicados exitosamente", 
-      data: newDataset 
-    });
+    const body = await readJsonBody<any>(req);
+    const dataset = await createDataset(accountId, isAdmin, body);
+
+    sendJson(res, 201, { ok: true, message: "Dataset creado como borrador", data: dataset });
   } catch (error) {
+    console.error("❌ Error en createDatasetAction:", error);
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }
 }

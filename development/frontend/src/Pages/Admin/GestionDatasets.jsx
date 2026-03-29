@@ -1,144 +1,204 @@
 import { useState, useEffect } from "react";
 import "../../styles/pages_styles/Admin/GestionDatasets.css";
+import { FiSearch, FiEdit, FiList, FiTrash2, FiSend, FiEye, FiPlusCircle } from "react-icons/fi"; 
 import CanView from "../../Components/Common/CanView";
 import CrearDataset from "./CrearDataset";
+import EditarDataset from "./EditarDataset"; 
 import { useNavigate } from "react-router-dom";
-
 import { useAuth } from "../../Context/AuthContext";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function GestionDatasets() {
   const navigate = useNavigate();
-
   const { user } = useAuth(); 
 
-  const [filters, setFilters] = useState({ nombre: "", categoria: "", estado: "", fecha: "" });
+  // Estados
+  const [filters, setFilters] = useState({ 
+    nombre: "", 
+    category_id: "", 
+    estado: "", 
+    fecha: "", 
+    institucion_id: "" 
+  });
+  
   const [isCreating, setIsCreating] = useState(false);
-
-  // 3. Empezamos con un arreglo vacío
+  const [editingDataset, setEditingDataset] = useState(null); 
+  
   const [datasets, setDatasets] = useState([]);
+  const [instituciones, setInstituciones] = useState([]);
+  const [categorias, setCategorias] = useState([]);
 
-  // 👇 4. EFECTO PARA TRAER LOS DATOS REALES DE POSTGRESQL 👇
+  // Carga inicial
   useEffect(() => {
     if (user?.token) {
       fetchDatasets();
+      fetchFilterOptions();
     }
   }, [user?.token]);
 
+  const fetchFilterOptions = async () => {
+    try {
+      const instRes = await fetch(`${API_URL}/api/instituciones`, {
+        headers: { "Authorization": `Bearer ${user?.token}` }
+      });
+      if (instRes.ok) {
+        const data = await instRes.json();
+        setInstituciones(data.instituciones || []);
+      }
+
+      const catRes = await fetch(`${API_URL}/api/categories`);
+      if (catRes.ok) {
+        const data = await catRes.json();
+        setCategorias(data.data || []);
+      }
+    } catch (error) {
+      console.error("Error cargando opciones de filtro:", error);
+    }
+  };
+
   const fetchDatasets = async () => {
     try {
-      // Hacemos el GET a la ruta que armamos en tu backend
-      const res = await fetch("http://localhost:3000/api/datasets", {
-        headers: { 
-          "Authorization": `Bearer ${user.token}` 
-        }
+      const res = await fetch(`${API_URL}/api/datasets`, {
+        headers: { "Authorization": `Bearer ${user.token}` }
       });
-      
       if (res.ok) {
         const data = await res.json();
-        // Tu backend responde con { ok: true, data: [...] }
-        setDatasets(data.data || []); 
+        setDatasets(data.data || data || []); 
       } else {
-        console.error("Error del backend leyendo datasets");
+        console.error("Error al obtener los datasets del backend");
       }
     } catch (error) {
       console.error("Error de red:", error);
     }
   };
 
+  // Funciones auxiliares para nombres
+  const getCategoryName = (id) => {
+    const category = categorias.find(c => c.category_id === id);
+    return category ? category.name : 'Desconocida';
+  };
+
+  const getInstitutionName = (id) => {
+    if (!id) return 'Sin Institución';
+    const institution = instituciones.find(i => i.institution_id === id);
+    return institution ? (institution.legal_name || institution.name) : 'Desconocida';
+  };
+
+  // Manejo de filtros
   const handleChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value
-    });
+    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   const handleSearch = () => {
-    console.log("Aplicar filtros:", filters);
-    // Aquí luego conectas con backend
+    console.log("Aplicando filtros:", filters);
+    // Lógica para enviar filtros al backend o filtrar localmente
   };
 
   const handleClear = () => {
-    setFilters({
-      nombre: "",
-      categoria: "",
-      estado: "",
-      fecha: ""
-    });
+    setFilters({ nombre: "", category_id: "", estado: "", fecha: "", institucion_id: "" });
   };
   
+  // ---> NUEVA FUNCIÓN PARA ELIMINAR <---
+  const handleDelete = async (id) => {
+    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar este dataset? Esta acción no se puede deshacer.");
+    
+    if (!confirmacion) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/datasets/${id}`, {
+        method: "DELETE",
+        headers: { 
+          "Authorization": `Bearer ${user.token}` 
+        }
+      });
+
+      if (res.ok) {
+        alert("Dataset eliminado con éxito.");
+        fetchDatasets(); // Recargamos la tabla
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Error del servidor al eliminar:", errorData);
+        alert(`No se pudo eliminar: ${errorData.message || 'Error del servidor (Posible 404)'}`);
+      }
+    } catch (error) {
+      console.error("Error de red al eliminar:", error);
+      alert("Ocurrió un error al intentar comunicar con el servidor.");
+    }
+  };
+
+  // Renderizados condicionales para las vistas de Crear y Editar
   if (isCreating) {
-    return <CrearDataset onCancel={() => setIsCreating(false)} />;
+    return <CrearDataset onCancel={() => { setIsCreating(false); fetchDatasets(); }} />;
   }
 
+  if (editingDataset) {
+    return <EditarDataset 
+      dataset={editingDataset} 
+      onCancel={() => { setEditingDataset(null); fetchDatasets(); }} 
+    />;
+  }
+
+  // Vista principal de Gestión
   return (
     <div className="gestion-datasets">
-
       {/* HEADER */}
-      <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="header">
         <div className="header-info">
-          <h1>Gestión de Conjunto de Datos</h1>
-          <p>Administra, filtra y gestiona los datasets disponibles en el sistema.</p>
+          <h1>Gestión de Conjuntos de Datos</h1>
+          <p>Crea, edita y elimina conjuntos de datos del observatorio de datos sostenible y gestiona las distribuciones de los conjuntos de datos</p>
         </div>
-        
-        <div className="header-actions">
-          <CanView requiredPermission="data_management.write">
-            <button 
-              className="btn-create" 
-              style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
-              // 👇 Cambiamos la acción para que navegue a la nueva página
-              onClick={() => setIsCreating(true)}
-            >
-              + Nuevo Dataset
-            </button>
-          </CanView>
-        </div>
+        <button className="btn-create" onClick={() => setIsCreating(true)}>
+          <FiPlusCircle size={18} /> Agregar Dataset
+        </button>
       </div>
 
       {/* FILTROS */}
-      <div className="filters-container">
+      <div className="filters-section">
+        <div className="filters-row-top">
+          <div className="input-wrapper search-wrapper">
+            <label>Buscar</label>
+            <div className="input-with-icon">
+              <FiSearch className="icon" />
+              <input type="text" name="nombre" placeholder="Buscar por el nombre del dataset" value={filters.nombre} onChange={handleChange} />
+            </div>
+          </div>
 
-        <input
-          type="text"
-          name="nombre"
-          placeholder="Buscar por nombre"
-          value={filters.nombre}
-          onChange={handleChange}
-        />
+          <div className="input-wrapper">
+            <label>Categoría</label>
+            <select name="category_id" value={filters.category_id} onChange={handleChange}>
+              <option value="">Cualquier</option>
+              {categorias.map(c => <option key={c.category_id} value={c.category_id}>{c.name}</option>)}
+            </select>
+          </div>
 
-        <select
-          name="categoria"
-          value={filters.categoria}
-          onChange={handleChange}
-        >
-          <option value="">Categoría</option>
-          <option value="Salud">Salud</option>
-          <option value="Educación">Educación</option>
-        </select>
+          <div className="input-wrapper">
+            <label>Institución</label>
+            <select name="institucion_id" value={filters.institucion_id} onChange={handleChange}>
+              <option value="">Cualquier</option>
+              {instituciones.map(inst => <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name || inst.name}</option>)}
+            </select>
+          </div>
 
-        <select
-          name="estado"
-          value={filters.estado}
-          onChange={handleChange}
-        >
-          <option value="">Estado</option>
-          <option value="Publicado">Publicado</option>
-          <option value="Pendiente">Pendiente</option>
-        </select>
+          <div className="input-wrapper">
+            <label>Estado</label>
+            <select name="estado" value={filters.estado} onChange={handleChange}>
+              <option value="">Cualquier</option>
+              <option value="published">Publicado</option>
+              <option value="draft">Borrador</option>
+              <option value="rejected">Rechazado</option>
+              <option value="pending_validation">En Revisión</option>
+            </select>
+          </div>
+        </div>
 
-        <input
-          type="date"
-          name="fecha"
-          value={filters.fecha}
-          onChange={handleChange}
-        />
-
-        <div className="filter-buttons">
-          <button className="btn-search" onClick={handleSearch}>
-            Buscar
-          </button>
-          <button className="btn-clear" onClick={handleClear}>
-            Limpiar
-          </button>
+        <div className="filters-row-bottom">
+          <div className="input-wrapper">
+            <label>Fecha de registro</label>
+            <input type="date" name="fecha" value={filters.fecha} onChange={handleChange} />
+          </div>
+          <button className="btn-aplicar" onClick={handleSearch}>APLICAR</button>
+          <button className="btn-limpiar" onClick={handleClear}>LIMPIAR</button>
         </div>
       </div>
 
@@ -150,45 +210,80 @@ function GestionDatasets() {
               <th>Nombre</th>
               <th>Categoría</th>
               <th>Institución</th>
-              <th>Fecha Registro</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th>Fecha de Registro</th>
+              <th style={{ textAlign: 'center' }}>Estado</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
             </tr>
           </thead>
-
           <tbody>
-            {datasets.map((data) => (
-              <tr key={data.id}>
-                <td>{data.nombre}</td>
-                <td>{data.categoria}</td>
-                <td>{data.institucion}</td>
-                <td>{data.fecha}</td>
-                <td>
-                  <span className={`estado ${(data.dataset_status || 'borrador').toLowerCase()}`}>
-                    {data.dataset_status === 'published' ? 'Publicado' : 
-                     data.dataset_status === 'pending_validation' ? 'En Revisión' : 
-                     data.dataset_status || 'Desconocido'}
-                  </span>
-                </td>
-                <td className="acciones">
-                  <CanView requiredPermission="data_management.write">
-                    <button className="btn-edit">Editar</button>
-                  </CanView>
+            {datasets.map((data) => {
+              const currentStatus = (data.dataset_status || data.status || 'draft').toLowerCase();
+              
+              let statusClass = 'borrador';
+              let displayStatus = 'Borrador';
 
-                  <CanView requiredPermission="data_validation.execute">
-                    <button className="btn-view">Revisar</button>
-                  </CanView>
+              if (currentStatus === 'published' || currentStatus === 'publicado') {
+                statusClass = 'publicado';
+                displayStatus = 'Publicado';
+              } else if (currentStatus === 'rejected' || currentStatus === 'rechazado') {
+                statusClass = 'rechazado';
+                displayStatus = 'Rechazado';
+              } else if (currentStatus === 'pending_validation') {
+                statusClass = 'revision';
+                displayStatus = 'En Revisión';
+              }
 
-                  <CanView requiredPermission="data_management.delete">
-                    <button className="btn-delete">Eliminar</button>
-                  </CanView>
+              const displayNombre = data.title || data.nombre || 'Sin título';
+              const displayFecha = data.fecha || (data.creation_date ? new Date(data.creation_date).toLocaleDateString() : 'Sin fecha');
+
+              return (
+                <tr key={data.dataset_id || data.id}>
+                  <td>{displayNombre}</td>
+                  <td>{data.categoria || getCategoryName(data.category_id)}</td>
+                  <td>{data.institucion || getInstitutionName(data.institution_id)}</td>
+                  <td>{displayFecha}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className={`estado-badge ${statusClass}`}>
+                      {displayStatus}
+                    </span>
+                  </td>
+                  <td className="acciones">
+                    {/* Botones condicionales según estado */}
+                    {statusClass === 'borrador' && <FiSend className="action-icon" title="Enviar a Validación" />}
+                    {statusClass === 'rechazado' && <FiEye className="action-icon" title="Ver Motivo de Rechazo" />}
+                    
+                    {/* Botón de Editar */}
+                    <FiEdit 
+                      className="action-icon" 
+                      title="Editar" 
+                      onClick={() => setEditingDataset(data)} 
+                    />
+                    
+                    {/* Botón de Distribuciones */}
+                    <FiList className="action-icon" title="Distribuciones" />
+                    
+                    {/* Botón de Eliminar */}
+                    <FiTrash2 
+                      className="action-icon" 
+                      title="Eliminar" 
+                      onClick={() => handleDelete(data.dataset_id || data.id)} 
+                      style={{ color: '#dc3545' }}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
+            
+            {datasets.length === 0 && (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No se encontraron datasets registrados.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }

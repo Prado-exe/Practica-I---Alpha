@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"; // 👈 Importante añadir estos
 import "../../Styles/Pages_styles/Public/Instituciones.css";
 import InstitucionCard from "../../Components/Cards/InstitucionCard";
 import Breadcrumb from "../../Components/Common/Breadcrumb";
@@ -19,8 +20,16 @@ function Instituciones() {
     loading
   } = useFetchList(getInstituciones, { limit: 9 }); 
   // Estados para el Modal/*/
+
+  // --- ESTADOS (Asegúrate de tener estos definidos si no usas useFetchList) ---
   const [modalOpen, setModalOpen] = useState(false);
   const [institucionSeleccionada, setInstitucionSeleccionada] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [instituciones, setInstituciones] = useState([]);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const elementosPorPagina = 9;
 
@@ -38,6 +47,7 @@ function Instituciones() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Activar carga
       const response = await getInstituciones({
         search: searchQuery,
         page: paginaActual,
@@ -47,6 +57,7 @@ function Instituciones() {
       setInstituciones(response.data || []);
       setTotalPaginas(response.totalPages || 1);
       setTotal(response.total || 0);
+      setLoading(false); // Finalizar carga
     };
 
     fetchData();
@@ -60,21 +71,20 @@ function Instituciones() {
       {/* BUSCADOR */}
       <SearchBarAdvanced
         placeholder="Buscar instituciones..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        value={searchQuery} // 👈 Cambiado a searchQuery para coincidir con tu estado
+        onChange={(e) => handleSearch(e.target.value)}
       />
 
       {/* HEADER */}
       <header className="instituciones-header">
         <h1>Instituciones</h1>
-        <span>{totalResults} encontradas</span>
+        <span>{total} encontradas</span>
       </header>
 
       <hr className="instituciones-separator" />
 
-      {/* GRID */}
+      {/* GRID - CORREGIDO AQUÍ */}
       <section className="instituciones-grid">
-
         {loading ? (
           <p className="loading-state">Cargando...</p>
         ) : instituciones.length === 0 ? (
@@ -82,23 +92,20 @@ function Instituciones() {
         ) : (
           instituciones.map(inst => (
             <InstitucionCard 
-              key={inst.institution_id} /* 👈 EL CAMBIO ESTÁ AQUÍ */
+              key={inst.institution_id} 
               institucion={inst} 
               onOpenModal={abrirModal} 
             />
           ))
-        ) : (
-          <p className="no-results">No se encontraron instituciones públicas.</p>
         )}
-
       </section>
 
       {/* PAGINACIÓN */}
-      {totalPages > 1 && (
+      {totalPaginas > 1 && (
         <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
+          currentPage={paginaActual}
+          totalPages={totalPaginas}
+          onPageChange={setPaginaActual}
         />
       )}
 
