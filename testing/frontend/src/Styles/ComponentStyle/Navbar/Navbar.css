@@ -5,14 +5,17 @@
   font-family:var(--font-body);
   position:sticky;
   top:0;
-  z-index:1000;
-  background:var(--bg-color);
+  /* Subido para que nada pase por encima al scrollear */
+  z-index: 9999; 
+  /* Forzamos fondo sólido blanco para evitar el "fantasma" del texto */
+  background: #ffffff; 
   color:var(--text-color);
   transition:
     transform 0.3s ease,
     box-shadow 0.25s ease;
 }
 
+/* Esta clase ya no afectará la transparencia, solo la visibilidad */
 .navbar-hidden{
   transform:translateY(-100%);
 }
@@ -32,8 +35,9 @@
   display:flex;
   align-items:center;
   justify-content:space-between;
-
   padding:1rem 2rem;
+  /* Aseguramos que esta sección sea opaca */
+  background: #ffffff;
 }
 
 /* logo */
@@ -79,7 +83,7 @@
 }
 
 
-/*  BOTONES LOGIN */
+/* BOTONES LOGIN */
 
 .navbar-auth{
   display:flex;
@@ -215,6 +219,8 @@
     opacity 0.25s ease,
     transform 0.25s ease;
   pointer-events:none;
+  /* Z-index superior al del contenido para evitar filtraciones */
+  z-index: 10000; 
 }
 
 .dropdown:hover .dropdown-menu{
@@ -240,7 +246,6 @@
 /* FOCUS ACCESIBLE*/
 a:focus-visible,
 button:focus-visible{
-
   outline:3px solid yellow;
   outline-offset:2px;
 }
@@ -261,10 +266,12 @@ button:focus-visible{
   }
   /* menú colapsable */
   .navbar-bottom{
+    display:flex; /* Cambio a flex para mejor manejo en móvil */
     flex-direction:column;
     max-height:0;
     overflow:hidden;
     transition:max-height 0.35s ease;
+    gap: 0;
   }
 
   .navbar-bottom.open{
@@ -274,12 +281,16 @@ button:focus-visible{
   .nav-btn{
     text-align:left;
     width:100%;
+    border-radius: 0;
   }
 
   .dropdown-menu{
-
     position:static;
     border-radius:0;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
   }
 }
 

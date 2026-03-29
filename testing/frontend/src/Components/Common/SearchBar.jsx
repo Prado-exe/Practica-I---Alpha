@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-//import "../../Styles/ComponentStyle/Common/SearchBar.css";
+import "../../Styles/Component_styles/SearchBar.css";
 
 function SearchBar({ placeholder = "Buscar...", onSearch, debounceTime = 300 }) {
   const [query, setQuery] = useState("");

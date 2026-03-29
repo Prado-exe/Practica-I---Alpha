@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Styles/ComponentStyle/Common/AccordionFilter.css */
 .filters-panel{
   border:1px solid #e0e0e0;
@@ -69,4 +70,154 @@
 
 .clear-filters-btn:hover{
   background:#f3f3f3;
+=======
+/* Contenedor principal */
+.filters-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* Espacio para que el label flotante no choque */
+  padding: 20px 10px;
+  background: #ffffff;
+  width: 100%;
+  max-width: 320px;
+}
+
+/* Estructura del acordeón (Estilo Material Outlined) */
+.filter-group {
+  position: relative;
+  border: 1.5px solid #4a90e2; /* Azul de la imagen */
+  border-radius: 4px;
+  background: white;
+}
+
+/* Label flotante sobre el borde */
+.summary-label {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: white;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4a90e2;
+  pointer-events: none; /* Evita que interfiera con el click del summary */
+  z-index: 1;
+}
+
+/* Header del filtro */
+.filter-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 12px;
+  cursor: pointer;
+  list-style: none;
+  outline: none;
+}
+
+/* Quitar flecha por defecto en Chrome/Safari */
+.filter-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Texto que muestra lo seleccionado o "Cualquiera" */
+.summary-display-value {
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+  flex: 1;
+}
+
+.summary-display-value.is-empty {
+  color: #999; /* Gris para el "Cualquiera" */
+}
+
+/* Icono de flecha personalizada */
+.filter-summary::after {
+  content: "";
+  width: 0; 
+  height: 0; 
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #666; /* Triángulo hacia abajo */
+  transition: transform 0.3s ease;
+}
+
+.filter-group[open] .filter-summary::after {
+  transform: rotate(180deg);
+}
+
+/* Contenido desplegable */
+.filter-content {
+  border-top: 1px solid #e0e0e0;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+}
+
+/* Items internos */
+.filter-option-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 15px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.filter-option-item:hover {
+  background-color: #f0f7ff;
+}
+
+.filter-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #4a90e2; /* Color del checkbox al marcarse */
+}
+
+.option-text {
+  font-size: 14px;
+  color: #444;
+}
+
+/* Botón de acción al final */
+.filters-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.clear-filters-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1.5px solid #4a90e2;
+  color: #4a90e2;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.clear-filters-btn:hover {
+  background: #f0f7ff;
+}
+
+/* Scrollbar estética para el contenido */
+.filter-content::-webkit-scrollbar {
+  width: 6px;
+}
+.filter-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 }
