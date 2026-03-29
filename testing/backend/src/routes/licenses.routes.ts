@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Licencias (licenses.routes.ts)
@@ -13,10 +14,13 @@
  * servicio intermedio, optimizando la latencia para este recurso específico.
  * ============================================================================
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { fetchAllLicensesFromDb } from "../repositories/licenses.repository";
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 
+<<<<<<< HEAD
 /**
  * Descripción: Controlador que procesa la obtención de todas las licencias de uso disponibles.
  * POR QUÉ: Centraliza la entrega del catálogo de licencias garantizando un contrato de respuesta predecible. En caso de fallo en la infraestructura de datos, el controlador captura la excepción y retorna un error 500 genérico para evitar la exposición de detalles internos de la base de datos al cliente, permitiendo que el frontend gestione el estado de error de forma controlada.
@@ -60,6 +64,8 @@ import { sendJson } from "../utils/json";
  * @return {Promise<void>}
  * @throws {Ninguna} Los errores se gestionan internamente y se retornan como respuesta HTTP.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getAllLicensesAction(req: HttpRequest, res: HttpResponse) {
   try {
     const data = await fetchAllLicensesFromDb();

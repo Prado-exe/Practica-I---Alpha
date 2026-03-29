@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 import { createDataset, getDatasets, getDatasetById, removeDataset, editDataset } from "../services/datasets.service";
+=======
+import { getDatasets, createDataset } from "../services/datasets.service";
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { readJsonBody } from "../utils/body";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 import { AppError } from "../types/app-error";
+<<<<<<< HEAD
 import { tryGetAuthPayload } from "../utils/auth";
 
 
@@ -19,6 +24,22 @@ export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
     // Validamos y limpiamos la paginación para evitar que metan letras
     const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
     const limit = Math.max(1, parseInt(url.searchParams.get("limit") || "10", 10));
+=======
+
+export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    // req.user viene del middleware requireAuth
+    const accountId = Number((req as any).user.sub);
+    
+    // Verificamos si es admin basándonos en los permisos de su token
+    const permissions = (req as any).user.permissions || [];
+    const isAdmin = permissions.includes("admin_general.manage");
+
+    const url = new URL(req.url || "", `http://${req.headers?.host || "localhost"}`);
+    const search = url.searchParams.get("search") || "";
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 
     const result = await getDatasets(accountId, isAdmin, search, page, limit);
     sendJson(res, 200, { ok: true, ...result });
@@ -29,6 +50,7 @@ export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
 
 export async function createDatasetAction(req: HttpRequest, res: HttpResponse) {
   try {
+<<<<<<< HEAD
     const payload = tryGetAuthPayload(req);
     const accountId = Number(payload?.sub);
     const isAdmin = payload?.role === 'super_admin' || payload?.role === 'data_admin';
@@ -84,6 +106,17 @@ export async function updateDatasetAction(req: HttpRequest, res: HttpResponse) {
 
     const result = await editDataset(id, accountId, body);
     sendJson(res, 200, { ok: true, message: "Dataset actualizado", data: result });
+=======
+    const accountId = Number((req as any).user.sub);
+    const permissions = (req as any).user.permissions || [];
+    const isAdmin = permissions.includes("admin_general.manage");
+
+    const body = await readJsonBody<any>(req); 
+    const newDataset = await createDataset(accountId, isAdmin, body);
+    
+    const msg = isAdmin ? "Dataset publicado exitosamente" : "Solicitud de creación enviada a revisión";
+    sendJson(res, 201, { ok: true, message: msg, data: newDataset });
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }

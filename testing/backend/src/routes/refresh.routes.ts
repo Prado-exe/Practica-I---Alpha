@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Renovación de Sesión (refresh.routes.ts)
@@ -17,6 +18,8 @@
  * para garantizar un cierre de sesión seguro a nivel de navegador.
  * ============================================================================
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { parseCookies } from "../utils/request-cookies";
@@ -24,6 +27,7 @@ import { setRefreshTokenCookie, clearRefreshTokenCookie } from "../utils/cookies
 import { refreshUserSession } from "../services/auth.service";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 
+<<<<<<< HEAD
 /**
  * Descripción: Controlador que gestiona el ciclo de "Refresh Token Rotation" para mantener la sesión del usuario viva.
  * POR QUÉ: Extrae y envía metadatos de red (IP y User-Agent) al servicio subyacente de forma obligatoria. Esto permite al servicio de autenticación rastrear desde dónde se está solicitando la renovación y activar alertas o bloqueos si detecta un cambio brusco (ej. robo de sesión).
@@ -58,6 +62,8 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * @return {Promise<void>}
  * @throws {Ninguna} Errores manejados internamente; muta la respuesta HTTP limpiando cookies si es necesario.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function refreshAction(req: HttpRequest, res: HttpResponse) {
   console.log("=== [DEBUG] INICIANDO PETICIÓN DE REFRESH ===");
   try {
@@ -78,6 +84,10 @@ export async function refreshAction(req: HttpRequest, res: HttpResponse) {
       userAgent: req.headers["user-agent"] ?? null,
     });
     console.log("✅ Sesión renovada exitosamente para el usuario:", result.account.email);
+<<<<<<< HEAD
+=======
+    // Ajusta si tu función pide el ExpiresAt (result.refreshExpiresAt)
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     setRefreshTokenCookie(res, result.refreshToken);
     sendJson(res, 200, {
       ok: true,

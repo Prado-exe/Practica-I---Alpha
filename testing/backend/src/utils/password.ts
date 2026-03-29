@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Utilidades de Criptografía de Contraseñas (password.ts)
@@ -15,10 +16,13 @@
  * para hardware de propósito general.
  * ============================================================================
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import bcrypt from "bcrypt";
 
 const SALT_ROUNDS = 12;
 
+<<<<<<< HEAD
 /**
  * Descripción: Genera un hash seguro y unidireccional a partir de una contraseña.
  * POR QUÉ: Utiliza `bcrypt.hash` con un factor de 12 para asegurar que, incluso 
@@ -30,10 +34,13 @@ const SALT_ROUNDS = 12;
  * @return {Promise<string>} El hash resultante listo para ser almacenado en la base de datos.
  * @throws {Error} Si el motor de bcrypt encuentra fallos de entropía o errores internos.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, SALT_ROUNDS);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Valida una contraseña en texto plano contra un hash previamente almacenado.
  * POR QUÉ: Se utiliza `bcrypt.compare` para mitigar ataques de tiempo (timing attacks). La función implementa comparaciones en tiempo constante, evitando que un atacante deduzca información sobre el hash basándose en cuánto tarda el servidor en responder. Además, la función extrae automáticamente el salt del hash proporcionado, simplificando la lógica de verificación.
@@ -42,6 +49,8 @@ export async function hashPassword(password: string): Promise<string> {
  * @return {Promise<boolean>} Retorna `true` si la contraseña es válida, `false` en caso contrario.
  * @throws {Error} Ante fallos en el proceso de comparación criptográfica.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function comparePassword(
   password: string,
   passwordHash: string

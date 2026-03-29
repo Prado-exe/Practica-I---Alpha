@@ -39,3 +39,18 @@ CREATE INDEX IF NOT EXISTS idx_institutions_access_level
 
 CREATE INDEX IF NOT EXISTS idx_institutions_country_name
     ON institutions(country_name);
+
+
+CREATE OR REPLACE FUNCTION trg_delete_institution_logo_fn()
+RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM aws_file_references WHERE aws_file_reference_id = OLD.logo_file_id;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_delete_institution_logo
+AFTER DELETE ON institutions
+FOR EACH ROW
+EXECUTE FUNCTION trg_delete_institution_logo_fn();

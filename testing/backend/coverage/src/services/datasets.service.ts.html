@@ -23,30 +23,52 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
+<<<<<<< HEAD
                 <span class="strong">96.22% </span>
                 <span class="quiet">Statements</span>
                 <span class='fraction'>51/53</span>
+=======
+                <span class="strong">85.71% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>12/14</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         
             
             <div class='fl pad1y space-right2'>
+<<<<<<< HEAD
                 <span class="strong">88% </span>
                 <span class="quiet">Branches</span>
                 <span class='fraction'>22/25</span>
+=======
+                <span class="strong">66.66% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>10/15</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
+<<<<<<< HEAD
                 <span class='fraction'>6/6</span>
+=======
+                <span class='fraction'>2/2</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         
             
             <div class='fl pad1y space-right2'>
+<<<<<<< HEAD
                 <span class="strong">96% </span>
                 <span class="quiet">Lines</span>
                 <span class='fraction'>48/50</span>
+=======
+                <span class="strong">90% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>9/10</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         
             
@@ -94,6 +116,7 @@
 <a name='L29'></a><a href='#L29'>29</a>
 <a name='L30'></a><a href='#L30'>30</a>
 <a name='L31'></a><a href='#L31'>31</a>
+<<<<<<< HEAD
 <a name='L32'></a><a href='#L32'>32</a>
 <a name='L33'></a><a href='#L33'>33</a>
 <a name='L34'></a><a href='#L34'>34</a>
@@ -280,6 +303,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+<a name='L32'></a><a href='#L32'>32</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -289,6 +324,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
@@ -374,12 +410,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -403,10 +442,13 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// En src/services/datasets.service.ts
@@ -481,6 +523,17 @@ export async function createDataset(accountId: number, isAdmin: boolean, input: 
 &nbsp;
 export async function getDatasets(accountId: number, isAdmin: boolean, search: string = "", page: number = 1, limit: number = 10) {
   const offset = (page - 1) * limit;
+=======
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { createFullDatasetInDb, fetchDatasetsPaginated } from "../repositories/datasets.repository";
+import { AppError } from "../types/app-error"; 
+&nbsp;
+export async function getDatasets(accountId: number, isAdmin: boolean, search: string = "", page: number = 1, limit: number = 10) {
+  const offset = (page - 1) * limit;
+  
+  // Llamamos a la función con el nombre correcto del repositorio
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const result = await fetchDatasetsPaginated(accountId, isAdmin, search, limit, offset);
   
   return {
@@ -490,6 +543,7 @@ export async function getDatasets(accountId: number, isAdmin: boolean, search: s
   };
 }
 &nbsp;
+<<<<<<< HEAD
 // 1. Servicio para "Revisar"
 export async function getDatasetById(id: number) {
   const dataset = await fetchDatasetDetailsFromDb(id);
@@ -582,6 +636,23 @@ export async function editDataset(datasetId: number, accountId: number, input: a
 &nbsp;
 &nbsp;
 &nbsp;
+=======
+export async function createDataset(accountId: number, isAdmin: boolean, input: any) {
+  // 1. Validaciones básicas obligatorias (NOT NULL en SQL)
+  if (!input.title) throw new AppError("El título del dataset es obligatorio.", 400);
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!input.category_id) <span class="cstat-no" title="statement not covered" >throw new AppError("La categoría es obligatoria.", 400);</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!input.description) throw new AppError("La descripción es obligatoria.", 400);
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!input.license_id) throw new AppError("Debe seleccionar una licencia válida.", 400);
+&nbsp;
+  // 2. Validación de longitud (según restricción chk_datasets_summary_length)
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (input.summary &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >input.summary.length &gt; 500) {</span>
+<span class="cstat-no" title="statement not covered" >    throw new AppError("El resumen no puede exceder los 500 caracteres.", 400);</span>
+  }
+  
+  // 3. Llamamos a la función 'createFullDatasetInDb' que maneja el Dataset + Request + Files
+  return await createFullDatasetInDb(accountId, isAdmin, input);
+}
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -589,7 +660,11 @@ export async function editDataset(datasetId: number, accountId: number, input: a
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+<<<<<<< HEAD
                 at 2026-03-29T17:08:40.163Z
+=======
+                at 2026-03-26T02:52:40.548Z
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         <script src="../../prettify.js"></script>
         <script>

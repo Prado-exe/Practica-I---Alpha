@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Procesador de Cuerpo de Petición (body.ts)
@@ -45,6 +46,13 @@ const MAX_JSON_BODY_SIZE_BYTES = 1024 * 1024; // 1 MB
  * @throws {AppError} (400) Si el contenido no es un JSON válido.
  * @throws {AppError} (500) Si ocurre un error de lectura en el socket.
  */
+=======
+import type { HttpRequest } from "../types/http";
+import { AppError } from "../types/app-error";
+
+const MAX_JSON_BODY_SIZE_BYTES = 1024 * 1024; // 1 MB
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function readJsonBody<T>(req: HttpRequest): Promise<T> {
   return new Promise((resolve, reject) => {
     let body = "";

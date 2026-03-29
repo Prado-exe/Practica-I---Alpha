@@ -1,3 +1,25 @@
+<<<<<<< HEAD
+=======
+/**
+ * ============================================================================
+ * MÓDULO: Servicio de Autenticación (auth.service.ts)
+ * * PROPÓSITO: Centraliza la lógica de negocio para la identidad del usuario, 
+ * el ciclo de vida de las sesiones y la gestión de credenciales.
+ * * RESPONSABILIDAD: Funciona como el orquestador de seguridad entre los 
+ * controladores HTTP y la base de datos, garantizando que ninguna acción 
+ * comprometa la integridad de las cuentas.
+ * * DECISIONES DE DISEÑO / SUPUESTOS:
+ * - Anti-enumeración: Las funciones de login y recuperación devuelven mensajes 
+ * genéricos para no revelar a un atacante si un correo existe o no en la BD.
+ * - Rotación de Sesiones: Se utiliza la técnica "Refresh Token Rotation" con 
+ * hashes SHA-256 en la base de datos. Si la BD se filtra, los tokens reales 
+ * no quedan expuestos.
+ * - Bloqueos (Rate Limiting): Delegado a nivel de base de datos mediante 
+ * timestamps (locked_until, blocked_until) para evitar el uso de memoria 
+ * volátil (como Redis) en esta etapa del proyecto.
+ * ============================================================================
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { createHash, randomBytes } from "crypto";
 import { env } from "../config/env";
 import { AppError } from "../types/app-error";
@@ -89,6 +111,17 @@ async function buildUniqueUsername(baseUsername: string): Promise<string> {
   }
 }
 
+<<<<<<< HEAD
+=======
+
+/**
+ * Descripción: Formatea la entidad de la base de datos para exponer solo los datos seguros al frontend.
+ * POR QUÉ: Evita la filtración accidental de hashes de contraseñas, tokens de recuperación o estados internos en las respuestas HTTP.
+ * @param account {any} Objeto crudo del usuario proveniente de la base de datos.
+ * @return {PublicAccount} Objeto sanitizado sin datos sensibles.
+ * @throws {Ninguna}
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function mapPublicAccount(account: any): PublicAccount {
   return {
     account_id: account.account_id,
@@ -102,6 +135,16 @@ export function mapPublicAccount(account: any): PublicAccount {
   };
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Descripción: Crea una nueva cuenta de usuario y emite el primer código de verificación.
+ * POR QUÉ: Invalida proactivamente cualquier código previo asociado a este flujo (ej. si el usuario hace doble clic en "Registrar") para prevenir condiciones de carrera (Race Conditions) y acumulación de basura en la tabla de OTPs.
+ * @param payload {RegisterInput} Datos del formulario de registro.
+ * @return {Promise<Object>} Confirmación de creación, cuenta pública y meta de verificación.
+ * @throws {AppError} 409 Si el correo ya existe. 500 Si no se encuentra el rol base.
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function registerUser(payload: RegisterInput) {
   const existing = await findAccountByEmail(payload.email);
 
@@ -155,23 +198,44 @@ export async function registerUser(payload: RegisterInput) {
   };
 }
 
+<<<<<<< HEAD
 export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
   const account = await findAccountLoginByEmail(payload.email);
 
   // OWASP: Anti-Enumeración
+=======
+/**
+ * Descripción: Autentica al usuario verificando credenciales, gestionando bloqueos por fuerza bruta y creando la sesión.
+ * POR QUÉ: Implementa un flujo atípico llamado "Trampa de Revalidación": Si un usuario acaba de salir de un bloqueo por fuerza bruta (locked_until), se asume que la contraseña pudo ser comprometida. El sistema lo atrapa en estado 'pending_revalidation' y lo obliga a pasar un reto de 2FA (OTP al correo) antes de emitir los JWT.
+ * @param payload {LoginInput} Credenciales del usuario.
+ * @param meta {LoginMeta} Metadatos (IP, User-Agent) para la creación de la sesión de auditoría.
+ * @return {Promise<Object>} Los tokens JWT o una bandera de `requiresRevalidation`.
+ * @throws {AppError} 401 si las credenciales fallan, 403 si la cuenta está bloqueada temporalmente.
+ */
+export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
+  const account = await findAccountLoginByEmail(payload.email);
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   if (!account) {
     throw new AppError("Correo o contraseña incorrectos", 401);
   }
 
+<<<<<<< HEAD
   // 1. Verificar si la cuenta está actualmente bloqueada por tiempo
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   if (account.locked_until && new Date(account.locked_until) > new Date()) {
     throw new AppError("Cuenta bloqueada temporalmente por seguridad. Intente más tarde.", 403);
   }
 
+<<<<<<< HEAD
   // 2. Verificar si está atrapado en la "Trampa de Revalidación"
   if (account.account_status === "pending_revalidation") {
     // Aquí el usuario ya intentó loguearse después del castigo, 
     // pero aún no ha puesto el código de 6 dígitos.
+=======
+  if (account.account_status === "pending_revalidation") {
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     return {
       requiresRevalidation: true,
       email: account.email,
@@ -179,16 +243,24 @@ export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
     };
   }
 
+<<<<<<< HEAD
   // 3. Validar la contraseña
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const isPasswordValid = await comparePassword(payload.password, account.password_hash);
 
   if (!isPasswordValid) {
     const currentFails = account.failed_login_count || 0;
     
+<<<<<<< HEAD
     // Si este es el intento fallido número 10
     if (currentFails + 1 >= 10) {
       const lockTime = new Date(Date.now() + 60 * 60 * 1000); 
       // 👇 ¡AGREGAMOS ESTO PARA QUE LLEGUE A 10 EN LA BD!
+=======
+    if (currentFails + 1 >= 10) {
+      const lockTime = new Date(Date.now() + 60 * 60 * 1000); 
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
       await incrementFailedLoginAttempts(account.account_id); 
       await lockAccountUntil(account.account_id, lockTime);
       throw new AppError("Demasiados intentos fallidos. Cuenta bloqueada por 1 hora.", 403);
@@ -198,6 +270,7 @@ export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
     }
   }
 
+<<<<<<< HEAD
   // 4. ¡Contraseña Correcta! Pero... ¿acaba de salir de un bloqueo temporal?
   if (account.locked_until) {
     // 1. Cambiamos el estado y limpiamos el historial de fallos
@@ -218,6 +291,21 @@ export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
     await createRevalidationCode(account.account_id, account.email, codeHash, expiresAt);
 
     // 6. Enviamos el correo usando tu función existente
+=======
+  if (account.locked_until) {
+    await updateAccountStatus(account.account_id, "pending_revalidation");
+    await resetFailedLoginAttempts(account.account_id);
+    
+    await invalidateActiveVerificationCodes(account.account_id, "account_reverification", "new_login_after_lockout");
+
+    const code = generateOtpCode(6);
+    const codeHash = hashOtpCode(code);
+    
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await createRevalidationCode(account.account_id, account.email, codeHash, expiresAt);
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     try {
       await sendVerificationEmail(account.email, code);
     } catch (error) {
@@ -231,7 +319,10 @@ export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
     };
   }
 
+<<<<<<< HEAD
   // 5. Login normal y exitoso
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   await resetFailedLoginAttempts(account.account_id); 
   
   if (account.account_status !== "active" || !account.email_verified) {
@@ -297,6 +388,16 @@ export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
   };
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Descripción: Valida los OTP (One-Time Passwords) enviados al correo.
+ * POR QUÉ: Utiliza resolución dinámica del tipo de código (`codeType`) basándose en el estado de la cuenta. Esto permite usar el mismo endpoint y tabla de la BD tanto para "Nuevos Registros" como para "Cuentas Atrapadas tras Bloqueo". Adicionalmente bloquea el código temporalmente si hay intentos fallidos para prevenir fuerza bruta.
+ * @param payload {VerifyEmailCodeInput} Email del usuario y el código de 6 dígitos.
+ * @return {Promise<Object>} Confirmación de éxito.
+ * @throws {AppError} 400 si el código es incorrecto o expirado, 429 si se exceden los intentos.
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function verifyEmailCode(payload: VerifyEmailCodeInput) {
   const account = await findAccountBasicByEmail(payload.email);
 
@@ -304,7 +405,10 @@ export async function verifyEmailCode(payload: VerifyEmailCodeInput) {
     throw new AppError("No existe una cuenta asociada a ese correo", 404);
   }
 
+<<<<<<< HEAD
   // 👇 1. Detectar si viene por Registro Nuevo o por Trampa de Bloqueo
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   let codeType: "register_email" | "account_reverification" = "register_email";
   
   if (account.account_status === "pending_revalidation") {
@@ -316,7 +420,10 @@ export async function verifyEmailCode(payload: VerifyEmailCodeInput) {
     };
   }
 
+<<<<<<< HEAD
   // 👇 2. Buscar el código correcto usando el codeType dinámico
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const verificationCode = await findLatestVerificationCodeByAccountId(
     account.account_id,
     codeType
@@ -373,7 +480,10 @@ export async function verifyEmailCode(payload: VerifyEmailCodeInput) {
     throw new AppError("El código ingresado es incorrecto", 400);
   }
 
+<<<<<<< HEAD
   // 👇 3. Quemar el código y restaurar la cuenta según de dónde venía
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   await consumeVerificationCode(verificationCode.verification_code_id);
   
   if (codeType === "account_reverification") {
@@ -390,6 +500,16 @@ export async function verifyEmailCode(payload: VerifyEmailCodeInput) {
   };
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Descripción: Revoca una sesión activa.
+ * POR QUÉ: No elimina el registro de la tabla (Soft-delete/Revoke) para mantener una traza de auditoría de las sesiones históricas.
+ * @param sessionId {number | string} ID de la sesión en BD extraído del JWT.
+ * @return {Promise<Object>} Confirmación de cierre.
+ * @throws {AppError} 404 si la sesión no existe.
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function logoutUser(sessionId: number | string) {
   const session = await findAuthSessionById(sessionId);
 
@@ -406,6 +526,17 @@ export async function logoutUser(sessionId: number | string) {
   };
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Descripción: Emite un nuevo Access Token y rota el Refresh Token existente.
+ * POR QUÉ: Implementa validación criptográfica del `refresh_token_hash`. Si un atacante intercepta un Refresh Token y lo usa, el servidor detectará que el hash no coincide con el último emitido (Token Reuse Detection) y revocará la sesión inmediatamente por seguridad.
+ * @param refreshToken {string} El token seguro almacenado en las cookies.
+ * @param meta {LoginMeta} Metadatos para actualizar el último uso de la sesión.
+ * @return {Promise<Object>} Nuevos Access y Refresh tokens.
+ * @throws {AppError} 401 si se detecta reutilización o si la firma es inválida.
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function refreshUserSession(refreshToken: string, meta: LoginMeta = {}) {
   let decoded;
 
@@ -504,6 +635,16 @@ export async function refreshUserSession(refreshToken: string, meta: LoginMeta =
   };
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Descripción: Emite un nuevo OTP de verificación y lo envía al correo.
+ * POR QUÉ: Devuelve un éxito ficticio ("Si el correo existe...") incluso si la cuenta no se encuentra, previniendo enumeración de correos. Exige un "cooldown" de 60 segundos por diseño para mitigar ataques de Spam o agotamiento de cuota en el proveedor de emails.
+ * @param email {string} Correo al que se enviará el código.
+ * @return {Promise<Object>} Mensaje de confirmación genérico.
+ * @throws {AppError} 429 Si no han pasado 60 segundos o si se supera el límite de 3 reenvíos.
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function resendVerificationCode(email: string) {
   const account = await findAccountBasicByEmail(email);
 
@@ -577,6 +718,16 @@ export async function resendVerificationCode(email: string) {
   };
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Descripción: Inicia el flujo de recuperación de contraseña generando un token seguro.
+ * POR QUÉ: En lugar de guardar el token en texto plano, se almacena un hash (`tokenHash`). Así, si la BD es comprometida, los atacantes no pueden usar los tokens para tomar el control de cuentas. Se emplea protección anti-enumeración devolviendo siempre éxito.
+ * @param email {string} Correo del usuario que solicita recuperación.
+ * @return {Promise<Object>} Mensaje de éxito genérico.
+ * @throws {Ninguna} Errores de envío de mail se loguean internamente para no revelar el fallo.
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function requestPasswordReset(email: string) {
   const account = await findAccountBasicByEmail(email);
 
@@ -588,7 +739,10 @@ export async function requestPasswordReset(email: string) {
   const tokenHash = hashSecureToken(resetToken);
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
+<<<<<<< HEAD
   // 👇 Ahora guarda en tu nueva tabla exclusiva (ya no le pasamos el email)
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   await createPasswordResetToken(account.account_id, tokenHash, expiresAt);
 
   const resetLink = `${env.FRONTEND_ORIGIN}/reset-password?token=${resetToken}`;
@@ -602,10 +756,23 @@ export async function requestPasswordReset(email: string) {
   return { message: "Si el correo está registrado, se enviará un enlace de recuperación." };
 }
 
+<<<<<<< HEAD
 export async function executePasswordReset(token: string, newPassword: string) {
   const tokenHash = hashSecureToken(token);
 
   // 👇 Ahora busca exclusivamente en la tabla password_reset_tokens
+=======
+/**
+ * Descripción: Procesa el token de recuperación y establece la nueva contraseña.
+ * POR QUÉ: Al cambiar la contraseña, automáticamente revoca *todas* las sesiones activas (`revokeAllActiveSessionsByAccountId`). Esto garantiza que si la cuenta estaba vulnerada, el intruso sea expulsado de inmediato de cualquier dispositivo.
+ * @param token {string} Token crudo recibido desde la URL del correo.
+ * @param newPassword {string} La nueva contraseña en texto plano.
+ * @return {Promise<Object>} Confirmación de actualización.
+ * @throws {AppError} 400 si el token ya expiró, fue usado o no existe.
+ */
+export async function executePasswordReset(token: string, newPassword: string) {
+  const tokenHash = hashSecureToken(token);
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const record = await findValidPasswordResetToken(tokenHash);
 
   if (!record) {
@@ -616,7 +783,10 @@ export async function executePasswordReset(token: string, newPassword: string) {
 
   await updateAccountPassword(record.account_id, newPasswordHash);
 
+<<<<<<< HEAD
   // 👇 Quema el token marcando used_at = NOW()
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   await consumePasswordResetToken(record.password_reset_token_id);
 
   await revokeAllActiveSessionsByAccountId(record.account_id, "password_reset");
@@ -625,15 +795,35 @@ export async function executePasswordReset(token: string, newPassword: string) {
 }
 
 
+<<<<<<< HEAD
 // --- 1. OBTENER TODOS LOS USUARIOS ---
+=======
+/**
+ * Descripción: Recupera la lista completa de usuarios.
+ * @return {Promise<Array>} Lista de usuarios.
+ * @throws {Ninguna}
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getAllUsers() {
   const users = await fetchAllUsersFromDb();
   return users;
 }
 
+<<<<<<< HEAD
 // --- 2. ACTUALIZAR ESTADO DEL USUARIO ---
 export async function updateUserStatus(userId: string | number, newStatus: string) {
   // Lógica de negocio: Validar estados permitidos según la BD
+=======
+/**
+ * Descripción: Actualiza el estado administrativo de un usuario (ej. suspender, activar).
+ * POR QUÉ: Valida los estados permitidos en la capa de servicio, desvinculando esta regla de negocio del controlador o la base de datos subyacente.
+ * @param userId {string | number} ID del usuario objetivo.
+ * @param newStatus {string} Estado nuevo a aplicar.
+ * @return {Promise<Object>} Confirmación de éxito.
+ * @throws {AppError} 400 si el estado no es válido, 404 si el usuario no existe.
+ */
+export async function updateUserStatus(userId: string | number, newStatus: string) {
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const validStatuses = ["active", "suspended", "pending_verification", "pending_revalidation"];
   if (!validStatuses.includes(newStatus)) {
     throw new AppError("Estado de cuenta no válido", 400);
@@ -648,16 +838,30 @@ export async function updateUserStatus(userId: string | number, newStatus: strin
   return { message: "Estado actualizado exitosamente" };
 }
 
+<<<<<<< HEAD
 // --- 3. ELIMINAR USUARIO ---
 export async function deleteUser(userId: string | number) {
   // Lógica de negocio: Verificar el rol antes de borrar
+=======
+/**
+ * Descripción: Elimina a un usuario del sistema permanentemente.
+ * POR QUÉ: Implementa una guardia de seguridad hardcodeada para proteger el rol 'super_admin'. Así se previene el caso crítico donde un administrador borre por accidente (o malicia) la cuenta principal del sistema.
+ * @param userId {string | number} ID del usuario a eliminar.
+ * @return {Promise<Object>} Confirmación de éxito.
+ * @throws {AppError} 403 si se intenta borrar un superadmin, 404 si no existe.
+ */
+export async function deleteUser(userId: string | number) {
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const roleCode = await getUserRoleCodeById(userId);
   
   if (roleCode === 'super_admin') {
     throw new AppError("Acción denegada: No puedes eliminar a un Super Administrador", 403);
   }
 
+<<<<<<< HEAD
   // Llamada al repositorio
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const affectedRows = await deleteUserFromDb(userId);
 
   if (affectedRows === 0) {
@@ -667,7 +871,21 @@ export async function deleteUser(userId: string | number) {
   return { message: "Usuario eliminado correctamente" };
 }
 
+<<<<<<< HEAD
 // --- 4. EDITAR USUARIO DESDE EL PANEL ADMIN ---
+=======
+/**
+ * Descripción: Edita el perfil de un usuario desde la perspectiva de un administrador.
+ * POR QUÉ: Permite cambiar la contraseña opcionalmente sin pasar por el flujo de recuperación de usuario. Resuelve internamente la conversión del roleCode string a su roleId numérico de BD.
+ * @param userId {string | number} ID del usuario a modificar.
+ * @param fullName {string} Nombre completo.
+ * @param email {string} Correo (podría requerir validación extra de unicidad delegada a la BD).
+ * @param roleCode {string} Código del rol a asignar.
+ * @param newPassword {string} (Opcional) Nueva contraseña.
+ * @return {Promise<Object>} Confirmación de actualización.
+ * @throws {AppError} 400 si el rol seleccionado es inválido, 404 si no encuentra al usuario.
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function editUserAdmin(userId: string | number, fullName: string, email: string, roleCode: string, newPassword?: string) {
   let newPasswordHash;
   
@@ -690,6 +908,14 @@ export async function editUserAdmin(userId: string | number, fullName: string, e
   return { message: "Usuario actualizado correctamente" };
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Descripción: Devuelve todos los roles activos disponibles para asignar.
+ * @return {Promise<Array>} Lista de roles activos.
+ * @throws {Ninguna}
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getActiveRoles() {
   const roles = await fetchActiveRolesFromDb();
   return roles;

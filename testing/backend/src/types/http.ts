@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Tipado de Transporte HTTP (http.ts)
@@ -26,10 +27,16 @@ import type { JwtAccessPayload } from "./auth";
  * ser opcional (`?`), permite que el mismo tipo de objeto sea utilizado tanto 
  * en rutas públicas (donde `user` es undefined) como en rutas protegidas.
  */
+=======
+import type { IncomingMessage, ServerResponse } from "http";
+import type { JwtAccessPayload } from "./auth";
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export interface HttpRequest extends IncomingMessage {
   user?: JwtAccessPayload;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Alias para la respuesta del servidor estándar de Node.js.
  * POR QUÉ: Se define este tipo para mantener la coherencia semántica en la 
@@ -52,6 +59,10 @@ export type HttpResponse = ServerResponse<IncomingMessage>;
  * @return {Promise<boolean | void> | boolean | void} `true` para detener el flujo, `void/false` para continuar.
  * @throws {Error} Excepciones no controladas que deben ser capturadas por el servidor principal.
  */
+=======
+export type HttpResponse = ServerResponse<IncomingMessage>;
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export type Middleware = (
   req: HttpRequest,
   res: HttpResponse

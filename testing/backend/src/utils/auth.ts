@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Lógica de Autenticación y Validación de Sesión (auth.ts)
@@ -18,6 +19,8 @@
  * HTTP.
  * ============================================================================
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { AppError } from "../types/app-error";
 import type { HttpRequest } from "../types/http";
 import type { JwtAccessPayload } from "../types/auth";
@@ -28,6 +31,7 @@ import {
   findAccountByIdForSession,
 } from "../repositories/auth.repository";
 
+<<<<<<< HEAD
 /**
  * Descripción: Función de blindaje que garantiza que una petición está plenamente autorizada antes de permitir el acceso al controlador.
  * POR QUÉ: Implementa una jerarquía de validación crítica. Primero valida la integridad del token; luego, consulta la persistencia para confirmar que la sesión no ha sido revocada (permitiendo cierres de sesión efectivos); y finalmente, verifica el estado del usuario (email verificado y cuenta activa) para bloquear accesos a cuentas suspendidas en tiempo real. Además, actualiza la fecha de último uso (`last_used`) para auditoría de actividad e inactividad.
@@ -43,6 +47,10 @@ import {
  * @throws {AppError} (403) Si la cuenta del usuario no está verificada o está inactiva.
  */
 export async function requireAuth(req: HttpRequest): Promise<JwtAccessPayload> {
+=======
+export async function requireAuth(req: HttpRequest): Promise<JwtAccessPayload> {
+  // 1. Blindaje contra mayúsculas/minúsculas en los headers
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const rawHeader = req.headers.authorization || req.headers.Authorization;
   const authHeader = typeof rawHeader === "string" ? rawHeader : "";
 
@@ -61,6 +69,10 @@ export async function requireAuth(req: HttpRequest): Promise<JwtAccessPayload> {
     throw new AppError("Token inválido o expirado", 401);
   }
 
+<<<<<<< HEAD
+=======
+  // 2. Verificación de Sesión en Base de Datos
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const session = await findAuthSessionById(payload.sessionId);
 
   if (!session) {
@@ -78,6 +90,10 @@ export async function requireAuth(req: HttpRequest): Promise<JwtAccessPayload> {
     throw new AppError("Sesión expirada", 401);
   }
 
+<<<<<<< HEAD
+=======
+  // 3. Verificación de Estado del Usuario en Base de Datos
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const account = await findAccountByIdForSession(payload.sub);
 
   if (!account) {
@@ -90,11 +106,16 @@ export async function requireAuth(req: HttpRequest): Promise<JwtAccessPayload> {
     throw new AppError("La cuenta no está habilitada", 403);
   }
 
+<<<<<<< HEAD
+=======
+  // 4. Si pasó todos los filtros, actualizamos su última actividad
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   await updateAuthSessionLastUsed(session.session_id);
 
   return payload;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Intenta extraer la identidad del usuario sin forzar el error si la autenticación falta o falla.
  * POR QUÉ: Esta función es necesaria para rutas "híbridas" donde el contenido puede cambiar si el usuario está autenticado (ej: mostrar favoritos), pero el acceso no está prohibido para visitantes anónimos. A diferencia de `requireAuth`, esta función omite la validación contra la base de datos por razones de rendimiento, asumiendo que el controlador posterior manejará la lógica de visualización si el payload es nulo.
@@ -103,6 +124,10 @@ export async function requireAuth(req: HttpRequest): Promise<JwtAccessPayload> {
  * @throws {Ninguna} Silencia internamente los errores de validación de JWT para retornar null de forma segura.
  */
 export function tryGetAuthPayload(req: HttpRequest): JwtAccessPayload | null {
+=======
+export function tryGetAuthPayload(req: HttpRequest): JwtAccessPayload | null {
+  // Aplicamos el mismo blindaje de mayúsculas/minúsculas aquí
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const rawHeader = req.headers.authorization || req.headers.Authorization;
   const authHeader = typeof rawHeader === "string" ? rawHeader : "";
 

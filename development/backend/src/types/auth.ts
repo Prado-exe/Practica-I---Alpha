@@ -1,3 +1,28 @@
+<<<<<<< HEAD
+=======
+/**
+ * ============================================================================
+ * MÓDULO: Modelos y Tipos de Autenticación (auth.ts)
+ * * PROPÓSITO: Centralizar los contratos de datos (Interfaces) para usuarios, 
+ * sesiones, códigos de verificación y payloads de seguridad.
+ * * RESPONSABILIDAD: Definir la estructura de los objetos que fluyen entre la 
+ * base de datos, los servicios y los tokens JWT, garantizando integridad de 
+ * tipos en todo el ciclo de vida de la identidad.
+ * * DECISIONES DE DISEÑO / SUPUESTOS:
+ * - Fragmentación de Modelos (Account): Se implementa una jerarquía de interfaces 
+ * (`Basic`, `Login`, `Public`) para aplicar el principio de "Mínima Exposición 
+ * de Datos". Esto evita que campos sensibles como el hash de 
+ * la contraseña o contadores de fallos de login viajen accidentalmente hacia 
+ * el frontend o capas externas del sistema.
+ * - Auditoría de Seguridad: Las interfaces de `AuthSession` y 
+ * `VerificationCodeRecord` están diseñadas para soportar rastreo forense, 
+ * incluyendo IP, User-Agent, conteo de intentos y motivos de revocación.
+ * - Desacoplamiento de Tokens: Los payloads de JWT (`Access` vs `Refresh`) se 
+ * definen de forma independiente para que el contenido del token no esté 
+ * amarrado estrictamente a la estructura de la tabla de base de datos.
+ * ============================================================================
+ */
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export interface Account {
   account_id: number;
   role_id: number;

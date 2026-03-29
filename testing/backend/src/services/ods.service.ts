@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Servicio de ODS (ods.service.ts)
@@ -23,6 +24,10 @@ import { fetchAllOdsFromDb } from "../repositories/ods.repository";
  * @throws {Ninguna} Las excepciones de conectividad o base de datos no se capturan aquí; burbujean directamente al manejador global de errores.
  */
 
+=======
+import { fetchAllOdsFromDb } from "../repositories/ods.repository";
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getOdsForDropdown() {
   return await fetchAllOdsFromDb();
 }

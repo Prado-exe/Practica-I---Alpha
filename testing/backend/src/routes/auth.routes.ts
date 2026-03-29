@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Enrutador Principal de Autenticación y Gestión (auth.routes.ts)
@@ -16,6 +17,9 @@
  * ============================================================================
  */
 
+=======
+// src/routes/auth.routes.ts
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { Router } from "../utils/router";
 import type { HttpRequest } from "../types/http";
 import { tryGetAuthPayload } from "../utils/auth";
@@ -53,6 +57,7 @@ import {
 } from "./instituciones.routes";
 
 import { getAllCategoriesAction } from "./categories.routes";
+<<<<<<< HEAD
 import { 
   getDatasetsAction, 
   createDatasetAction, 
@@ -60,10 +65,14 @@ import {
   deleteDatasetAction, 
   updateDatasetAction 
 } from "./datasets.routes";
+=======
+import { getDatasetsAction, createDatasetAction } from "./datasets.routes";
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { getAllOdsAction } from "./ods.routes";
 import { getAllTagsAction } from "./tags.routes";
 import { getAllLicensesAction} from "./licenses.routes";
 
+<<<<<<< HEAD
 /**
  * Descripción: Extrae el identificador de la sesión activa desde el Access Token o el Refresh Token.
  * POR QUÉ: Implementa una lógica de extracción de doble fuente. Primero intenta obtener el ID del payload del Access Token (transatómico/rápido). Si falla, recurre al Refresh Token en las cookies para asegurar la trazabilidad de la sesión incluso en flujos de renovación o cierre de sesión donde el token de acceso puede haber expirado o ser inexistente.
@@ -71,6 +80,9 @@ import { getAllLicensesAction} from "./licenses.routes";
  * @return {number | string | null} El ID de la sesión encontrada o null si no hay rastro de identidad.
  * @throws {Ninguna} Los errores de verificación de JWT se capturan internamente para retornar null de forma segura.
  */
+=======
+// --- FUNCIONES DE AYUDA (Exportadas) ---
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function getSessionIdFromRequest(req: HttpRequest): number | string | null {
   const accessPayload = tryGetAuthPayload(req);
   if (accessPayload?.sessionId) return accessPayload.sessionId;
@@ -87,6 +99,7 @@ export function getSessionIdFromRequest(req: HttpRequest): number | string | nul
   }
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Determina el código de estado HTTP adecuado según la naturaleza del error capturado.
  * POR QUÉ: Desacopla la lógica de negocio del protocolo de transporte. Clasifica errores conocidos de la aplicación (`AppError`) con sus estados específicos y traduce automáticamente fallos de validación estructural (`ZodError`) a un HTTP 400 (Bad Request), protegiendo el sistema al devolver un 500 genérico ante excepciones desconocidas.
@@ -94,12 +107,15 @@ export function getSessionIdFromRequest(req: HttpRequest): number | string | nul
  * @return {number} Código de estado HTTP (200, 400, 403, 404, 500, etc.).
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function getErrorStatus(error: unknown): number {
   if (error instanceof AppError) return error.statusCode;
   if (error instanceof ZodError) return 400;
   return 500;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Extrae o genera un mensaje de error seguro para ser enviado al cliente.
  * POR QUÉ: Estandariza la respuesta de error. En el caso de `ZodError`, devuelve el array completo de `issues` para permitir al frontend realizar validaciones de campo en tiempo real. Para errores no controlados, anonimiza el mensaje para evitar la filtración de información sensible de la infraestructura (stack traces, nombres de tablas, etc.).
@@ -107,12 +123,15 @@ export function getErrorStatus(error: unknown): number {
  * @return {any} String con el mensaje o array de objetos con detalles de validación.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function getErrorMessage(error: unknown): any {
   if (error instanceof AppError) return error.message;
   if (error instanceof ZodError) return error.issues;
   return "Error interno del servidor";
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Instancia configurada del enrutador que mapea la superficie de ataque y los recursos de la API.
  * POR QUÉ: Centraliza la política de Control de Acceso Basado en Roles (RBAC). Al definir aquí los permisos necesarios (ej: `user_management.read`), se crea una capa de gobernanza única donde es sencillo verificar y actualizar los requisitos de seguridad de cada endpoint sin navegar por múltiples archivos de controladores.
@@ -122,6 +141,11 @@ export function getErrorMessage(error: unknown): any {
  */
 export const authRouter = new Router();
 authRouter.add("POST", "/api/upload/presigned-url", [requirePermission("data_management.write")], generateUploadUrlAction);
+=======
+// --- EL ENRUTADOR PRINCIPAL ---
+export const authRouter = new Router();
+authRouter.add("POST", "/api/upload/presigned-url", [], generateUploadUrlAction);
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 authRouter.add("POST", "/api/login", [], loginAction);
 authRouter.add("POST", "/api/logout", [], logoutAction);
 authRouter.add("POST", "/api/register", [], registerAction);
@@ -158,6 +182,7 @@ authRouter.add("GET", "/api/categories", [], getAllCategoriesAction);
 authRouter.add("GET", "/api/tags", [], getAllTagsAction);
 authRouter.add("GET", "/api/licenses", [], getAllLicensesAction);
 
+<<<<<<< HEAD
 //---datasets
 // 2. Busca la sección de RUTAS DE DATASETS al final del archivo y déjalas así:
 authRouter.add("GET", "/api/datasets", [requirePermission("catalog.read")], getDatasetsAction);
@@ -166,5 +191,9 @@ authRouter.add("GET", "/api/datasets/:id", [requirePermission("catalog.read")], 
 authRouter.add("PUT", "/api/datasets/:id", [requirePermission("data_management.write")], updateDatasetAction);
 authRouter.add("DELETE", "/api/datasets/:id", [requirePermission("data_management.delete")], deleteDatasetAction);
 
+=======
+authRouter.add("GET", "/api/datasets", [requireLogin], getDatasetsAction);
+authRouter.add("POST", "/api/datasets", [requireLogin], createDatasetAction);
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 
 

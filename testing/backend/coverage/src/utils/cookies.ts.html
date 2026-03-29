@@ -157,6 +157,7 @@
 <a name='L92'></a><a href='#L92'>92</a>
 <a name='L93'></a><a href='#L93'>93</a>
 <a name='L94'></a><a href='#L94'>94</a>
+<<<<<<< HEAD
 <a name='L95'></a><a href='#L95'>95</a>
 <a name='L96'></a><a href='#L96'>96</a>
 <a name='L97'></a><a href='#L97'>97</a>
@@ -260,6 +261,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+<a name='L95'></a><a href='#L95'>95</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -302,6 +306,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -317,6 +322,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -338,6 +345,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -348,12 +356,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-yes">16x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -362,6 +373,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -379,6 +399,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -417,6 +438,9 @@
  * ============================================================================
  */
 import type { HttpResponse } from "../types/http";
+=======
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type { HttpResponse } from "../types/http";
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { env } from "../config/env";
 &nbsp;
 interface CookieOptions {
@@ -427,6 +451,7 @@ interface CookieOptions {
   maxAge?: number;
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Construye la cadena de texto serializada para una cookie individual.
  * POR QUÉ: Utiliza `encodeURIComponent` en el valor para garantizar que 
@@ -438,6 +463,8 @@ interface CookieOptions {
  * @param options {CookieOptions} Configuración de visibilidad y vida útil.
  * @return {string} Cadena formateada para la cabecera Set-Cookie.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 function buildCookie(name: string, value: string, options: CookieOptions = {}): string {
   const parts: string[] = [`${name}=${encodeURIComponent(value)}`];
 &nbsp;
@@ -464,6 +491,7 @@ function buildCookie(name: string, value: string, options: CookieOptions = {}): 
   return parts.join("; ");
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Inyecta una cookie en la cabecera de la respuesta HTTP actual.
  * POR QUÉ: Implementa una lógica de normalización de cabeceras. Dado que 
@@ -479,6 +507,8 @@ function buildCookie(name: string, value: string, options: CookieOptions = {}): 
  * @return {void}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function setCookie(
   res: HttpResponse,
   name: string,
@@ -501,6 +531,7 @@ export function setCookie(
 <span class="cstat-no" title="statement not covered" >  res.setHeader("Set-Cookie", [String(current), cookie]);</span>
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Ordena al navegador eliminar una cookie específica.
  * POR QUÉ: Setea el valor a una cadena vacía y el `maxAge` a 0. Esta es la 
@@ -511,6 +542,8 @@ export function setCookie(
  * @param options {CookieOptions} Debe coincidir con el Path y Domain originales para que la eliminación sea exitosa.
  * @return {void}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function clearCookie(
   res: HttpResponse,
   name: string,
@@ -524,6 +557,7 @@ export function clearCookie(
 &nbsp;
 const isProduction = env.NODE_ENV === "production";
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Configura de forma segura la cookie que transporta el Refresh Token.
  * POR QUÉ: 
@@ -537,6 +571,8 @@ const isProduction = env.NODE_ENV === "production";
  * @param refreshToken {string} Token de larga duración generado por el servicio de JWT.
  * @return {void}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function setRefreshTokenCookie(res: HttpResponse, refreshToken: string): void {
   // Si no está en producción, secure será false.
   const isProduction = env.NODE_ENV === "production";
@@ -550,6 +586,7 @@ export function setRefreshTokenCookie(res: HttpResponse, refreshToken: string): 
   });
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Elimina específicamente la cookie del Refresh Token.
  * POR QUÉ: Debe replicar exactamente las opciones de `path` y `sameSite` 
@@ -558,6 +595,8 @@ export function setRefreshTokenCookie(res: HttpResponse, refreshToken: string): 
  * @param res {HttpResponse} Objeto de respuesta.
  * @return {void}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function clearRefreshTokenCookie(res: HttpResponse): void {
   const isProduction = env.NODE_ENV === "production";
 &nbsp;
@@ -574,7 +613,11 @@ export function clearRefreshTokenCookie(res: HttpResponse): void {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+<<<<<<< HEAD
                 at 2026-03-29T17:08:40.163Z
+=======
+                at 2026-03-26T02:52:40.548Z
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Recuperación de Contraseña (password.routes.ts)
@@ -17,12 +18,15 @@
  * de CPU (bcrypt) si la contraseña es menor a 8 caracteres.
  * ============================================================================
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { readJsonBody } from "../utils/body";
 import { sendJson } from "../utils/json";
 import { requestPasswordReset, executePasswordReset } from "../services/auth.service";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 
+<<<<<<< HEAD
 /**
  * Descripción: Inicia el flujo de recuperación generando un token seguro y enviándolo por correo.
  * POR QUÉ: Se valida la presencia del correo directamente en el controlador para abortar la petición inmediatamente (Fallo Rápido / Fail-Fast) con un HTTP 400, evitando llamadas innecesarias a la base de datos si el payload está incompleto.
@@ -63,6 +67,8 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * @return {Promise<void>}
  * @throws {Ninguna} Errores manejados y devueltos como respuesta JSON estandarizada.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function requestPasswordResetAction(req: HttpRequest, res: HttpResponse) {
   try {
     const body = await readJsonBody<{ email: string }>(req);
@@ -83,6 +89,7 @@ export async function requestPasswordResetAction(req: HttpRequest, res: HttpResp
   }
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Consume el token de recuperación y establece la nueva contraseña del usuario.
  * POR QUÉ: Implementa un workaround de coerción de tipos (`typeof body.token === "string" ? ... : ""`). Esto mitiga vulnerabilidades donde un atacante podría enviar arrays u objetos en lugar de strings, lo cual podría causar excepciones no controladas o comportamientos anómalos en el motor de base de datos o en la función de hashing. Además, impone una longitud mínima de 8 caracteres antes de invocar la encriptación por seguridad.
@@ -128,6 +135,8 @@ export async function requestPasswordResetAction(req: HttpRequest, res: HttpResp
  * @return {Promise<void>}
  * @throws {Ninguna} Atrapa cualquier excepción (ej. token expirado) y la traduce a la respuesta HTTP adecuada.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function resetPasswordAction(req: HttpRequest, res: HttpResponse) {
   try {
     const body = await readJsonBody<{ token: string; password: string }>(req);

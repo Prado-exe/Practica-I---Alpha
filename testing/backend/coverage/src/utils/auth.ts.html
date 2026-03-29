@@ -146,6 +146,7 @@
 <a name='L81'></a><a href='#L81'>81</a>
 <a name='L82'></a><a href='#L82'>82</a>
 <a name='L83'></a><a href='#L83'>83</a>
+<<<<<<< HEAD
 <a name='L84'></a><a href='#L84'>84</a>
 <a name='L85'></a><a href='#L85'>85</a>
 <a name='L86'></a><a href='#L86'>86</a>
@@ -216,6 +217,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+<a name='L84'></a><a href='#L84'>84</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -245,6 +249,10 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
+=======
+<span class="cline-any cline-neutral">&nbsp;</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
@@ -262,6 +270,10 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
+=======
+<span class="cline-any cline-neutral">&nbsp;</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
@@ -274,6 +286,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
@@ -283,6 +296,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -301,6 +320,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * ============================================================================
  * MÓDULO: Lógica de Autenticación y Validación de Sesión (auth.ts)
@@ -322,6 +342,9 @@
  * ============================================================================
  */
 import { AppError } from "../types/app-error";
+=======
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { AppError } from "../types/app-error";
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest } from "../types/http";
 import type { JwtAccessPayload } from "../types/auth";
 import { verifyAccessToken } from "./jwt";
@@ -331,6 +354,7 @@ import {
   findAccountByIdForSession,
 } from "../repositories/auth.repository";
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Función de blindaje que garantiza que una petición está plenamente autorizada antes de permitir el acceso al controlador.
  * POR QUÉ: Implementa una jerarquía de validación crítica. Primero valida la integridad del token; luego, consulta la persistencia para confirmar que la sesión no ha sido revocada (permitiendo cierres de sesión efectivos); y finalmente, verifica el estado del usuario (email verificado y cuenta activa) para bloquear accesos a cuentas suspendidas en tiempo real. Además, actualiza la fecha de último uso (`last_used`) para auditoría de actividad e inactividad.
@@ -346,6 +370,10 @@ import {
  * @throws {AppError} (403) Si la cuenta del usuario no está verificada o está inactiva.
  */
 export async function requireAuth(req: HttpRequest): Promise&lt;JwtAccessPayload&gt; {
+=======
+export async function requireAuth(req: HttpRequest): Promise&lt;JwtAccessPayload&gt; {
+  // 1. Blindaje contra mayúsculas/minúsculas en los headers
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const rawHeader = req.headers.authorization || req.headers.Authorization;
   const authHeader = typeof rawHeader === "string" ? rawHeader : "";
 &nbsp;
@@ -364,6 +392,10 @@ export async function requireAuth(req: HttpRequest): Promise&lt;JwtAccessPayload
     throw new AppError("Token inválido o expirado", 401);
   }
 &nbsp;
+<<<<<<< HEAD
+=======
+  // 2. Verificación de Sesión en Base de Datos
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const session = await findAuthSessionById(payload.sessionId);
 &nbsp;
   if (!session) {
@@ -381,6 +413,10 @@ export async function requireAuth(req: HttpRequest): Promise&lt;JwtAccessPayload
     throw new AppError("Sesión expirada", 401);
   }
 &nbsp;
+<<<<<<< HEAD
+=======
+  // 3. Verificación de Estado del Usuario en Base de Datos
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const account = await findAccountByIdForSession(payload.sub);
 &nbsp;
   if (!account) {
@@ -393,11 +429,16 @@ export async function requireAuth(req: HttpRequest): Promise&lt;JwtAccessPayload
     throw new AppError("La cuenta no está habilitada", 403);
   }
 &nbsp;
+<<<<<<< HEAD
+=======
+  // 4. Si pasó todos los filtros, actualizamos su última actividad
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   await updateAuthSessionLastUsed(session.session_id);
 &nbsp;
   return payload;
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Intenta extraer la identidad del usuario sin forzar el error si la autenticación falta o falla.
  * POR QUÉ: Esta función es necesaria para rutas "híbridas" donde el contenido puede cambiar si el usuario está autenticado (ej: mostrar favoritos), pero el acceso no está prohibido para visitantes anónimos. A diferencia de `requireAuth`, esta función omite la validación contra la base de datos por razones de rendimiento, asumiendo que el controlador posterior manejará la lógica de visualización si el payload es nulo.
@@ -406,6 +447,10 @@ export async function requireAuth(req: HttpRequest): Promise&lt;JwtAccessPayload
  * @throws {Ninguna} Silencia internamente los errores de validación de JWT para retornar null de forma segura.
  */
 export function tryGetAuthPayload(req: HttpRequest): JwtAccessPayload | null {
+=======
+export function tryGetAuthPayload(req: HttpRequest): JwtAccessPayload | null {
+  // Aplicamos el mismo blindaje de mayúsculas/minúsculas aquí
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const rawHeader = req.headers.authorization || req.headers.Authorization;
   const authHeader = typeof rawHeader === "string" ? rawHeader : "";
 &nbsp;
@@ -427,7 +472,11 @@ export function tryGetAuthPayload(req: HttpRequest): JwtAccessPayload | null {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+<<<<<<< HEAD
                 at 2026-03-29T17:08:40.163Z
+=======
+                at 2026-03-26T02:52:40.548Z
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         <script src="../../prettify.js"></script>
         <script>

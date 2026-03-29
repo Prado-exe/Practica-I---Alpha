@@ -23,9 +23,15 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
+<<<<<<< HEAD
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
                 <span class='fraction'>4/4</span>
+=======
+                <span class="strong">0% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>0/4</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         
             
@@ -37,16 +43,28 @@
         
             
             <div class='fl pad1y space-right2'>
+<<<<<<< HEAD
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
                 <span class='fraction'>1/1</span>
+=======
+                <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/1</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         
             
             <div class='fl pad1y space-right2'>
+<<<<<<< HEAD
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
                 <span class='fraction'>4/4</span>
+=======
+                <span class="strong">0% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>0/4</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         
             
@@ -61,7 +79,11 @@
             </div>
         </template>
     </div>
+<<<<<<< HEAD
     <div class='status-line high'></div>
+=======
+    <div class='status-line low'></div>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -75,6 +97,7 @@
 <a name='L10'></a><a href='#L10'>10</a>
 <a name='L11'></a><a href='#L11'>11</a>
 <a name='L12'></a><a href='#L12'>12</a>
+<<<<<<< HEAD
 <a name='L13'></a><a href='#L13'>13</a>
 <a name='L14'></a><a href='#L14'>14</a>
 <a name='L15'></a><a href='#L15'>15</a>
@@ -138,11 +161,15 @@
 <a name='L73'></a><a href='#L73'>73</a>
 <a name='L74'></a><a href='#L74'>74</a>
 <a name='L75'></a><a href='#L75'>75</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+=======
+<a name='L13'></a><a href='#L13'>13</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -228,10 +255,20 @@
  * ============================================================================
  */
 import { getOdsForDropdown } from "../services/ods.service";
+=======
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { getOdsForDropdown } from "../services/ods.service";
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Controlador que atiende las peticiones GET para obtener la lista completa de los ODS.
  * POR QUÉ: Se reutilizan las funciones `getErrorStatus` y `getErrorMessage` del módulo de autenticación para asegurar que cualquier excepción de base de datos o red devuelva el mismo contrato de error (status HTTP semántico y un JSON predecible) que el resto de la API, facilitando el manejo de errores globales en el frontend.
@@ -284,6 +321,14 @@ export async function getAllOdsAction(req: HttpRequest, res: HttpResponse) {
     sendJson(res, 200, { ok: true, data });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+=======
+export async function <span class="fstat-no" title="function not covered" >getAllOdsAction(r</span>eq: HttpRequest, res: HttpResponse) {
+<span class="cstat-no" title="statement not covered" >  try {</span>
+    const data = <span class="cstat-no" title="statement not covered" >await getOdsForDropdown();</span>
+<span class="cstat-no" title="statement not covered" >    sendJson(res, 200, { ok: true, data });</span>
+  } catch (error) {
+<span class="cstat-no" title="statement not covered" >    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   }
 }</pre></td></tr></table></pre>
 
@@ -292,7 +337,11 @@ export async function getAllOdsAction(req: HttpRequest, res: HttpResponse) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+<<<<<<< HEAD
                 at 2026-03-29T17:08:40.163Z
+=======
+                at 2026-03-26T02:52:40.548Z
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Esquemas de Validación de Autenticación (auth.validators.ts)
@@ -26,6 +27,10 @@ import { z } from "zod";
  * @return {ZodObject} Esquema validado y transformado.
  * @throws {ZodError} Si los campos no cumplen con las restricciones de longitud o formato.
  */
+=======
+import { z } from "zod";
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export const registerSchema = z.object({
   name: z
     .string()
@@ -42,6 +47,7 @@ export const registerSchema = z.object({
     .max(128, "La contraseña es demasiado larga"),
 });
 
+<<<<<<< HEAD
 /**
  * Descripción: Valida las credenciales de acceso durante el inicio de sesión.
  * POR QUÉ: A diferencia del registro, aquí la contraseña solo exige `min(1)` para ser obligatoria. No se validan longitudes máximas complejas en este punto para agilizar el proceso de "Fail-Fast" en la capa de red antes de realizar el hash de la clave en el servicio.
@@ -49,6 +55,8 @@ export const registerSchema = z.object({
  * @return {ZodObject} Esquema con email normalizado.
  * @throws {ZodError} Si el formato del correo es inválido.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export const loginSchema = z.object({
   email: z
     .string()
@@ -59,6 +67,7 @@ export const loginSchema = z.object({
     .min(1, "La contraseña es obligatoria"),
 });
 
+<<<<<<< HEAD
 /**
  * Descripción: Esquema para la validación de códigos de verificación OTP (One-Time Password).
  * POR QUÉ: Utiliza una expresión regular (`/^\d{6}$/`) para asegurar que el código sea estrictamente de 6 dígitos numéricos. Esta restricción previene que el backend intente realizar consultas costosas a la base de datos con tokens mal formados o inyecciones de texto que no coinciden con el formato OTP generado por el sistema.
@@ -66,6 +75,8 @@ export const loginSchema = z.object({
  * @return {ZodObject} Esquema validado.
  * @throws {ZodError} Si el código contiene letras o no tiene exactamente 6 caracteres.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export const verifyCodeSchema = z.object({
   email: z
     .string()
@@ -80,6 +91,7 @@ export type RegisterSchemaInput = z.infer<typeof registerSchema>;
 export type LoginSchemaInput = z.infer<typeof loginSchema>;
 export type VerifyCodeSchemaInput = z.infer<typeof verifyCodeSchema>;
 
+<<<<<<< HEAD
 /**
  * Descripción: Valida la solicitud para re-emitir un código de verificación.
  * POR QUÉ: Es un esquema minimalista diseñado para mitigar el abuso de la función de envío de correos. Al validar el formato y la longitud máxima (160) en esta capa, evitamos disparar lógica de negocio o servicios de terceros (SMTP/SES) con direcciones de correo que son estructuralmente inválidas.
@@ -87,6 +99,8 @@ export type VerifyCodeSchemaInput = z.infer<typeof verifyCodeSchema>;
  * @return {ZodObject} Esquema con email normalizado.
  * @throws {ZodError} Si el correo es inválido.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export const resendVerificationSchema = z.object({
   email: z.string().trim().email("Correo inválido").max(160),
 });

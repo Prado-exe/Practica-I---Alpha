@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Servicio de Etiquetas/Tags (tags.service.ts)
@@ -23,6 +24,10 @@ import { fetchAllTagsFromDb } from "../repositories/tags.repository";
  * @return {Promise<Array>} Lista de objetos que representan las etiquetas disponibles en el sistema.
  * @throws {Ninguna} Las excepciones originadas en la base de datos se propagan silenciosamente al manejador de errores global del router.
  */
+=======
+import { fetchAllTagsFromDb } from "../repositories/tags.repository";
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getTagsForDropdown() {
   return await fetchAllTagsFromDb();
 }

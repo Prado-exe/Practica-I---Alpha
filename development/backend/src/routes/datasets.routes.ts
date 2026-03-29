@@ -4,6 +4,7 @@ import { sendJson } from "../utils/json";
 import { readJsonBody } from "../utils/body";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 import { AppError } from "../types/app-error";
+<<<<<<< HEAD
 
 export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
   try {
@@ -18,6 +19,22 @@ export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
     const search = url.searchParams.get("search") || "";
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+=======
+import { tryGetAuthPayload } from "../utils/auth";
+
+export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const accountId = Number((req as any).user.sub);
+    const permissions = (req as any).user.permissions || [];
+    const isAdmin = permissions.includes("data_management.read") || permissions.includes("data_management.write");
+
+    const url = new URL(req.url || "", `http://${req.headers?.host || "localhost"}`);
+    const search = url.searchParams.get("search") || "";
+    
+    // Validamos y limpiamos la paginación para evitar que metan letras
+    const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+    const limit = Math.max(1, parseInt(url.searchParams.get("limit") || "10", 10));
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 
     const result = await getDatasets(accountId, isAdmin, search, page, limit);
     sendJson(res, 200, { ok: true, ...result });
@@ -28,6 +45,7 @@ export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
 
 export async function createDatasetAction(req: HttpRequest, res: HttpResponse) {
   try {
+<<<<<<< HEAD
     const accountId = Number((req as any).user.sub);
     const permissions = (req as any).user.permissions || [];
     const isAdmin = permissions.includes("admin_general.manage");
@@ -38,6 +56,18 @@ export async function createDatasetAction(req: HttpRequest, res: HttpResponse) {
     const msg = isAdmin ? "Dataset publicado exitosamente" : "Solicitud de creación enviada a revisión";
     sendJson(res, 201, { ok: true, message: msg, data: newDataset });
   } catch (error) {
+=======
+    const payload = tryGetAuthPayload(req);
+    const accountId = Number(payload?.sub);
+    const isAdmin = payload?.role === 'super_admin' || payload?.role === 'data_admin';
+
+    const body = await readJsonBody<any>(req);
+    const dataset = await createDataset(accountId, isAdmin, body);
+
+    sendJson(res, 201, { ok: true, message: "Dataset creado como borrador", data: dataset });
+  } catch (error) {
+    console.error("❌ Error en createDatasetAction:", error);
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }
 }

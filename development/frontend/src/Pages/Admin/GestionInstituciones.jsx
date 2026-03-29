@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 import { useEffect, useState, useRef } from "react";
 import CanView from "../../Components/Common/CanView";
 import { useAuth } from "../../Context/AuthContext";
+=======
+import { useEffect, useState } from "react";
+import CanView from "../../Components/Common/CanView";
+import { useAuth } from "../../Context/AuthContext";
+import { FiSearch, FiEye, FiEdit, FiTrash2, FiPlusCircle } from "react-icons/fi";
+import CrearInstitucion from "./CrearInstitucion"; 
+import EditarInstitucion from "./EditarInstitucion"; 
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import "../../Styles/Pages_styles/Admin/GestionInstituciones.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -10,6 +19,7 @@ function GestionInstituciones() {
   const [instituciones, setInstituciones] = useState([]);
   const [loading, setLoading] = useState(true);
 
+<<<<<<< HEAD
   // Estados para búsqueda y filtros
   const [busqueda, setBusqueda] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
@@ -51,6 +61,18 @@ function GestionInstituciones() {
   }, [user?.token]);
 
   // 1. Obtener Instituciones de PostgreSQL
+=======
+  const [filters, setFilters] = useState({ busqueda: "", tipo: "", estado: "" });
+  const [isCreating, setIsCreating] = useState(false);
+  const [editingInstitution, setEditingInstitution] = useState(null); 
+  const [modalDetallesOpen, setModalDetallesOpen] = useState(false);
+  const [institucionDetalle, setInstitucionDetalle] = useState(null);
+
+  useEffect(() => {
+    if (user?.token) fetchInstituciones();
+  }, [user?.token]);
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const fetchInstituciones = async () => {
     setLoading(true);
     try {
@@ -68,6 +90,7 @@ function GestionInstituciones() {
     }
   };
 
+<<<<<<< HEAD
   // 2. Previsualizar la imagen antes de subirla
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -163,6 +186,8 @@ function GestionInstituciones() {
   };
 
   // 4. Eliminar Institución
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   const handleEliminar = async (id, nombre) => {
     if(!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente a ${nombre}?`)) return;
     
@@ -172,6 +197,7 @@ function GestionInstituciones() {
         headers: { "Authorization": `Bearer ${user.token}` }
       });
       if(res.ok) {
+<<<<<<< HEAD
         fetchInstituciones();
       } else {
         const err = await res.json();
@@ -227,10 +253,61 @@ function GestionInstituciones() {
         <CanView requiredPermission="admin_general.manage">
           <button onClick={abrirModalCrear} style={{ background: "#2196F3", color: "white", border: "none", padding: "10px 15px", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>
             + Nueva Institución
+=======
+        alert("Institución eliminada con éxito.");
+        fetchInstituciones();
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.message || 'No se pudo eliminar'}`);
+      }
+    } catch(error) {
+      console.error(error);
+      alert("Error de red al intentar eliminar.");
+    }
+  };
+
+  const handleChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
+  const handleClear = () => setFilters({ busqueda: "", tipo: "", estado: "" });
+
+  const abrirModalDetalles = (inst) => {
+    setInstitucionDetalle(inst);
+    setModalDetallesOpen(true);
+  };
+
+  if (isCreating) {
+    return <CrearInstitucion onCancel={() => { setIsCreating(false); fetchInstituciones(); }} />;
+  }
+
+  if (editingInstitution) {
+    return <EditarInstitucion 
+      institucion={editingInstitution} 
+      onCancel={() => { setEditingInstitution(null); fetchInstituciones(); }} 
+    />;
+  }
+
+  const institucionesFiltradas = instituciones.filter(inst => 
+    (inst.legal_name || "").toLowerCase().includes(filters.busqueda.toLowerCase()) &&
+    (filters.tipo === "" || inst.institution_type === filters.tipo) &&
+    (filters.estado === "" || inst.institution_status === filters.estado)
+  );
+
+  return (
+    <div className="gestion-instituciones">
+      
+      <div className="header">
+        <div className="header-info">
+          <h1>Instituciones</h1>
+          <p>Administra entidades responsables de datasets.</p>
+        </div>
+        <CanView requiredPermission="admin_general.manage">
+          <button className="btn-create" onClick={() => setIsCreating(true)}>
+            <FiPlusCircle size={18} /> Nueva Institución
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
           </button>
         </CanView>
       </div>
 
+<<<<<<< HEAD
       {/* FILTROS */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
         <input type="text" placeholder="Buscar por nombre..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} style={{ flex: 1, padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }} />
@@ -445,6 +522,183 @@ function GestionInstituciones() {
       )}
 
 
+=======
+      <div className="filters-section">
+        <div className="filters-row-top">
+          <div className="input-wrapper search-wrapper">
+            <label>Buscar</label>
+            <div className="input-with-icon">
+              <FiSearch className="icon" />
+              <input type="text" name="busqueda" placeholder="Buscar por nombre" value={filters.busqueda} onChange={handleChange} />
+            </div>
+          </div>
+          <div className="input-wrapper">
+            <label>Tipo</label>
+            <select name="tipo" value={filters.tipo} onChange={handleChange}>
+              <option value="">Cualquier</option>
+              <option value="Academica">Académica</option>
+              <option value="Institución pública">Institución pública</option>
+              <option value="Privada">Privada</option>
+              <option value="ONG">ONG</option>
+            </select>
+          </div>
+          <div className="input-wrapper">
+            <label>Estado</label>
+            <select name="estado" value={filters.estado} onChange={handleChange}>
+              <option value="">Cualquier</option>
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
+            </select>
+          </div>
+          <div className="filter-buttons">
+            <button className="btn-aplicar" onClick={() => console.log("Filtrando localmente...")}>APLICAR</button>
+            <button className="btn-limpiar" onClick={handleClear}>LIMPIAR</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Sigla</th>
+              <th>Tipo</th>
+              <th className="text-center">Datasets</th>
+              <th className="text-center">Estado</th>
+              <th className="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan="6" className="text-center p-20">Cargando datos...</td></tr>
+            ) : institucionesFiltradas.length === 0 ? (
+              <tr><td colSpan="6" className="text-center p-20 text-muted">No hay instituciones registradas o que coincidan con la búsqueda.</td></tr>
+            ) : (
+              institucionesFiltradas.map((inst) => {
+                const isActive = inst.institution_status === 'active';
+                return (
+                  <tr key={inst.institution_id || inst.id}>
+                    <td>{inst.legal_name}</td>
+                    <td>{inst.short_name || "-"}</td>
+                    <td>{inst.institution_type}</td>
+                    <td className="text-center">-</td>
+                    <td className="text-center">
+                      <span className={`estado-badge ${isActive ? 'activo' : 'inactivo'}`}>
+                        {isActive ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </td>
+                    <td className="acciones">
+                      <FiEye className="action-icon" title="Ver detalles" onClick={() => abrirModalDetalles(inst)} />
+                      <FiEdit className="action-icon" title="Editar" onClick={() => setEditingInstitution(inst)} />
+                      <FiTrash2 className="action-icon" title="Eliminar" onClick={() => handleEliminar(inst.institution_id || inst.id, inst.legal_name)} />
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* MODAL DE DETALLES (ESTILO FICHA) */}
+{modalDetallesOpen && institucionDetalle && (
+  <div className="modal-overlay">
+    <div className="modal-content-ficha">
+      
+      {/* Header */}
+      <div className="modal-header-ficha">
+        <h2 className="modal-title">Detalle de la Institucion</h2>
+        <button onClick={() => setModalDetallesOpen(false)} className="modal-close">✕</button>
+      </div>
+
+      <div className="modal-body-ficha">
+        
+        {/* Logo Centrado */}
+        <div className="logo-view-container">
+          <img 
+            src={institucionDetalle.logo_url || "/placeholder-logo.png"} 
+            alt="Logo Institucional" 
+            className="logo-view-img" 
+          />
+        </div>
+
+        {/* Campos de información */}
+        <div className="info-row">
+          <span className="info-label">Nombre oficial :</span>
+          <div className="info-value-box">{institucionDetalle.legal_name}</div>
+        </div>
+
+        <div className="info-row">
+          <span className="info-label">Sigla/Acrónimo :</span>
+          <div className="info-value-box">{institucionDetalle.short_name || "-"}</div>
+        </div>
+
+        <div className="info-row">
+          <span className="info-label">Tipo :</span>
+          <div className="info-value-box">{institucionDetalle.institution_type}</div>
+        </div>
+
+        <div className="info-row">
+          <span className="info-label">Pais :</span>
+          <div className="info-value-box">{institucionDetalle.country_name}</div>
+        </div>
+
+        <div className="info-row">
+          <span className="info-label">Dependencia :</span>
+          <div className="info-value-box">No Aplica</div>
+        </div>
+
+        <div className="info-row">
+          <span className="info-label">Área temática :</span>
+          <div className="info-value-box">{institucionDetalle.main_thematic_area || "-"}</div>
+        </div>
+
+        <div className="info-row">
+          <span className="info-label">Rol :</span>
+          <div className="info-value-box">{institucionDetalle.data_role}</div>
+        </div>
+
+        <div className="info-row">
+          <span className="info-label">Licencia de uso :</span>
+          <div className="info-value-box">{institucionDetalle.usage_license || "-"}</div>
+        </div>
+
+        {/* Descripción */}
+        <div className="description-container">
+          <span className="description-label">Descripcion</span>
+          <div className="description-text-box">
+            {institucionDetalle.description}
+          </div>
+        </div>
+
+        {/* Estados con píldoras */}
+        <div className="info-row" style={{ marginTop: '10px' }}>
+          <span className="info-label">Nivel de acceso :</span>
+          <span className="estado-badge activo" style={{ background: '#2d6cf0' }}>
+            {institucionDetalle.access_level === 'public' ? 'Publico' : 'Interno'}
+          </span>
+        </div>
+
+        <div className="info-row">
+          <span className="info-label">Estado :</span>
+          <span className={`estado-badge ${institucionDetalle.institution_status === 'active' ? 'activo' : 'inactivo'}`}>
+            {institucionDetalle.institution_status === 'active' ? 'Activo' : 'Inactivo'}
+          </span>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="modal-footer-ficha">
+        <button onClick={() => setModalDetallesOpen(false)} className="btn-close-modal">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     </div>
   );
 }

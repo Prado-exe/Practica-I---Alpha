@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Utilidades de Procesamiento de Cookies (request-cookies.ts)
@@ -37,6 +38,10 @@ import type { HttpRequest } from "../types/http";
  * - (URIError): Puede lanzarse si `decodeURIComponent` encuentra una 
  * secuencia de escape de caracteres mal formada en el string de cookies.
  */
+=======
+import type { HttpRequest } from "../types/http";
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function parseCookies(req: HttpRequest): Record<string, string> {
   const cookieHeader = req.headers.cookie;
 

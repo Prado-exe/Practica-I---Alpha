@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Repositorio de Autenticación y Usuarios (auth.repository.ts)
@@ -16,6 +17,8 @@
  * viaje a la base de datos.
  * ============================================================================
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { pool } from "../config/db";
 import { AppError } from "../types/app-error";
 import type {
@@ -29,6 +32,7 @@ import type {
   VerificationCodeRecord,
 } from "../types/auth";
 
+<<<<<<< HEAD
 /**
  * Descripción: Resuelve el identificador interno numérico de un rol a partir de su código de texto.
  * POR QUÉ: La base de datos utiliza claves foráneas enteras (`role_id`) por eficiencia de indexación, pero la capa de servicio y controladores operan con cadenas (ej. 'admin') para mayor legibilidad del código.
@@ -36,6 +40,8 @@ import type {
  * @return {Promise<number | null>} ID numérico del rol o null si no existe.
  * @throws {Ninguna} Errores de BD burbujean.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findRoleIdByCode(code: string): Promise<number | null> {
   const query = `
     SELECT role_id
@@ -48,6 +54,7 @@ export async function findRoleIdByCode(code: string): Promise<number | null> {
   return rows[0]?.role_id ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Busca una cuenta completa utilizando su correo electrónico.
  * POR QUÉ: Se limita explícitamente a `LIMIT 1` para asegurar que el motor de PostgreSQL detenga la búsqueda en el índice tan pronto encuentre la coincidencia (aunque la columna sea unique), optimizando milisegundos.
@@ -55,6 +62,8 @@ export async function findRoleIdByCode(code: string): Promise<number | null> {
  * @return {Promise<Account | null>} Registro de la cuenta.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findAccountByEmail(email: string): Promise<Account | null> {
   const query = `
     SELECT
@@ -75,12 +84,15 @@ export async function findAccountByEmail(email: string): Promise<Account | null>
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Busca una cuenta completa utilizando su nombre de usuario.
  * @param username {string} Nombre de usuario único.
  * @return {Promise<Account | null>} Registro de la cuenta.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findAccountByUsername(username: string): Promise<Account | null> {
   const query = `
     SELECT
@@ -101,6 +113,7 @@ export async function findAccountByUsername(username: string): Promise<Account |
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Inserta una nueva cuenta en la base de datos.
  * POR QUÉ: Se omite intencionalmente retornar el `password_hash` en el bloque `RETURNING` para evitar que la credencial encriptada viaje innecesariamente hacia la capa de servicio, reduciendo la superficie de exposición en memoria.
@@ -108,6 +121,8 @@ export async function findAccountByUsername(username: string): Promise<Account |
  * @return {Promise<BasicAccount>} Perfil básico del usuario recién creado.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function createAccount(input: CreateAccountInput): Promise<BasicAccount> {
   const query = `
     INSERT INTO accounts (
@@ -148,6 +163,7 @@ export async function createAccount(input: CreateAccountInput): Promise<BasicAcc
   return rows[0];
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Crea un nuevo registro de código OTP en la base de datos.
  * POR QUÉ: Hardcodea la política base de seguridad directamente en el insert (`attempts_count = 0`, `max_attempts = 5`). Esto garantiza que, incluso si la capa de servicio olvida enviar estos parámetros, la base de datos nazca con límites defensivos estrictos.
@@ -155,6 +171,8 @@ export async function createAccount(input: CreateAccountInput): Promise<BasicAcc
  * @return {Promise<Object>} ID interno del código y su fecha de expiración.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function createVerificationCode(
   input: CreateVerificationCodeInput
 ): Promise<{ verification_code_id: number; expires_at: string | Date }> {
@@ -206,6 +224,7 @@ export async function createVerificationCode(
   return rows[0];
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Obtiene el perfil del usuario junto con su rol y matriz completa de permisos condensada.
  * POR QUÉ: Utiliza la función `json_agg` nativa de PostgreSQL para colapsar todos los permisos individuales asociados al rol en un solo array JSON. Esto evita el problema de las "N+1 consultas" (buscar el usuario y luego hacer un select por cada permiso), resolviendo toda la autorización en un solo viaje a la BD.
@@ -213,6 +232,8 @@ export async function createVerificationCode(
  * @return {Promise<LoginAccount | null>} Objeto de cuenta enriquecido con permisos.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findAccountLoginByEmail(email: string): Promise<LoginAccount | null> {
   const query = `
     SELECT
@@ -246,6 +267,7 @@ export async function findAccountLoginByEmail(email: string): Promise<LoginAccou
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Búsqueda ultra-ligera de datos públicos de una cuenta.
  * POR QUÉ: Excluye hashes y timestamps de auditoría. Se utiliza en flujos de reenvío de correos o validaciones rápidas donde cargar la entidad completa implicaría un gasto de memoria RAM innecesario en el servidor Node.js.
@@ -253,6 +275,8 @@ export async function findAccountLoginByEmail(email: string): Promise<LoginAccou
  * @return {Promise<BasicAccount | null>} Datos esenciales del usuario.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findAccountBasicByEmail(email: string): Promise<BasicAccount | null> {
   const query = `
     SELECT
@@ -271,6 +295,7 @@ export async function findAccountBasicByEmail(email: string): Promise<BasicAccou
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Recupera el código OTP más reciente emitido para un flujo específico de un usuario.
  * POR QUÉ: El ordenamiento `ORDER BY created_at DESC LIMIT 1` y el filtro `code_type` son críticos. Garantizan que el sistema solo evalúe el *último* código solicitado, previniendo bugs donde un usuario solicita dos códigos rápidos y el sistema evalúa el primero que ya caducó lógicamente.
@@ -279,6 +304,8 @@ export async function findAccountBasicByEmail(email: string): Promise<BasicAccou
  * @return {Promise<VerificationCodeRecord | null>} El registro del código más reciente.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findLatestVerificationCodeByAccountId(
   accountId: number,
   codeType: "register_email" | "account_reverification"
@@ -313,6 +340,7 @@ export async function findLatestVerificationCodeByAccountId(
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Incrementa atómicamente el contador de intentos fallidos de inicio de sesión.
  * POR QUÉ: Se ejecuta como una operación matemática directa en el motor (`failed_login_count + 1`) en lugar de leer el valor en Node y actualizarlo. Esto previene condiciones de carrera si el atacante lanza peticiones simultáneas masivas.
@@ -320,6 +348,8 @@ export async function findLatestVerificationCodeByAccountId(
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function incrementFailedLoginAttempts(accountId: number): Promise<void> {
   const query = `
     UPDATE accounts
@@ -332,12 +362,15 @@ export async function incrementFailedLoginAttempts(accountId: number): Promise<v
   await pool.query(query, [accountId]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Limpia el registro de intentos fallidos y levanta los bloqueos temporales.
  * @param accountId {number} ID del usuario autenticado correctamente.
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function resetFailedLoginAttempts(accountId: number): Promise<void> {
   const query = `
     UPDATE accounts
@@ -351,6 +384,7 @@ export async function resetFailedLoginAttempts(accountId: number): Promise<void>
   await pool.query(query, [accountId]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Establece una marca de tiempo en el futuro hasta la cual la cuenta no puede loguearse.
  * @param accountId {number} ID de la cuenta a bloquear.
@@ -358,6 +392,8 @@ export async function resetFailedLoginAttempts(accountId: number): Promise<void>
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function lockAccountUntil(accountId: number, lockedUntil: Date): Promise<void> {
   const query = `
     UPDATE accounts
@@ -370,6 +406,7 @@ export async function lockAccountUntil(accountId: number, lockedUntil: Date): Pr
   await pool.query(query, [accountId, lockedUntil]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Modifica el estado global de la cuenta (ej. activo, suspendido, pendiente).
  * @param accountId {number} ID del usuario.
@@ -377,6 +414,8 @@ export async function lockAccountUntil(accountId: number, lockedUntil: Date): Pr
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateAccountStatus(accountId: number, status: string): Promise<void> {
   const query = `
     UPDATE accounts
@@ -389,12 +428,15 @@ export async function updateAccountStatus(accountId: number, status: string): Pr
   await pool.query(query, [accountId, status]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Registra la fecha y hora exacta del último inicio de sesión exitoso.
  * @param accountId {number} ID del usuario.
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateLastLoginAt(accountId: number): Promise<void> {
   const query = `
     UPDATE accounts
@@ -407,12 +449,15 @@ export async function updateLastLoginAt(accountId: number): Promise<void> {
   await pool.query(query, [accountId]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Aumenta el registro de intentos fallidos al ingresar un OTP.
  * @param verificationCodeId {number} ID interno del código OTP.
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function incrementVerificationAttempts(verificationCodeId: number): Promise<void> {
   const query = `
     UPDATE verification_codes
@@ -423,6 +468,7 @@ export async function incrementVerificationAttempts(verificationCodeId: number):
   await pool.query(query, [verificationCodeId]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Invalida un código OTP marcándolo como utilizado.
  * POR QUÉ: Soft-delete funcional. Guardar el `consumed_at` permite a soporte técnico verificar a qué hora exacta el usuario completó su verificación.
@@ -430,6 +476,8 @@ export async function incrementVerificationAttempts(verificationCodeId: number):
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function consumeVerificationCode(verificationCodeId: number): Promise<void> {
   const query = `
     UPDATE verification_codes
@@ -440,12 +488,15 @@ export async function consumeVerificationCode(verificationCodeId: number): Promi
   await pool.query(query, [verificationCodeId]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Completa el ciclo de registro de un usuario nuevo marcándolo como verificado y activo.
  * @param accountId {number} ID del usuario.
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function activateAccount(accountId: number): Promise<void> {
   const query = `
     UPDATE accounts
@@ -460,6 +511,7 @@ export async function activateAccount(accountId: number): Promise<void> {
   await pool.query(query, [accountId]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Crea un registro de sesión (Refresh Token) en la base de datos.
  * POR QUÉ: Captura metadatos del dispositivo e IP para construir en el futuro un panel de "Dispositivos Activos" para el usuario.
@@ -467,6 +519,8 @@ export async function activateAccount(accountId: number): Promise<void> {
  * @return {Promise<AuthSession>} Registro de sesión inicializado.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function createAuthSession(input: CreateAuthSessionInput): Promise<AuthSession> {
   const query = `
     INSERT INTO auth_sessions (
@@ -518,12 +572,15 @@ export async function createAuthSession(input: CreateAuthSessionInput): Promise<
   return rows[0];
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Busca una sesión por su ID evaluando su estado de revocación.
  * @param sessionId {number | string} ID de la sesión.
  * @return {Promise<AuthSession | null>} Registro de la sesión.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findAuthSessionById(sessionId: number | string): Promise<AuthSession | null> {
   const query = `
     SELECT
@@ -548,6 +605,7 @@ export async function findAuthSessionById(sessionId: number | string): Promise<A
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Marca explícitamente una sesión como finalizada/inválida.
  * POR QUÉ: Se exige un `reason` descriptivo ("logout", "refresh_token_reuse", etc.) para clasificar estadísticamente por qué mueren las sesiones en el sistema y detectar patrones anómalos.
@@ -556,6 +614,8 @@ export async function findAuthSessionById(sessionId: number | string): Promise<A
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function revokeAuthSession(
   sessionId: number | string,
   reason = "logout"
@@ -573,12 +633,15 @@ export async function revokeAuthSession(
   await pool.query(query, [sessionId, reason]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Actualiza el timestamp de última actividad de una sesión.
  * @param sessionId {number} ID de la sesión.
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateAuthSessionLastUsed(sessionId: number): Promise<void> {
   const query = `
     UPDATE auth_sessions
@@ -591,6 +654,7 @@ export async function updateAuthSessionLastUsed(sessionId: number): Promise<void
   await pool.query(query, [sessionId]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Busca un usuario junto con sus permisos a partir de su ID.
  * POR QUÉ: Similar a `findAccountLoginByEmail`, pero optimizado por Primary Key. Es utilizado en el flujo de Refresh Token para reconstruir la matriz de permisos del Access Token basándose en el estado *actual* de la BD, asegurando que si a un usuario se le quitan permisos, estos se reflejen de inmediato al refrescar.
@@ -598,6 +662,8 @@ export async function updateAuthSessionLastUsed(sessionId: number): Promise<void
  * @return {Promise<LoginAccount | null>} Cuenta con array de permisos actualizado.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findAccountByIdForSession(accountId: number | string): Promise<LoginAccount | null> {
   const query = `
     SELECT
@@ -631,6 +697,7 @@ export async function findAccountByIdForSession(accountId: number | string): Pro
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Reemplaza atómicamente el Refresh Token actual de una sesión por uno nuevo (Rotation).
  * @param sessionId {number} ID de la sesión.
@@ -640,6 +707,8 @@ export async function findAccountByIdForSession(accountId: number | string): Pro
  * @return {Promise<AuthSession | null>} La sesión actualizada.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function rotateAuthSessionRefreshToken(
   sessionId: number,
   currentRefreshTokenId: string,
@@ -676,6 +745,7 @@ export async function rotateAuthSessionRefreshToken(
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Invalida de golpe todas las sesiones activas de un usuario.
  * POR QUÉ: Método de contingencia crítica. Se utiliza obligatoriamente cuando hay un cambio de contraseña o una sospecha de brecha de seguridad para expulsar al usuario de todos sus dispositivos conectados instantáneamente.
@@ -684,6 +754,8 @@ export async function rotateAuthSessionRefreshToken(
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function revokeAllActiveSessionsByAccountId(
   accountId: number,
   reason = "new_login"
@@ -702,6 +774,7 @@ export async function revokeAllActiveSessionsByAccountId(
   await pool.query(query, [accountId, reason]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Anula todos los códigos OTP de un tipo específico que estén vigentes para un usuario.
  * POR QUÉ: Previene la acumulación de códigos válidos paralelos en la bandeja de entrada del usuario, asegurando que solo el último código generado sea utilizable.
@@ -711,6 +784,8 @@ export async function revokeAllActiveSessionsByAccountId(
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function invalidateActiveVerificationCodes(
   accountId: number,
   codeType: "register_email" | "account_reverification",
@@ -729,6 +804,7 @@ export async function invalidateActiveVerificationCodes(
   await pool.query(query, [accountId, codeType, reason]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Actualiza un registro OTP existente para extender su vigencia por un reenvío.
  * @param verificationCodeId {number} ID del registro OTP.
@@ -737,6 +813,8 @@ export async function invalidateActiveVerificationCodes(
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function markVerificationCodeResent(
   verificationCodeId: number,
   expiresAt: Date,
@@ -754,6 +832,7 @@ export async function markVerificationCodeResent(
   await pool.query(query, [verificationCodeId, codeHash, expiresAt]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Congela temporalmente la posibilidad de verificar un código específico por exceso de intentos.
  * @param verificationCodeId {number} ID del OTP.
@@ -761,6 +840,8 @@ export async function markVerificationCodeResent(
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function blockVerificationCodeUntil(
   verificationCodeId: number,
   blockedUntil: Date
@@ -773,6 +854,7 @@ export async function blockVerificationCodeUntil(
   await pool.query(query, [verificationCodeId, blockedUntil]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Guarda un token seguro específico para el flujo de recuperación de contraseña.
  * POR QUÉ: Se utiliza una tabla separada (`password_reset_tokens`) para aislar este flujo crítico de los OTPs regulares numéricos de 6 dígitos, permitiendo tokens alfanuméricos largos y políticas de caducidad independientes.
@@ -782,6 +864,8 @@ export async function blockVerificationCodeUntil(
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function createPasswordResetToken(
   accountId: number,
   tokenHash: string,
@@ -797,6 +881,7 @@ export async function createPasswordResetToken(
   await pool.query(query, [accountId, tokenHash, expiresAt]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Busca un código OTP activo comprobando que no esté caducado ni consumido.
  * @param codeHash {string} Hash del código a buscar.
@@ -804,6 +889,8 @@ export async function createPasswordResetToken(
  * @return {Promise<VerificationCodeRecord | null>} Registro OTP si es válido.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findValidVerificationCodeByHash(
   codeHash: string,
   codeType: string
@@ -821,6 +908,7 @@ export async function findValidVerificationCodeByHash(
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Sobrescribe el hash de la contraseña de un usuario en la base de datos.
  * @param accountId {number} ID del usuario.
@@ -828,6 +916,8 @@ export async function findValidVerificationCodeByHash(
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateAccountPassword(
   accountId: number, 
   newPasswordHash: string
@@ -843,6 +933,7 @@ export async function updateAccountPassword(
   await pool.query(query, [accountId, newPasswordHash]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Crea un código de desafío para la trampa de revalidación.
  * @param accountId {number} ID del usuario atrapado.
@@ -852,6 +943,8 @@ export async function updateAccountPassword(
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function createRevalidationCode(
   accountId: number,
   email: string,
@@ -878,12 +971,15 @@ export async function createRevalidationCode(
   await pool.query(query, [accountId, email, codeHash, expiresAt]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Valida criptográficamente un token de recuperación evaluando su vigencia.
  * @param tokenHash {string} Hash del token recibido desde la URL.
  * @return {Promise<Object>} El ID del token y a qué usuario pertenece si es válido.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function findValidPasswordResetToken(
   tokenHash: string
 ): Promise<{ password_reset_token_id: string, account_id: number } | null> {
@@ -899,12 +995,15 @@ export async function findValidPasswordResetToken(
   return rows[0] ?? null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Marca un token de recuperación como utilizado.
  * @param tokenId {string} ID (UUID) de la fila del token.
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function consumePasswordResetToken(
   tokenId: string
 ): Promise<void> {
@@ -916,6 +1015,7 @@ export async function consumePasswordResetToken(
   await pool.query(query, [tokenId]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Recupera el catálogo completo de cuentas de usuario para el panel de administración.
  * POR QUÉ: Realiza un JOIN directo con la tabla roles para devolver el texto del rol (`r.code`) y así el frontend no deba mapear manualmente IDs con nombres. Se ordenan de forma descendente para mostrar los más recientes primero.
@@ -923,6 +1023,8 @@ export async function consumePasswordResetToken(
  * @return {Promise<Array>} Lista de objetos mapeados con estructura simplificada.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function fetchAllUsersFromDb() {
   const query = `
     SELECT 
@@ -939,6 +1041,7 @@ export async function fetchAllUsersFromDb() {
   return rows;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Actualiza el estado administrativo de una cuenta.
  * POR QUÉ: Se omite intencionalmente una consulta `SELECT` previa. En su lugar se utiliza `RETURNING account_id` y se lee la propiedad nativa `rowCount` de `pg-pool` para confirmar al servicio si la actualización tuvo efecto o si el usuario no existía.
@@ -947,6 +1050,8 @@ export async function fetchAllUsersFromDb() {
  * @return {Promise<number>} Cantidad de filas afectadas (0 o 1).
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateUserStatusInDb(userId: string | number, newStatus: string) {
   const query = `
     UPDATE accounts 
@@ -958,12 +1063,15 @@ export async function updateUserStatusInDb(userId: string | number, newStatus: s
   return rowCount ?? 0; // Solo devolvemos cuántas filas se afectaron
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Recupera el string representativo del rol de un usuario.
  * @param userId {string | number} ID del usuario.
  * @return {Promise<string | null>} Código del rol o null si no existe.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getUserRoleCodeById(userId: string | number) {
   const query = `
     SELECT r.code 
@@ -975,6 +1083,7 @@ export async function getUserRoleCodeById(userId: string | number) {
   return rows.length > 0 ? rows[0].code : null;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Ejecuta un Hard-Delete de una cuenta en la base de datos.
  * POR QUÉ: Al igual que en la edición, se basa en `rowCount` para confirmar el borrado sin lecturas previas, descargando de trabajo a la base de datos.
@@ -982,12 +1091,15 @@ export async function getUserRoleCodeById(userId: string | number) {
  * @return {Promise<number>} Filas eliminadas.
  * @throws {Ninguna} Las restricciones de clave foránea (FK constraint) pueden lanzar error si el usuario tiene recursos anclados en otras tablas.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function deleteUserFromDb(userId: string | number) {
   const query = "DELETE FROM accounts WHERE account_id = $1";
   const { rowCount } = await pool.query(query, [userId]);
   return rowCount ?? 0;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Sobrescribe el perfil completo de un usuario con opción a cambiar credenciales.
  * POR QUÉ: Ramifica la consulta SQL basándose en si existe o no `passwordHash`. Esto evita enviar cadenas nulas que romperían la columna en BD o requerir dos métodos separados en el repositorio.
@@ -999,6 +1111,8 @@ export async function deleteUserFromDb(userId: string | number) {
  * @return {Promise<number>} Filas actualizadas (0 o 1).
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateUserAdminInDb(id: string | number, fullName: string, email: string, roleId: number, passwordHash?: string) {
   if (passwordHash) {
     const query = `UPDATE accounts SET full_name = $1, email = $2, role_id = $3, password_hash = $4, updated_at = NOW() WHERE account_id = $5 RETURNING account_id`;
@@ -1011,12 +1125,15 @@ export async function updateUserAdminInDb(id: string | number, fullName: string,
   }
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Devuelve el listado base de roles que están habilitados comercialmente en el sistema.
  * @param {void}
  * @return {Promise<Array>} Roles activos con ID y Nombre.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function fetchActiveRolesFromDb() {
   const query = `
     SELECT code, name 

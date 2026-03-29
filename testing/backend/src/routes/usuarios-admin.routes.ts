@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Gestión de Usuarios (usuarios-admin.routes.ts)
@@ -17,10 +18,14 @@
  * formato de salida de errores en toda la API.
  * ============================================================================
  */
+=======
+// src/routes/usuarios-admin.routes.ts
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { readJsonBody } from "../utils/body";
 import { sendJson } from "../utils/json";
 import { getErrorStatus, getErrorMessage} from "./auth.routes";
+<<<<<<< HEAD
 import { getAllUsers, updateUserStatus, deleteUser, editUserAdmin, getActiveRoles  } from "../services/auth.service";
 
 /**
@@ -50,6 +55,13 @@ import { getAllUsers, updateUserStatus, deleteUser, editUserAdmin, getActiveRole
  * @return {Promise<void>}
  * @throws {Ninguna} Errores atrapados y enviados como JSON.
  */
+=======
+
+// IMPORTANTE: Deberás crear estas 3 funciones en tu archivo auth.service.ts
+import { getAllUsers, updateUserStatus, deleteUser, editUserAdmin, getActiveRoles  } from "../services/auth.service";
+
+
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getUsuariosAction(req: HttpRequest, res: HttpResponse) {
   try {
     const usuarios = await getAllUsers();
@@ -59,6 +71,7 @@ export async function getUsuariosAction(req: HttpRequest, res: HttpResponse) {
   }
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Modifica el estado operativo de una cuenta de usuario específica (ej. de 'active' a 'suspended').
  * POR QUÉ: Se utiliza el método HTTP `PATCH` en lugar de `PUT` porque esta operación representa una mutación parcial (solo el campo estado) del recurso usuario, respetando los estándares RESTful.
@@ -111,6 +124,12 @@ export async function getUsuariosAction(req: HttpRequest, res: HttpResponse) {
 export async function toggleEstadoAction(req: HttpRequest, res: HttpResponse) {
   try {
    
+=======
+export async function toggleEstadoAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    // Ajusta esto dependiendo de cómo tu Router personalizado extrae los parámetros de la URL
+    // A veces es req.params.id, otras veces hay que sacarlo del string de la URL
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     const id = (req as any).params?.id; 
     
     if (!id) {
@@ -127,6 +146,7 @@ export async function toggleEstadoAction(req: HttpRequest, res: HttpResponse) {
   }
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Elimina definitivamente una cuenta de usuario del sistema.
  * POR QUÉ: El controlador asume un rol puramente orquestador. Las reglas vitales de seguridad (como impedir que un administrador borre al "super_admin") no se programan aquí, sino que se delegan 100% al servicio (`deleteUser`) para mantener el controlador "tonto" y agnóstico a la lógica de negocio profunda.
@@ -163,6 +183,8 @@ export async function toggleEstadoAction(req: HttpRequest, res: HttpResponse) {
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function deleteUsuarioAction(req: HttpRequest, res: HttpResponse) {
   try {
     const id = (req as any).params?.id;
@@ -180,6 +202,7 @@ export async function deleteUsuarioAction(req: HttpRequest, res: HttpResponse) {
   }
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Modifica el perfil de un usuario, alterando sus datos personales, nivel de acceso y credenciales si es necesario.
  * POR QUÉ: Se exige explícitamente el campo `role_code` en esta capa. Una cuenta que pierde su asociación de rol corrompe todo el modelo RBAC del sistema, por lo que el controlador aborta la petición (Fallo rápido/Fail-fast) antes de contactar a la base de datos si este dato se omitió en el JSON.
@@ -241,6 +264,8 @@ export async function deleteUsuarioAction(req: HttpRequest, res: HttpResponse) {
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function editUsuarioAction(req: HttpRequest, res: HttpResponse) {
   try {
     const id = (req as any).params?.id; 
@@ -250,6 +275,10 @@ export async function editUsuarioAction(req: HttpRequest, res: HttpResponse) {
       return;
     }
 
+<<<<<<< HEAD
+=======
+    // Agregamos role_code a los datos esperados
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     const body = await readJsonBody<{ full_name: string, email: string, role_code: string, password?: string }>(req);
     
     if (!body.role_code) {
@@ -265,6 +294,7 @@ export async function editUsuarioAction(req: HttpRequest, res: HttpResponse) {
   }
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Recupera el listado base de roles activos que pueden ser asignados a un usuario.
  * POR QUÉ: Se aísla este método en lugar de utilizar la función pesada `getRolesDetails` del módulo de roles. Dado que este endpoint está pensado para poblar un simple combo box (dropdown select) en el formulario de "Editar Usuario", solo requiere la tupla básica de ID y Nombre de los roles activos, optimizando la latencia y el tamaño del payload HTTP.
@@ -290,6 +320,8 @@ export async function editUsuarioAction(req: HttpRequest, res: HttpResponse) {
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getRolesAction(req: HttpRequest, res: HttpResponse) {
   try {
     const roles = await getActiveRoles();

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Gestión de Cookies de Servidor (cookies.ts)
@@ -15,6 +16,8 @@
  * en los controladores.
  * ============================================================================
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpResponse } from "../types/http";
 import { env } from "../config/env";
 
@@ -26,6 +29,7 @@ interface CookieOptions {
   maxAge?: number;
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Construye la cadena de texto serializada para una cookie individual.
  * POR QUÉ: Utiliza `encodeURIComponent` en el valor para garantizar que 
@@ -37,6 +41,8 @@ interface CookieOptions {
  * @param options {CookieOptions} Configuración de visibilidad y vida útil.
  * @return {string} Cadena formateada para la cabecera Set-Cookie.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 function buildCookie(name: string, value: string, options: CookieOptions = {}): string {
   const parts: string[] = [`${name}=${encodeURIComponent(value)}`];
 
@@ -63,6 +69,7 @@ function buildCookie(name: string, value: string, options: CookieOptions = {}): 
   return parts.join("; ");
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Inyecta una cookie en la cabecera de la respuesta HTTP actual.
  * POR QUÉ: Implementa una lógica de normalización de cabeceras. Dado que 
@@ -78,6 +85,8 @@ function buildCookie(name: string, value: string, options: CookieOptions = {}): 
  * @return {void}
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function setCookie(
   res: HttpResponse,
   name: string,
@@ -100,6 +109,7 @@ export function setCookie(
   res.setHeader("Set-Cookie", [String(current), cookie]);
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Ordena al navegador eliminar una cookie específica.
  * POR QUÉ: Setea el valor a una cadena vacía y el `maxAge` a 0. Esta es la 
@@ -110,6 +120,8 @@ export function setCookie(
  * @param options {CookieOptions} Debe coincidir con el Path y Domain originales para que la eliminación sea exitosa.
  * @return {void}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function clearCookie(
   res: HttpResponse,
   name: string,
@@ -123,6 +135,7 @@ export function clearCookie(
 
 const isProduction = env.NODE_ENV === "production";
 
+<<<<<<< HEAD
 /**
  * Descripción: Configura de forma segura la cookie que transporta el Refresh Token.
  * POR QUÉ: 
@@ -136,6 +149,8 @@ const isProduction = env.NODE_ENV === "production";
  * @param refreshToken {string} Token de larga duración generado por el servicio de JWT.
  * @return {void}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function setRefreshTokenCookie(res: HttpResponse, refreshToken: string): void {
   // Si no está en producción, secure será false.
   const isProduction = env.NODE_ENV === "production";
@@ -149,6 +164,7 @@ export function setRefreshTokenCookie(res: HttpResponse, refreshToken: string): 
   });
 }
 
+<<<<<<< HEAD
 /**
  * Descripción: Elimina específicamente la cookie del Refresh Token.
  * POR QUÉ: Debe replicar exactamente las opciones de `path` y `sameSite` 
@@ -157,6 +173,8 @@ export function setRefreshTokenCookie(res: HttpResponse, refreshToken: string): 
  * @param res {HttpResponse} Objeto de respuesta.
  * @return {void}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function clearRefreshTokenCookie(res: HttpResponse): void {
   const isProduction = env.NODE_ENV === "production";
 

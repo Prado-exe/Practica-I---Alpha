@@ -105,6 +105,7 @@
 <a name='L40'></a><a href='#L40'>40</a>
 <a name='L41'></a><a href='#L41'>41</a>
 <a name='L42'></a><a href='#L42'>42</a>
+<<<<<<< HEAD
 <a name='L43'></a><a href='#L43'>43</a>
 <a name='L44'></a><a href='#L44'>44</a>
 <a name='L45'></a><a href='#L45'>45</a>
@@ -191,6 +192,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+<a name='L43'></a><a href='#L43'>43</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -204,6 +208,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -211,10 +216,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -225,6 +233,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -234,6 +244,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -245,6 +256,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -254,6 +267,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -261,12 +275,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * ============================================================================
  * MÓDULO: Servicio de Roles y Permisos (roles.service.ts)
@@ -285,6 +302,9 @@
  * ============================================================================
  */
 import {
+=======
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   getRolesWithDetailsFromDb,
   getAllPermissionsFromDb,
   createRoleWithPermissionsInDb,
@@ -293,6 +313,7 @@ import {
 } from "../repositories/roles.repository";
 import { AppError } from "../types/app-error";
 &nbsp;
+<<<<<<< HEAD
 &nbsp;
 /**
  * Descripción: Recupera el listado completo de roles junto con el desglose de todos los permisos que cada uno posee.
@@ -301,10 +322,13 @@ import { AppError } from "../types/app-error";
  * @return {Promise&lt;Array&gt;} Lista de roles estructurada con sus respectivos arrays de permisos.
  * @throws {Ninguna} 
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getRolesDetails() {
   return await getRolesWithDetailsFromDb();
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Recupera el catálogo maestro de permisos disponibles en el sistema.
  * POR QUÉ: Provee la materia prima necesaria para que el frontend pueda construir dinámicamente la interfaz de creación y edición de roles (ej. renderizar los checkboxes organizados por módulos).
@@ -312,10 +336,13 @@ export async function getRolesDetails() {
  * @return {Promise&lt;Array&gt;} Lista de todos los permisos registrados en la BD.
  * @throws {Ninguna}
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getAllPermissions() {
   return await getAllPermissionsFromDb();
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Valida y registra un nuevo rol de sistema asignándole su conjunto de permisos inicial.
  * POR QUÉ: Implementa una validación estricta de "Fallo Rápido" (Fail-Fast). Un rol sin permisos o sin código identificador es inútil y potencialmente peligroso en el modelo RBAC, por lo que la función aborta y rechaza la petición en memoria antes de siquiera intentar interactuar con la base de datos.
@@ -326,6 +353,8 @@ export async function getAllPermissions() {
  * @return {Promise&lt;Object&gt;} Mensaje de éxito y el ID del rol recién creado.
  * @throws {AppError} 400 Si los campos están vacíos o el array de permisos no tiene elementos.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function createNewRole(code: string, name: string, description: string, permisos: number[]) {
   if (!code || !name || !permisos || permisos.length === 0) {
     throw new AppError("Faltan campos obligatorios o permisos", 400);
@@ -335,6 +364,7 @@ export async function createNewRole(code: string, name: string, description: str
   return { message: "Rol creado exitosamente", roleId };
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Modifica los metadatos de un rol existente y reemplaza la totalidad de sus permisos asociados.
  * POR QUÉ: Reutiliza la misma barrera de validación estricta de la creación. Al exigir siempre un array `permisos` no vacío, previene que un administrador bloquee accidentalmente un rol dejándolo con cero accesos por un error en la interfaz de usuario.
@@ -346,6 +376,8 @@ export async function createNewRole(code: string, name: string, description: str
  * @return {Promise&lt;Object&gt;} Mensaje de confirmación.
  * @throws {AppError} 400 Si faltan datos críticos o se envían permisos vacíos.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateExistingRole(roleId: number, code: string, name: string, description: string, permisos: number[]) {
   if (!code || !name || !permisos || permisos.length === 0) {
     throw new AppError("Faltan campos obligatorios o permisos", 400);
@@ -355,6 +387,7 @@ export async function updateExistingRole(roleId: number, code: string, name: str
   return { message: "Rol actualizado exitosamente" };
 }
 &nbsp;
+<<<<<<< HEAD
 /**
  * Descripción: Elimina un rol del sistema y ejecuta la política de mitigación para los usuarios afectados.
  * POR QUÉ: Intercepta y traduce los errores provenientes del repositorio de datos. Si se intenta borrar un rol protegido (como el 'super_admin') o la reasignación de usuarios falla, el `catch` captura el error nativo y lo empaqueta en un `AppError` con código HTTP 403 (Prohibido) para que el controlador lo entienda y se lo muestre limpio al cliente.
@@ -362,6 +395,8 @@ export async function updateExistingRole(roleId: number, code: string, name: str
  * @return {Promise&lt;Object&gt;} Mensaje confirmando la eliminación y el traspaso de usuarios.
  * @throws {AppError} 403 Si la operación de borrado o reasignación es denegada por reglas de integridad.
  */
+=======
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function removeRole(roleId: number) {
   try {
     await deleteRoleAndReassignUsersInDb(roleId);
@@ -376,7 +411,11 @@ export async function removeRole(roleId: number) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+<<<<<<< HEAD
                 at 2026-03-29T17:08:40.163Z
+=======
+                at 2026-03-26T02:52:40.548Z
+>>>>>>> refactorizacion-y-testeo-de-algunas-cosas
             </div>
         <script src="../../prettify.js"></script>
         <script>
