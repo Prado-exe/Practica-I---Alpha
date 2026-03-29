@@ -79,7 +79,46 @@
 <a name='L14'></a><a href='#L14'>14</a>
 <a name='L15'></a><a href='#L15'>15</a>
 <a name='L16'></a><a href='#L16'>16</a>
-<a name='L17'></a><a href='#L17'>17</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -94,20 +133,44 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import crypto from "crypto";
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * ============================================================================
+ * MÓDULO: Utilidades de Tokens Criptográficos (token.ts)
+ * * PROPÓSITO: Proveer herramientas para la creación y almacenamiento seguro 
+ * de tokens de alta entropía (recuperación de clave, verificación de email).
+ * * RESPONSABILIDAD: Garantizar que los tokens generados sean impredecibles y 
+ * que su persistencia en la base de datos no comprometa la seguridad del 
+ * usuario en caso de una filtración de datos.
+ * * DECISIONES DE DISEÑO / SUPUESTOS:
+ * - Almacenamiento "Hashed": Siguiendo el principio de defensa en profundidad, 
+ * los tokens nunca se guardan en texto plano. Se aplica una función hash 
+ * antes de la inserción en BD, de modo que un atacante con acceso a las tablas 
+ * no pueda reconstruir los enlaces de recuperación válidos.
+ * ============================================================================
+ */
+import crypto from "crypto";
 &nbsp;
 /**
- * Genera un token aleatorio criptográficamente seguro.
- * @param bytes Longitud en bytes (por defecto 32 bytes = 64 caracteres hex)
+ * Descripción: Genera una cadena aleatoria hexadecimal utilizando un generador de números pseudoaleatorios criptográficamente seguro (CSPRNG).
+ * POR QUÉ: Se utiliza el módulo `crypto` nativo de Node.js en lugar de `Math.random()` porque este último es predecible y vulnerable a ataques de fuerza bruta. El valor por defecto de 32 bytes genera una cadena de 64 caracteres, lo que proporciona una colisión prácticamente imposible para identificadores únicos globales.
+ * @param bytes {number} Cantidad de bytes de entropía a generar (por defecto 32).
+ * @return {string} Representación hexadecimal del token.
+ * @throws {Error} Si el sistema no dispone de suficiente entropía acumulada para generar bytes seguros.
  */
 export function generateSecureToken(bytes: number = 32): string {
   return crypto.randomBytes(bytes).toString("hex");
 }
 &nbsp;
 /**
- * Aplica un hash SHA-256 a un token para guardarlo de forma segura en la BD.
- * @param token El token original en texto plano
+ * Descripción: Transforma un token de texto plano en un hash SHA-256.
+ * POR QUÉ: Esta función actúa como una caja negra de una sola vía. Al usar SHA-256, nos aseguramos de que incluso si la base de datos es comprometida, los tokens activos no puedan ser utilizados por un tercero. Dado que los tokens generados por `generateSecureToken` ya poseen una alta entropía, no es estrictamente necesario el uso de sales (salts) adicionales como ocurre con las contraseñas de usuario.
+ * @param token {string} El token original generado para el usuario.
+ * @return {string} El resumen (digest) hexadecimal del token para almacenamiento.
+ * @throws {Ninguna} Operación síncrona determinista.
  */
 export function hashSecureToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -118,7 +181,7 @@ export function hashSecureToken(token: string): string {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-26T02:52:40.548Z
+                at 2026-03-29T16:48:14.503Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
