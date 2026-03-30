@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Inicio de Sesión (login.routes.ts)
@@ -17,18 +15,12 @@
  * en el cliente.
  * ============================================================================
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { readJsonBody } from "../utils/body";
 import { sendJson } from "../utils/json";
 import { setRefreshTokenCookie } from "../utils/cookies";
 import { loginSchema } from "../validators/auth.validators";
 import { loginUser } from "../services/auth.service";
-<<<<<<< HEAD
-// 👇 Importamos tus helpers de errores
-import { getErrorStatus, getErrorMessage } from "./auth.routes";
-
-=======
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 
 /**
@@ -71,7 +63,6 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * @return {Promise<void>} 
  * @throws {Error} Errores de validación de esquema o credenciales incorrectas (mapeados a HTTP 400/401).
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function loginAction(req: HttpRequest, res: HttpResponse) {
   try {
     const body = await readJsonBody(req);
@@ -84,10 +75,6 @@ export async function loginAction(req: HttpRequest, res: HttpResponse) {
 
     const result = await loginUser(payload, meta);
 
-<<<<<<< HEAD
-    // Si tu servicio devuelve requiresRevalidation
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     if (result.requiresRevalidation) {
       return sendJson(res, 403, { 
         ok: false, 

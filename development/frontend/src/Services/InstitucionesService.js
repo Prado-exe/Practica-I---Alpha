@@ -1,42 +1,8 @@
-<<<<<<< HEAD
-// src/Services/InstitucionesService.js
-export const getInstituciones = async ({
-  search = "",
-  page = 1,
-  limit = 9
-} = {}) => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-
-  const { instituciones: allInstituciones } = await import("../data/InstitucionesData");
-
-  let result = [...allInstituciones];
-
-  // 🔎 búsqueda
-  if (search) {
-    result = result.filter(inst =>
-      inst.nombre.toLowerCase().includes(search.toLowerCase())
-    );
-  }
-
-  const total = result.length;
-
-  // 📄 paginación
-  const paginated = result.slice((page - 1) * limit, page * limit);
-
-  return {
-    data: paginated,
-    total,
-    page,
-    totalPages: Math.ceil(total / limit)
-  };
-};
-=======
 // frontend/src/Services/InstitucionesService.js
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export async function getInstituciones({ search = "", page = 1, limit = 9 }) {
   try {
-    // URLSearchParams requiere strings, así que convertimos los números
     const queryParams = new URLSearchParams({ 
       search, 
       page: String(page), 
@@ -60,4 +26,3 @@ export async function getInstituciones({ search = "", page = 1, limit = 9 }) {
     return { data: [], total: 0, totalPages: 1 };
   }
 }
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas

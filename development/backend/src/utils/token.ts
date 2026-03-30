@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import crypto from "crypto";
-
-/**
- * Genera un token aleatorio criptográficamente seguro.
- * @param bytes Longitud en bytes (por defecto 32 bytes = 64 caracteres hex)
-=======
 /**
  * ============================================================================
  * MÓDULO: Utilidades de Tokens Criptográficos (token.ts)
@@ -28,23 +21,17 @@ import crypto from "crypto";
  * @param bytes {number} Cantidad de bytes de entropía a generar (por defecto 32).
  * @return {string} Representación hexadecimal del token.
  * @throws {Error} Si el sistema no dispone de suficiente entropía acumulada para generar bytes seguros.
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
  */
 export function generateSecureToken(bytes: number = 32): string {
   return crypto.randomBytes(bytes).toString("hex");
 }
 
 /**
-<<<<<<< HEAD
- * Aplica un hash SHA-256 a un token para guardarlo de forma segura en la BD.
- * @param token El token original en texto plano
-=======
  * Descripción: Transforma un token de texto plano en un hash SHA-256.
  * POR QUÉ: Esta función actúa como una caja negra de una sola vía. Al usar SHA-256, nos aseguramos de que incluso si la base de datos es comprometida, los tokens activos no puedan ser utilizados por un tercero. Dado que los tokens generados por `generateSecureToken` ya poseen una alta entropía, no es estrictamente necesario el uso de sales (salts) adicionales como ocurre con las contraseñas de usuario.
  * @param token {string} El token original generado para el usuario.
  * @return {string} El resumen (digest) hexadecimal del token para almacenamiento.
  * @throws {Ninguna} Operación síncrona determinista.
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
  */
 export function hashSecureToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");

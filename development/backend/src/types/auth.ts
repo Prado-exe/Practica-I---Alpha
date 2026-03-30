@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * ============================================================================
  * MÓDULO: Modelos y Tipos de Autenticación (auth.ts)
@@ -22,7 +20,6 @@
  * amarrado estrictamente a la estructura de la tabla de base de datos.
  * ============================================================================
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export interface Account {
   account_id: number;
   role_id: number;

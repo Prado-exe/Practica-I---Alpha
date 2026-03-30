@@ -25,7 +25,7 @@ services:
       - ./backend:/app
       - /app/node_modules
     environment:
-      - DB_HOST_POSTGRES=postgres
+      - DB_HOST_POSTGRES=postgres-dev
       - DB_USER=user
       - DB_PASS=password
       - DB_NAME=appdb
@@ -45,11 +45,8 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
-<<<<<<< HEAD
-=======
       - ./db/migrations:/migrations:ro
       - ./db/init:/docker-entrypoint-initdb.d:ro
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     networks:
       - dev-net
 

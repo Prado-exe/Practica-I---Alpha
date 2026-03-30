@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * ============================================================================
  * MÓDULO: Gestión de JSON Web Tokens (jwt.ts)
@@ -21,7 +19,6 @@
  * de cómo se hayan serializado originalmente.
  * ============================================================================
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import jwt, { type JwtPayload, type SignOptions, type VerifyOptions } from "jsonwebtoken";
 import { env } from "../config/env";
 import type { JwtAccessPayload, JwtRefreshPayload } from "../types/auth";
@@ -72,8 +69,6 @@ function buildRefreshVerifyOptions(): VerifyOptions {
   };
 }
 
-<<<<<<< HEAD
-=======
 
 /**
  * Descripción: Genera un Access Token firmado para sesiones de corta duración.
@@ -82,13 +77,10 @@ function buildRefreshVerifyOptions(): VerifyOptions {
  * @return {string} Token JWT firmado.
  * @throws {Error} Si el secreto de acceso no está configurado o hay fallos en la librería de firma.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function signAccessToken(payload: JwtAccessPayload): string {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, buildAccessSignOptions());
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Genera un Refresh Token para la persistencia de sesiones prolongadas.
  * POR QUÉ: A diferencia del Access Token, este incluye un `tokenId` único que permite implementar rotación de tokens y detección de robos de sesión en el backend. Se firma con un secreto independiente para elevar la seguridad del flujo de renovación.
@@ -96,13 +88,10 @@ export function signAccessToken(payload: JwtAccessPayload): string {
  * @return {string} Token JWT firmado.
  * @throws {Error} Ante fallos en la configuración o proceso de firma.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function signRefreshToken(payload: JwtRefreshPayload): string {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, buildRefreshSignOptions());
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Valida la integridad de un Access Token y extrae su contenido tipado.
  * POR QUÉ: 
@@ -117,7 +106,6 @@ export function signRefreshToken(payload: JwtRefreshPayload): string {
  * @return {JwtAccessPayload} El payload normalizado y verificado.
  * @throws {AppError} (401) Si el token expiró, la firma es inválida o el payload está mal formado.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function verifyAccessToken(token: string): JwtAccessPayload {
   let decoded: string | JwtPayload;
 
@@ -135,17 +123,9 @@ export function verifyAccessToken(token: string): JwtAccessPayload {
     throw new AppError("Token inválido", 401);
   }
 
-<<<<<<< HEAD
-  // 1. Convertimos los IDs a números, sin importar si vienen como string o number
   const sub = Number(decoded.sub);
   const sessionId = Number(decoded.sessionId);
 
-  // 2. Validamos que sean números válidos y exista el email
-=======
-  const sub = Number(decoded.sub);
-  const sessionId = Number(decoded.sessionId);
-
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   if (
     isNaN(sub) ||
     isNaN(sessionId) ||
@@ -154,25 +134,15 @@ export function verifyAccessToken(token: string): JwtAccessPayload {
     throw new AppError("Payload de access token inválido", 401);
   }
 
-<<<<<<< HEAD
-  // 3. RETORNAMOS TODO EL PAYLOAD (¡Especialmente los permisos!)
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   return {
     sub,
     email: decoded.email,
     sessionId,
     role: decoded.role || "registered_user",
-<<<<<<< HEAD
-    // Aseguramos que los permisos siempre sean un arreglo
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     permissions: Array.isArray(decoded.permissions) ? decoded.permissions : [],
   };
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Verifica y decodifica un Refresh Token para procesos de renovación.
  * POR QUÉ: Además de la validación estándar, este método asegura la presencia del `tokenId`, dato crítico para que el servicio de autenticación pueda verificar si el token ha sido revocado o ya utilizado en una rotación previa. Al igual que en el Access Token, normaliza los IDs a valores numéricos para mantener la integridad con la base de datos.
@@ -180,15 +150,10 @@ export function verifyAccessToken(token: string): JwtAccessPayload {
  * @return {JwtRefreshPayload} Datos necesarios para identificar la sesión a renovar.
  * @throws {AppError} (401) Si el token es inválido, expiró o no contiene la estructura requerida.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function verifyRefreshToken(token: string): JwtRefreshPayload {
   try {
     const decoded = jwt.verify(token, env.JWT_REFRESH_SECRET) as any;
 
-<<<<<<< HEAD
-    // Convertimos explícitamente a número lo que sea que venga de la base de datos
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     const sub = Number(decoded.sub);
     const sessionId = Number(decoded.sessionId);
 

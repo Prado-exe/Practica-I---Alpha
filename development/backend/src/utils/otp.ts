@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import { createHash, randomInt } from "crypto";
-
-=======
 /**
  * ============================================================================
  * MÓDULO: Utilidades de Código OTP (otp.ts)
@@ -27,7 +23,6 @@ import { createHash, randomInt } from "crypto";
  * @return {string} Cadena de texto que representa el código numérico.
  * @throws {Error} Si el motor criptográfico falla por falta de entropía en el sistema.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function generateOtpCode(length = 6): string {
   let code = "";
 
@@ -38,8 +33,6 @@ export function generateOtpCode(length = 6): string {
   return code;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Aplica un resumen SHA-256 a un código OTP para su almacenamiento seguro.
  * POR QUÉ: Los OTP son credenciales temporales pero críticas. Utilizar SHA-256 asegura que el valor en la base de datos sea inútil si es extraído, requiriendo que el usuario proporcione el código original para que el sistema realice la comparación de hashes. No requiere salt adicional dado que la corta vida útil del token y su naturaleza aleatoria mitigan el riesgo de tablas de búsqueda (rainbow tables).
@@ -47,7 +40,6 @@ export function generateOtpCode(length = 6): string {
  * @return {string} El hash hexadecimal del código.
  * @throws {Ninguna} Operación determinista síncrona.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function hashOtpCode(code: string): string {
   return createHash("sha256").update(code).digest("hex");
 }

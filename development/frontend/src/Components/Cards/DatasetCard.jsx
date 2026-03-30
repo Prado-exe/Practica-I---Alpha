@@ -1,45 +1,54 @@
+// frontend/src/Components/Cards/DatasetCard.jsx
+import { useNavigate } from "react-router-dom"; 
 import "../../Styles/ComponentStyle/Cards/DatasetCard.css";
 
 function DatasetCard({ dataset }) {
+  const navigate = useNavigate(); // 👈 2. Inicializar
+
+  // 3. Crear función de redirección (Asegúrate de usar el ID correcto)
+  const handleVerDetalle = () => {
+    const id = dataset.id || dataset.dataset_id;
+    navigate(`/conjuntodatos/${id}`);
+  };
+
   return (
     <article className="dataset-card">
-
-      {/* Header */}
       <div className="dataset-header">
         <span className="dataset-date">
-          {dataset.created || "Sin fecha"}
+          {dataset.fecha || "Sin fecha"}
         </span>
 
-        <button className="dataset-btn">
+        {/* 4. Agregar el evento onClick al botón */}
+        <button className="dataset-btn" onClick={handleVerDetalle}>
           Ver →
         </button>
       </div>
 
-      {/* Institución */}
-      {dataset.institution && (
+      {/* Institución responsable */}
+      {dataset.institucion && (
         <p className="dataset-institution">
-          {dataset.institution}
+          {dataset.institucion}
         </p>
       )}
 
-      {/* Título */}
+      {/* Título principal del Dataset */}
       <h3 className="dataset-title">
-        {dataset.title}
+        {dataset.nombre}
       </h3>
 
-      {/* Descripción */}
-      <p className="dataset-description">
-        {dataset.description}
-      </p>
+      {/* Breve descripción (opcional) */}
+      {dataset.description && (
+        <p className="dataset-description">
+          {dataset.description}
+        </p>
+      )}
 
-      {/* Tags */}
-      {dataset.tags?.length > 0 && (
+      {/* Etiquetas / Categoría */}
+      {dataset.categoria && (
         <div className="dataset-tags">
-          {dataset.tags.map(tag => (
-            <span key={tag} className="dataset-tag">
-              {tag}
-            </span>
-          ))}
+          <span className="dataset-tag">
+            {dataset.categoria}
+          </span>
         </div>
       )}
     </article>

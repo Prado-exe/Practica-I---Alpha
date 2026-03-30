@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-import { pool } from "../config/db";
-
-// 1. Obtener todos los roles con sus conteos y lista de permisos
-=======
 /**
  * ============================================================================
  * MÓDULO: Repositorio de Roles y Permisos (roles.repository.ts)
@@ -28,7 +23,6 @@ import { pool } from "../config/db";
  * @return {Promise<Array>} Lista de roles con conteos e IDs de permisos.
  * @throws {Ninguna} Errores de sintaxis o conexión burbujean al manejador global.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getRolesWithDetailsFromDb() {
   const query = `
     SELECT 
@@ -46,9 +40,6 @@ export async function getRolesWithDetailsFromDb() {
   return rows;
 }
 
-<<<<<<< HEAD
-// 2. Obtener la lista maestra de permisos disponibles
-=======
 /**
  * Descripción: Obtiene el catálogo completo de permisos habilitados en el sistema.
  * POR QUÉ: La consulta incluye explícitamente un `ORDER BY module_code, permission_id`. Esto no es meramente estético, sino una decisión de diseño para que el frontend pueda iterar y agrupar automáticamente los checkboxes en bloques visuales (ej. "Módulo de Usuarios", "Módulo de Datasets") sin tener que escribir lógica compleja de ordenamiento en JavaScript.
@@ -56,20 +47,12 @@ export async function getRolesWithDetailsFromDb() {
  * @return {Promise<Array>} Lista de permisos estructurados y ordenados.
  * @throws {Ninguna}
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getAllPermissionsFromDb() {
   const query = `SELECT permission_id, code, description FROM permissions WHERE is_active = TRUE ORDER BY module_code, permission_id`;
   const { rows } = await pool.query(query);
   return rows;
 }
 
-<<<<<<< HEAD
-// 3. Crear Rol + Asignar Permisos (Transacción)
-export async function createRoleWithPermissionsInDb(code: string, name: string, description: string, permisos: number[]) {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN'); // Iniciamos transacción
-=======
 /**
  * Descripción: Inserta un nuevo rol y mapea secuencialmente sus permisos de forma atómica.
  * POR QUÉ: Se implementa una transacción (`BEGIN/COMMIT`). Si el servidor Node.js crashea o la red se cae a la mitad del bucle `for` de inserción de permisos, el bloque `CATCH` ejecuta un `ROLLBACK`. Esto previene el escenario catastrófico de tener un rol creado en el sistema, pero con un set de permisos incompleto.
@@ -84,7 +67,6 @@ export async function createRoleWithPermissionsInDb(code: string, name: string, 
   const client = await pool.connect();
   try {
     await client.query('BEGIN'); 
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     
     // Insertamos el rol
     const roleRes = await client.query(
@@ -93,11 +75,7 @@ export async function createRoleWithPermissionsInDb(code: string, name: string, 
     );
     const roleId = roleRes.rows[0].role_id;
 
-<<<<<<< HEAD
-    // Insertamos cada permiso seleccionado
-=======
 
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     for (const permId of permisos) {
       await client.query(
         `INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)`,
@@ -115,9 +93,6 @@ export async function createRoleWithPermissionsInDb(code: string, name: string, 
   }
 }
 
-<<<<<<< HEAD
-// 4. Actualizar Rol + Reemplazar Permisos (Transacción)
-=======
 /**
  * Descripción: Modifica los metadatos de un rol y renueva por completo su matriz de accesos.
  * POR QUÉ: Se optó por una estrategia "Wipe and Replace" (Eliminar y Reemplazar) mediante un `DELETE` total seguido de múltiples `INSERT`s en lugar de calcular las diferencias (Diff) en memoria. Al estar dentro de una transacción, esta técnica es muchísimo más simple, menos propensa a bugs lógicos y garantiza que el estado final en BD sea idéntico al array solicitado.
@@ -129,33 +104,21 @@ export async function createRoleWithPermissionsInDb(code: string, name: string, 
  * @return {Promise<void>} 
  * @throws {Error} Lanza error si falla el borrado o la inserción de la matriz.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateRoleWithPermissionsInDb(roleId: number, code: string, name: string, description: string, permisos: number[]) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     
-<<<<<<< HEAD
-    // Actualizamos datos básicos
-=======
 
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     await client.query(
       `UPDATE roles SET code = $1, name = $2, description = $3, updated_at = NOW() WHERE role_id = $4`,
       [code, name, description, roleId]
     );
     
-<<<<<<< HEAD
-    // Borramos permisos antiguos
-    await client.query(`DELETE FROM role_permissions WHERE role_id = $1`, [roleId]);
-    
-    // Insertamos los nuevos permisos
-=======
   
     await client.query(`DELETE FROM role_permissions WHERE role_id = $1`, [roleId]);
     
   
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     for (const permId of permisos) {
       await client.query(
         `INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)`,
@@ -172,9 +135,6 @@ export async function updateRoleWithPermissionsInDb(roleId: number, code: string
   }
 }
 
-<<<<<<< HEAD
-// 5. Eliminar Rol y Reasignar Usuarios (Transacción)
-=======
 /**
  * Descripción: Elimina un rol del sistema aplicando una estrategia de degradación segura para sus usuarios.
  * POR QUÉ: Contiene una capa de validación "Hardcoded" que evalúa el código del rol destino y aborta la transacción lanzando un error si se intentan eliminar pilares del sistema (`super_admin` o `registered_user`). Adicionalmente, reasigna a los usuarios afectados al rol base en la misma transacción, previniendo que queden "huérfanos" (con `role_id` nulo) lo cual rompería su capacidad de iniciar sesión. Confía en el `ON DELETE CASCADE` de PostgreSQL para limpiar los permisos de forma automática.
@@ -182,42 +142,26 @@ export async function updateRoleWithPermissionsInDb(roleId: number, code: string
  * @return {Promise<void>}
  * @throws {Error} Lanza excepción si se intenta borrar un rol vital o si la transacción fracasa.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function deleteRoleAndReassignUsersInDb(roleId: number) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     
-<<<<<<< HEAD
-    // Buscamos el ID de "registered_user" para reasignar a los huérfanos
-    const regRoleRes = await client.query(`SELECT role_id FROM roles WHERE code = 'registered_user'`);
-    const regRoleId = regRoleRes.rows[0].role_id;
-
-    // Protegemos la BD para que nadie borre por accidente los roles vitales
-=======
    
     const regRoleRes = await client.query(`SELECT role_id FROM roles WHERE code = 'registered_user'`);
     const regRoleId = regRoleRes.rows[0].role_id;
 
    
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     const targetRoleRes = await client.query(`SELECT code FROM roles WHERE role_id = $1`, [roleId]);
     const targetCode = targetRoleRes.rows[0]?.code;
     if (targetCode === 'super_admin' || targetCode === 'registered_user') {
       throw new Error("PROHIBIDO: No puedes borrar roles del sistema.");
     }
 
-<<<<<<< HEAD
-    // Reasignamos usuarios
-    await client.query(`UPDATE accounts SET role_id = $1 WHERE role_id = $2`, [regRoleId, roleId]);
-    
-    // Borramos el rol (la tabla role_permissions se limpia sola por tu ON DELETE CASCADE)
-=======
    
     await client.query(`UPDATE accounts SET role_id = $1 WHERE role_id = $2`, [regRoleId, roleId]);
     
  
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     await client.query(`DELETE FROM roles WHERE role_id = $1`, [roleId]);
 
     await client.query('COMMIT');

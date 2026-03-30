@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-export class AppError extends Error {
-  public readonly statusCode: number;
-
-=======
 /**
  * ============================================================================
  * MÓDULO: Definición de Errores de Aplicación (app-error.ts)
@@ -34,7 +29,6 @@ export class AppError extends Error {
    * @return {AppError} Una instancia tipada de error.
    * @throws {Ninguna}
    */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   constructor(message: string, statusCode = 500) {
     super(message);
     this.name = "AppError";

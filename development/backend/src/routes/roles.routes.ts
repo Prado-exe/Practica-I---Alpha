@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import type { HttpRequest, HttpResponse } from "../types/http";
-import { sendJson } from "../utils/json";
-import { readJsonBody } from "../utils/body";
-// Reutilizamos tus funciones de error ya existentes en auth.routes
-=======
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Roles y Permisos (roles.routes.ts)
@@ -24,7 +18,6 @@ import { readJsonBody } from "../utils/body";
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { readJsonBody } from "../utils/body";
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { getErrorStatus, getErrorMessage } from "./auth.routes"; 
 import {
   getRolesDetails,
@@ -34,8 +27,6 @@ import {
   removeRole
 } from "../services/roles.service";
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Recupera el catálogo de roles enriquecido con conteos de usuarios y listas de permisos.
  * POR QUÉ: No devuelve una lista simple, sino una vista analítica pesada. Esto se diseñó específicamente para poblar la tabla principal del panel de administración ("Data Grid"), permitiendo al cliente mostrar toda la matriz de seguridad sin tener que hacer peticiones adicionales.
@@ -63,7 +54,6 @@ import {
  * @return {Promise<void>}
  * @throws {Ninguna} Errores manejados internamente y emitidos como JSON.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getRolesDetailsAction(req: HttpRequest, res: HttpResponse) {
   try {
     const roles = await getRolesDetails();
@@ -73,8 +63,6 @@ export async function getRolesDetailsAction(req: HttpRequest, res: HttpResponse)
   }
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Recupera el diccionario maestro de permisos del sistema.
  * POR QUÉ: Este endpoint es vital para la construcción dinámica de interfaces. El frontend consume esta lista para renderizar de forma automática todos los checkboxes agrupados por módulo al momento de crear o editar un rol, asegurando que la UI nunca esté desincronizada con la Base de Datos.
@@ -98,7 +86,6 @@ export async function getRolesDetailsAction(req: HttpRequest, res: HttpResponse)
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getPermisosAction(req: HttpRequest, res: HttpResponse) {
   try {
     const permisos = await getAllPermissions();
@@ -108,8 +95,6 @@ export async function getPermisosAction(req: HttpRequest, res: HttpResponse) {
   }
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Registra un nuevo rol de sistema y le asigna su matriz de permisos inicial de forma atómica.
  * POR QUÉ: Exige el array `permisos` desde la petición original. Esto refuerza el diseño de creación atómica: un rol no puede nacer "vacío" o en un estado de limbo de accesos, debe proveerse su configuración de seguridad completa desde el primer instante. Devuelve un estado HTTP 201 explícito.
@@ -162,7 +147,6 @@ export async function getPermisosAction(req: HttpRequest, res: HttpResponse) {
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function createRoleAction(req: HttpRequest, res: HttpResponse) {
   try {
     const body = await readJsonBody<{ code: string, name: string, description: string, permisos: number[] }>(req);
@@ -173,8 +157,6 @@ export async function createRoleAction(req: HttpRequest, res: HttpResponse) {
   }
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Actualiza los metadatos de un rol y reemplaza íntegramente sus permisos asociados.
  * POR QUÉ: Utiliza el verbo HTTP PUT porque la operación exige el payload completo y actúa como un reemplazo absoluto (Wipe and Replace), sobrescribiendo tanto los datos básicos como la matriz de permisos anterior, asegurando idempotencia en la llamada.
@@ -225,7 +207,6 @@ export async function createRoleAction(req: HttpRequest, res: HttpResponse) {
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function updateRoleAction(req: HttpRequest, res: HttpResponse) {
   try {
     const id = Number((req as any).params?.id);
@@ -239,8 +220,6 @@ export async function updateRoleAction(req: HttpRequest, res: HttpResponse) {
   }
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Elimina un rol del sistema delegando la mitigación de los usuarios afectados.
  * POR QUÉ: El controlador se limita a validar que el ID sea numéricamente válido y transfiere el flujo. Mantiene total ignorancia sobre las reglas de negocio críticas (como proteger al 'super_admin' o el 'registered_user'), cumpliendo con el principio de responsabilidad única.
@@ -276,7 +255,6 @@ export async function updateRoleAction(req: HttpRequest, res: HttpResponse) {
  * @return {Promise<void>}
  * @throws {Ninguna}
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function deleteRoleAction(req: HttpRequest, res: HttpResponse) {
   try {
     const id = Number((req as any).params?.id);

@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * ============================================================================
  * MÓDULO: Punto de Entrada Principal (server.ts)
@@ -20,7 +18,6 @@
  * controladores específicos provoquen la caída del proceso de Node.js.
  * ============================================================================
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import http from "http";
 import { env } from "./config/env";
 import { sendJson } from "./utils/json";
@@ -28,17 +25,22 @@ import { authRouter } from "./routes/auth.routes";
 import { testDbConnection } from "./config/db";
 import { warmupMailer } from "./utils/mailer";
 import { applySecurityHeaders } from "./utils/security-headers";
-
-<<<<<<< HEAD
-
-const server = http.createServer(async (req, res) => {
-  // 1. Envolvemos TODO en un try/catch maestro
-  try {
-    applySecurityHeaders(res);
-
-=======
+import { swaggerSpec } from './swagger';
 import { Router } from './utils/router';
-import { swaggerSpec } from './config/swagger';
+[{
+	"resource": "/c:/Users/matia/Documents/proyectos vs/Practica-I---Alpha/development/backend/src/server.ts",
+	"owner": "typescript",
+	"code": "2307",
+	"severity": 8,
+	"message": "Cannot find module './swagger' or its corresponding type declarations.",
+	"source": "ts",
+	"startLineNumber": 30,
+	"startColumn": 29,
+	"endLineNumber": 30,
+	"endColumn": 40,
+	"modelVersionId": 40,
+	"origin": "extHost1"
+}]
 
 
 const systemRouter = new Router();
@@ -76,7 +78,6 @@ const server = http.createServer(async (req, res) => {
       );
     }
 
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     res.setHeader("Access-Control-Allow-Origin", env.FRONTEND_ORIGIN);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -89,35 +90,23 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-<<<<<<< HEAD
-=======
     const docsHandled = await systemRouter.handle(req, res);
     if (docsHandled) return;
 
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     const handled = await authRouter.handle(req, res);
     if (handled) return; 
 
     sendJson(res, 404, { ok: false, message: "Ruta no encontrada" });
 
   } catch (error) {
-<<<<<<< HEAD
-    // 2. Si cualquier ruta explota, lo atrapamos aquí y evitamos que el servidor muera
     console.error("🔥 Error CRÍTICO no capturado en el servidor:", error);
     
-    // Si la conexión no se ha cerrado, enviamos un 500
-=======
-    console.error("🔥 Error CRÍTICO no capturado en el servidor:", error);
-    
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     if (!res.headersSent) {
       sendJson(res, 500, { ok: false, message: "Error interno del servidor" });
     }
   }
 });
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Función de arranque (Bootstrap) que inicializa la infraestructura necesaria.
  * POR QUÉ: Se utiliza un diseño de inicio secuencial donde la conexión a la 
@@ -133,17 +122,13 @@ const server = http.createServer(async (req, res) => {
  * @return {Promise<void>}
  * @throws {Error} Si la base de datos o la configuración del servidor fallan críticamente.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 async function bootstrap(): Promise<void> {
   try {
     await testDbConnection();
 
     server.listen(env.PORT, () => {
       console.log(`Server listening on port ${env.PORT}`);
-<<<<<<< HEAD
-=======
       console.log(`📄 Swagger docs disponibles en: http://localhost:${env.PORT}/api-docs`); // 👈 Un pequeño log extra para encontrarlo rápido
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     });
 
     void warmupMailer();
@@ -153,8 +138,4 @@ async function bootstrap(): Promise<void> {
   }
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 void bootstrap();

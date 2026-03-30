@@ -1,4 +1,4 @@
-import { swaggerSpec } from '../config/swagger';
+import { swaggerSpec } from '../swagger';
 
 export const getSwaggerHtml = (): string => {
   // Convertimos el objeto a un string de JSON válido para inyectarlo en el JS

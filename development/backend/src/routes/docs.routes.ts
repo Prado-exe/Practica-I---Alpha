@@ -1,8 +1,7 @@
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 
-// Importamos la configuración que ya hiciste
-import { swaggerSpec } from "../config/swagger"; 
+import { swaggerSpec } from '../swagger';
 
 // 1. Ruta que devuelve el JSON puro generado por swagger-jsdoc
 export function getDocsJsonAction(req: HttpRequest, res: HttpResponse) {

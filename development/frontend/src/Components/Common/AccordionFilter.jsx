@@ -7,12 +7,10 @@ function AccordionFilter({
   onChange,
   onClear
 }) {
+  
   const handleToggle = (filterKey, value) => {
     const currentValues = selectedFilters[filterKey] || [];
-<<<<<<< HEAD
-
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
+    // 🔹 Ahora comparamos IDs (values)
     const updatedValues = currentValues.includes(value)
       ? currentValues.filter((v) => v !== value)
       : [...currentValues, value];
@@ -22,68 +20,40 @@ function AccordionFilter({
 
   return (
     <aside className="filters-panel">
-<<<<<<< HEAD
-
-      <h3 className="filters-title">Filtros</h3>
-
-      {filters.map((filter) => (
-        <details
-          key={filter.key}
-          className="filter-group"
-          open={filter.defaultOpen}
-        >
-          <summary>{filter.title}</summary>
-
-          <div className="filter-content">
-            {filter.options.map((opt) => (
-              <label key={opt}>
-                <input
-                  type="checkbox"
-                  checked={
-                    selectedFilters[filter.key]?.includes(opt) || false
-                  }
-                  onChange={() =>
-                    handleToggle(filter.key, opt)
-                  }
-                />
-                {opt}
-              </label>
-            ))}
-          </div>
-        </details>
-      ))}
-
-      <div className="filters-actions">
-        <button className="clear-filters-btn" onClick={onClear}>
-          Limpiar filtros
-=======
       {filters.map((filter) => {
         const selections = selectedFilters[filter.key] || [];
         const hasSelection = selections.length > 0;
+
+        // 🔹 Para el resumen (summary), buscamos los nombres (labels) 
+        // de los IDs que están seleccionados actualmente
+        const selectedLabels = filter.options
+          .filter(opt => selections.includes(opt.value))
+          .map(opt => opt.label);
 
         return (
           <details
             key={filter.key}
             className="filter-group"
-            open={filter.defaultOpen}
+            open={filter.defaultOpen || hasSelection}
           >
             <summary className="filter-summary">
               <span className="summary-label">{filter.title}</span>
               <span className={`summary-display-value ${!hasSelection ? "is-empty" : ""}`}>
-                {hasSelection ? selections.join(", ") : "Cualquiera"}
+                {hasSelection ? selectedLabels.join(", ") : "Cualquiera"}
               </span>
             </summary>
 
             <div className="filter-content">
               {filter.options.map((opt) => (
-                <label key={opt} className="filter-option-item">
+                <label key={opt.value} className="filter-option-item">
                   <input
                     type="checkbox"
                     className="filter-checkbox"
-                    checked={selections.includes(opt)}
-                    onChange={() => handleToggle(filter.key, opt)}
+                    // 🔹 El ID es lo que determina si está marcado
+                    checked={selections.includes(opt.value)}
+                    onChange={() => handleToggle(filter.key, opt.value)}
                   />
-                  <span className="option-text">{opt}</span>
+                  <span className="option-text">{opt.label}</span>
                 </label>
               ))}
             </div>
@@ -92,9 +62,11 @@ function AccordionFilter({
       })}
 
       <div className="filters-actions">
-        <button className="clear-filters-btn" onClick={onClear}>
+        <button 
+          className="clear-filters-btn" 
+          onClick={onClear}
+        >
           Limpiar Todos Los Filtros
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
         </button>
       </div>
     </aside>

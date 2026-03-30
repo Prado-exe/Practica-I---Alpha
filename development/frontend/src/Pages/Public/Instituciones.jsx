@@ -1,22 +1,14 @@
-<<<<<<< HEAD
-=======
 import { useState, useEffect } from "react"; // 👈 Importante añadir estos
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import "../../Styles/Pages_styles/Public/Instituciones.css";
 import InstitucionCard from "../../Components/Cards/InstitucionCard";
 import Breadcrumb from "../../Components/Common/Breadcrumb";
 import Pagination from "../../Components/Common/Pagination";
 import SearchBarAdvanced from "../../Components/Common/SearchBarAdvanced";
-import { useFetchList } from "../../Components/Hooks/useFetchList";
 import { getInstituciones } from "../../Services/InstitucionesService";
 
 function Instituciones() {
 
-<<<<<<< HEAD
-  const {
-=======
   /*const {
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     search,
     setSearch,
     page,
@@ -26,8 +18,6 @@ function Instituciones() {
     totalResults,
     loading
   } = useFetchList(getInstituciones, { limit: 9 }); 
-<<<<<<< HEAD
-=======
   // Estados para el Modal/*/
 
   // --- ESTADOS (Asegúrate de tener estos definidos si no usas useFetchList) ---
@@ -71,7 +61,6 @@ function Instituciones() {
 
     fetchData();
   }, [searchQuery, paginaActual]);
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 
   return (
     <main className="instituciones-page">
@@ -81,58 +70,26 @@ function Instituciones() {
       {/* BUSCADOR */}
       <SearchBarAdvanced
         placeholder="Buscar instituciones..."
-<<<<<<< HEAD
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-=======
         value={searchQuery} // 👈 Cambiado a searchQuery para coincidir con tu estado
         onChange={(e) => handleSearch(e.target.value)}
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
       />
 
       {/* HEADER */}
       <header className="instituciones-header">
         <h1>Instituciones</h1>
-<<<<<<< HEAD
-        <span>{totalResults} encontradas</span>
-=======
         <span>{total} encontradas</span>
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
       </header>
 
       <hr className="instituciones-separator" />
 
-<<<<<<< HEAD
-      {/* GRID */}
-      <section className="instituciones-grid">
-
-=======
       {/* GRID - CORREGIDO AQUÍ */}
       <section className="instituciones-grid">
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
         {loading ? (
           <p className="loading-state">Cargando...</p>
         ) : instituciones.length === 0 ? (
           <p className="empty-state">No se encontraron instituciones</p>
         ) : (
           instituciones.map(inst => (
-<<<<<<< HEAD
-            <InstitucionCard key={inst.id} institucion={inst} />
-          ))
-        )}
-
-      </section>
-
-      {/* PAGINACIÓN */}
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
-      )}
-
-=======
             <InstitucionCard 
               key={inst.institution_id} 
               institucion={inst} 
@@ -182,7 +139,6 @@ function Instituciones() {
           </div>
         </div>
       )}
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     </main>
   );
 }

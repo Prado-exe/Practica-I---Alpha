@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Registro de Usuarios (register.routes.ts)
@@ -18,7 +16,6 @@
  * detallado de qué campos específicos fallaron en el formulario.
  * ============================================================================
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { readJsonBody } from "../utils/body";
 import { sendJson } from "../utils/json";
@@ -27,8 +24,6 @@ import { registerSchema } from "../validators/auth.validators";
 import { registerUser } from "../services/auth.service";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 
-<<<<<<< HEAD
-=======
 
 /**
  * Descripción: Controlador que orquesta la creación de un nuevo usuario validando sus datos de entrada.
@@ -89,7 +84,6 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * @return {Promise<void>}
  * @throws {Ninguna} Los errores se empaquetan y retornan en formato JSON.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function registerAction(req: HttpRequest, res: HttpResponse) {
   try {
     const body = await readJsonBody<unknown>(req);

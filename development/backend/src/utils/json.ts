@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import type { HttpResponse } from "../types/http";
-
-=======
 /**
  * ============================================================================
  * MÓDULO: Utilidades de Respuesta JSON (json.ts)
@@ -31,7 +27,6 @@ import type { HttpResponse } from "../types/http";
  * @return {void}
  * @throws {TypeError} Si `JSON.stringify` encuentra estructuras circulares que no puede serializar.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function sendJson(
   res: HttpResponse,
   statusCode: number,

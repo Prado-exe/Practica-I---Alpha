@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import { pool } from "../config/db";
-
-=======
 /**
  * ============================================================================
  * MÓDULO: Repositorio de ODS (ods.repository.ts)
@@ -25,7 +21,6 @@ import { pool } from "../config/db";
  * @return {Promise<Array<{ods_id: number, ods_number: number, name: string}>>} Arreglo ordenado con los datos esenciales de cada ODS.
  * @throws {Ninguna} Las excepciones de conectividad de la base de datos (ej. pool exhausto) burbujean al manejador global.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function fetchAllOdsFromDb() {
   const { rows } = await pool.query(`
     SELECT ods_id, ods_number, name 

@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-CREATE TABLE IF NOT EXISTS news_posts (
-    news_post_id BIGSERIAL PRIMARY KEY,
-
-    author_account_id BIGINT NOT NULL,
-
-=======
 
 CREATE TABLE IF NOT EXISTS news_categories (
     news_category_id SMALLSERIAL PRIMARY KEY,
@@ -27,29 +20,21 @@ CREATE TABLE IF NOT EXISTS news_posts (
 
     post_type VARCHAR(20) NOT NULL, 
 
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     summary VARCHAR(500) NULL,
     content TEXT NOT NULL,
 
-<<<<<<< HEAD
-=======
 
     news_category_id SMALLINT NULL,
     category_id BIGINT NULL,
     dataset_id BIGINT NULL,
 
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     post_status VARCHAR(30) NOT NULL DEFAULT 'draft',
     access_level VARCHAR(20) NOT NULL DEFAULT 'public',
 
     published_at TIMESTAMPTZ NULL,
     deleted_at TIMESTAMPTZ NULL,
-<<<<<<< HEAD
-
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
@@ -73,25 +58,6 @@ CREATE TABLE IF NOT EXISTS news_posts (
         CHECK (access_level IN ('public', 'internal')),
 
     CONSTRAINT chk_news_posts_summary_length
-<<<<<<< HEAD
-        CHECK (summary IS NULL OR char_length(summary) <= 500)
-);
-
-CREATE INDEX IF NOT EXISTS idx_news_posts_author_account_id
-    ON news_posts(author_account_id);
-
-CREATE INDEX IF NOT EXISTS idx_news_posts_status
-    ON news_posts(post_status);
-
-CREATE INDEX IF NOT EXISTS idx_news_posts_access_level
-    ON news_posts(access_level);
-
-CREATE INDEX IF NOT EXISTS idx_news_posts_published_at
-    ON news_posts(published_at);
-
-CREATE INDEX IF NOT EXISTS idx_news_posts_created_at
-    ON news_posts(created_at);
-=======
         CHECK (summary IS NULL OR char_length(summary) <= 500),
 
     CONSTRAINT chk_news_posts_type
@@ -129,4 +95,3 @@ CREATE INDEX IF NOT EXISTS idx_news_posts_status ON news_posts(post_status);
 CREATE INDEX IF NOT EXISTS idx_news_posts_access_level ON news_posts(access_level);
 CREATE INDEX IF NOT EXISTS idx_news_posts_published_at ON news_posts(published_at);
 CREATE INDEX IF NOT EXISTS idx_news_posts_created_at ON news_posts(created_at);
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas

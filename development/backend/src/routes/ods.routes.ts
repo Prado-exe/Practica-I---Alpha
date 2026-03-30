@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * ============================================================================
  * MÓDULO: Enrutador de ODS (ods.routes.ts)
@@ -16,14 +14,11 @@
  * sola llamada para poblar componentes UI estáticos (ej. Dropdowns).
  * ============================================================================
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { getOdsForDropdown } from "../services/ods.service";
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Controlador que atiende las peticiones GET para obtener la lista completa de los ODS.
  * POR QUÉ: Se reutilizan las funciones `getErrorStatus` y `getErrorMessage` del módulo de autenticación para asegurar que cualquier excepción de base de datos o red devuelva el mismo contrato de error (status HTTP semántico y un JSON predecible) que el resto de la API, facilitando el manejo de errores globales en el frontend.
@@ -70,7 +65,6 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * @return {Promise<void>} 
  * @throws {Ninguna} Los errores se envuelven y devuelven como respuestas HTTP gestionadas.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getAllOdsAction(req: HttpRequest, res: HttpResponse) {
   try {
     const data = await getOdsForDropdown();

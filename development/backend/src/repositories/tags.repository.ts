@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import { pool } from "../config/db";
-
-=======
 /**
  * ============================================================================
  * MÓDULO: Repositorio de Etiquetas/Tags (tags.repository.ts)
@@ -26,7 +22,6 @@ import { pool } from "../config/db";
  * @return {Promise<Array<{tag_id: number, name: string}>>} Arreglo ordenado con los identificadores y nombres de todas las etiquetas.
  * @throws {Ninguna} Errores de ejecución SQL o conexión de BD burbujean al manejador global.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function fetchAllTagsFromDb() {
   const { rows } = await pool.query(`
     SELECT tag_id, name 

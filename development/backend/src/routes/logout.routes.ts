@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Cierre de Sesión (logout.routes.ts)
@@ -18,15 +16,12 @@
  * sin poder cerrarla.
  * ============================================================================
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { logoutUser } from "../services/auth.service";
 import { clearRefreshTokenCookie } from "../utils/cookies";
 import { sendJson } from "../utils/json";
 import { getSessionIdFromRequest } from "./auth.routes"; 
 
-<<<<<<< HEAD
-=======
 /**
  * Descripción: Controlador que ejecuta el cierre de sesión eliminando el rastro tanto en el cliente como en el servidor.
  * POR QUÉ: Se implementa un doble bloque `try/catch`. El bloque interno envuelve la llamada a la base de datos (`logoutUser`); si esta falla (ej. red caída), solo emite un `console.warn` y permite que la ejecución continúe. El bloque externo actúa como una red de seguridad absoluta: ante cualquier error imprevisto (ej. fallo al extraer el `sessionId`), el `catch` intercepta el fallo, fuerza la eliminación de la cookie y devuelve un 200 OK de todos modos, priorizando la limpieza del lado del cliente.
@@ -52,7 +47,6 @@ import { getSessionIdFromRequest } from "./auth.routes";
  * @return {Promise<void>}
  * @throws {Ninguna} Por diseño, este endpoint atrapa y silencia todas las excepciones para garantizar la limpieza de la sesión en el cliente.
  */
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function logoutAction(req: HttpRequest, res: HttpResponse) {
   try {
     const sessionId = getSessionIdFromRequest(req);
