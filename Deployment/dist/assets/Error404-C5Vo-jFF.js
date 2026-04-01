@@ -1,0 +1,1 @@
+import{j as r,L as e}from"./index-CSHb0RNa.js";function i(){return r.jsxs("div",{className:"error404-container",children:[r.jsx("h1",{children:"404"}),r.jsx("h2",{children:"Página no encontrada"}),r.jsx("p",{children:"La página que buscas no existe o fue movida."}),r.jsx(e,{to:"/",className:"error404-btn",children:"Volver al inicio"})]})}export{i as default};

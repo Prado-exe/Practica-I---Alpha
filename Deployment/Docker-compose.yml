@@ -16,16 +16,23 @@ services:
       context: ./backend-src
       dockerfile: Dockerfile
     image: app-backend:prod
+    ports:
+      - "3000:3000"
     env_file:
-      - .env
+      - ./backend-src/.env
     depends_on:
-      - postgres
+      - postgres-dev
     restart: always
 
-  postgres:
+  postgres-dev:
     image: postgres:16
     env_file:
-      - .env
+      - ./backend-src/.env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
     restart: always
