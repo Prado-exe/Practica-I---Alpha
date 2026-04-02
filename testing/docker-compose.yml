@@ -25,7 +25,7 @@ services:
       - ./backend:/app
       - /app/node_modules
     environment:
-      - DB_HOST_POSTGRES=postgres
+      - DB_HOST_POSTGRES=postgres-dev
       - DB_USER=user
       - DB_PASS=password
       - DB_NAME=appdb
