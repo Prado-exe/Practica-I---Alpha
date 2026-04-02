@@ -1,79 +1,80 @@
-# QA Environment - Testing/Proyecto
+# Entorno de Desarrollo - nombre-del-proyecto
 
-Este directorio contiene el entorno de pruebas automatizadas (QA) del proyecto, configurado con **Docker**, **Next.js/React**, **PostgreSQL** y **Playwright**.
+Este directorio contiene el entorno de desarrollo local, configurado para facilitar el Hot Reloading y la sincronización entre el código fuente y los contenedores Docker.
 
 ## Inicio Rápido
 
-Para levantar todo el entorno, ejecuta el siguiente comando en la raíz de esta carpeta:
+Para levantar el entorno de desarrollo, ejecuta:
 
 ```bash
-docker compose up -d --build
+docker compose up --build
 ```
 
-Esto iniciará los siguientes servicios:
-- **Frontend** (Vite/React) en `http://localhost:5173`
-- **Backend** (Node.js) en `http://localhost:3000`
-- **PostgreSQL** en `localhost:5432`
-- **Playwright** (Contenedor de pruebas en reposo)
+Esto iniciará los servicios en modo interactivo:
+- **Frontend** (Vite/React): `http://localhost:5173`
+- **Backend** (Node.js): `http://localhost:3000`
+- **Postgres**: `localhost:5432`
 
 ---
 
 ## Estructura del Proyecto
 
 ```text
-Testing/Proyecto/
-├── backend/            # Código fuente del servidor
-├── frontend/           # Código fuente de la interfaz de usuario
-├── tests/              # Pruebas automatizadas de Playwright (.spec.js)
-├── postgres_data/      # Datos persistentes de la base de datos (Postgres)
-├── Docker-compose.yml  # Orquestación de servicios
-├── Dockerfile          # Imagen base para el entorno de desarrollo
-├── playwright.config.js # Configuración de Playwright
-└── package.json        # Dependencias de testing y scripts
+development/nombre-del-proyecto/
+├── backend/            # API Node.js/Express
+├── frontend/           # App React + Vite
+│   ├── src/            # Código fuente UI
+│   ├── public/         # Archivos estáticos
+│   └── vite.config.js  # Configuración de compilación
+├── dist/               # Producción (generado por build)
+├── postgres_data/      # Base de datos persistente (Dev)
+└── Docker-compose.yml  # Configuración de orquestación local
 ```
 ---
-<img width="296" height="656" alt="image" src="https://github.com/user-attachments/assets/8830fb94-6cce-4512-93e5-28f387e4793e" />
+<img width="282" height="482" alt="image" src="https://github.com/user-attachments/assets/cc88fae5-e90d-4be9-83bb-53617a0c4836" />
+
 ---
 ---
 
 ## Configuración Docker
 
-### Dockerfile
-El `Dockerfile` en la raíz de `Testing/Proyecto` está diseñado para crear un entorno de desarrollo consistente. 
-- Utiliza `node:20-alpine` por su ligereza.
-- Instala las dependencias definidas en el `package.json` raíz.
-- Expone el puerto `5173` para el servidor de desarrollo.
+### Frontend (Desarrollo)
+- El contenedor monta el volumen local `./frontend` hacia `/app`.
+- Esto permite que cualquier cambio que hagas en el código de React se refleje automáticamente (**HMR**) sin reiniciar Docker.
+- Usa el puerto `5173`.
 
-### Docker Compose
-El `Docker-compose.yml` gestiona 4 servicios principales:
-1.  **frontend**: Construye y sirve la app de React. Usa volúmenes para reflejar cambios en tiempo real.
-2.  **backend**: Serve el API de la aplicación.
-3.  **postgres**: Base de datos relacional. Persiste los datos en la carpeta local `./postgres_data`.
-4.  **playwright-qa**: Un contenedor especializado que ya incluye todos los navegadores necesarios para ejecutar pruebas E2E.
+### Backend (Desarrollo)
+- Monta `./backend` hacia `/app`.
+- Depende del servicio `postgres`.
+- Conectado a la red `dev-net`.
 
----
-
-## Ejecución de Tests (Playwright)
-
-Para ejecutar las pruebas dentro del contenedor de QA:
-
-### 1. Ejecutar todos los tests
-```bash
-docker compose exec playwright-qa npm test
-```
-
-### 2. Ver reporte de resultados
-Si hay fallos o quieres ver el detalle visual, ejecuta:
-```bash
-docker compose exec playwright-qa npm run report
-```
-Luego abre `http://localhost:36575` en tu navegador.
+### Base de Datos
+- **Postgres**: Imagen versión 16.
+- Los datos se guardan en la carpeta local `./postgres_data` para que no se pierdan al apagar los contenedores.
 
 ---
 
-## Notas de Desarrollo
+## Proceso de Build (Producción)
 
-- **Persistencia de Datos**: Los datos de Postgres se guardan en `./postgres_data`.
-- **Variables de Entorno**: El frontend utiliza `VITE_API_URL` para comunicarse con el backend.
+Si deseas generar los archivos para llevar a producción (`Deployment`), debes generar el build del frontend:
 
+1. Entra a la carpeta frontend:
+   ```bash
+   cd frontend
+   ```
+2. Ejecuta el build:
+   ```bash
+   npm run build
+   ```
+3. Los archivos se generarán en la carpeta `../dist/`.
+
+> [!NOTE]
+> La carpeta `dist` resultante es la que debe copiarse a la carpeta de `Deployment` para la puesta en marcha final.
+
+---
+
+## Notas Adicionales
+
+- **Limpieza**: Si deseas resetear los datos de desarrollo, puedes borrar la carpeta `postgres_data` y volver a ejecutar el docker compose.
+- **Variables de Entorno**: El frontend en desarrollo usa `http://localhost:3000` como base para las peticiones al API.
 

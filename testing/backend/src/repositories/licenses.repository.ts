@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Repositorio de Licencias (licenses.repository.ts)
@@ -22,10 +21,6 @@ import { pool } from "../config/db";
  * @return {Promise<Array<{license_id: number, name: string, code: string}>>} Arreglo con la información base de las licencias activas.
  * @throws {Ninguna} Los errores a nivel de base de datos (ej. pérdida de conexión) burbujean al manejador global.
  */
-=======
-import { pool } from "../config/db";
-
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function fetchAllLicensesFromDb() {
   const { rows } = await pool.query(`
     SELECT license_id, name, code 

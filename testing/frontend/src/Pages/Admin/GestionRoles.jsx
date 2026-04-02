@@ -167,8 +167,11 @@ function GestionRoles() {
         </div>
 
         {roles.map((rol) => {
-          // Bloqueamos la eliminación de los roles del sistema vitales
-          const esRolProtegido = rol.code === "super_admin" || rol.code === "registered_user";
+          
+          const rolesProtegidos = ["super_admin", "data_admin", "user_admin", "registered_user"];
+          
+          // Verificamos si el código del rol actual está dentro de la lista de protegidos
+          const esRolProtegido = rolesProtegidos.includes(rol.code);
 
           return (
             <div key={rol.role_id} className="roles-fila">
@@ -178,17 +181,22 @@ function GestionRoles() {
 
               <div className="acciones">
                 <CanView requiredPermission="roles_permissions.write">
-                  <button onClick={() => abrirModalEditar(rol)}>Editar</button>
                   
+                  {/* 👇 2. Evaluamos: Si NO es protegido, mostramos Editar y Eliminar 👇 */}
                   {!esRolProtegido ? (
-                    <button onClick={() => handleEliminar(rol)} className="eliminar">
-                      Eliminar
-                    </button>
+                    <>
+                      <button onClick={() => abrirModalEditar(rol)}>Editar</button>
+                      <button onClick={() => handleEliminar(rol)} className="eliminar">
+                        Eliminar
+                      </button>
+                    </>
                   ) : (
-                    <button disabled style={{background: "#ccc", cursor: "not-allowed"}} title="Rol del sistema protegido">
-                      Protegido
+                    /* 👇 3. Si ES protegido, mostramos un único botón gris de solo lectura 👇 */
+                    <button disabled style={{ background: "#e0e0e0", color: "#666", cursor: "not-allowed", width: "100%", border: "1px dashed #ccc" }} title="Rol del sistema protegido contra cambios">
+                      🔒 Sistema (Protegido)
                     </button>
                   )}
+
                 </CanView>
               </div>
             </div>

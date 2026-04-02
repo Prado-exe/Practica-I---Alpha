@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Configuración de Base de Datos (db.ts)
@@ -26,11 +25,6 @@ import { env } from "./env";
  * configurado, permitiendo al controlador de `pg` gestionar la cola de peticiones 
  * de forma eficiente cuando el tráfico es alto.
  */
-=======
-import { Pool } from "pg";
-import { env } from "./env";
-
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export const pool = new Pool({
   host: env.DB_HOST_POSTGRES,
   port: env.DB_PORT,
@@ -39,7 +33,6 @@ export const pool = new Pool({
   database: env.DB_NAME,
 });
 
-<<<<<<< HEAD
 /**
  * Descripción: Ejecuta una consulta de verificación rápida para validar la salud de la conexión.
  * POR QUÉ: Se utiliza como "Health Check" crítico durante la inicialización del servidor. Ejecuta un `SELECT 1` (la consulta más ligera posible) para confirmar que las credenciales son correctas y el servidor de BD es alcanzable antes de que la aplicación comience a aceptar tráfico HTTP, evitando errores en cascada en los controladores.
@@ -47,8 +40,6 @@ export const pool = new Pool({
  * @return {Promise<void>} Promesa que se resuelve si la conexión es exitosa.
  * @throws {Error} Si el pool no puede obtener un cliente o la consulta falla, deteniendo el arranque seguro del sistema.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function testDbConnection(): Promise<void> {
   const client = await pool.connect();
 

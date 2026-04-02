@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Middleware de Seguridad y Autorización (auth.middleware.ts)
@@ -17,14 +16,11 @@
  * de handlers.
  * ============================================================================
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { requireAuth } from "../utils/auth";
 import { sendJson } from "../utils/json";
 import { AppError } from "../types/app-error";
 
-<<<<<<< HEAD
 /**
  * Descripción: Valida la identidad del usuario procesando el token de acceso.
  * POR QUÉ: Actúa como la capa base de confianza. Se separa de la lógica de permisos para poder ser reutilizada en endpoints que solo requieren saber quién es el usuario (ej: perfil propio) sin importar sus roles específicos. Captura errores de tipo `AppError` para mapear fallos de expiración o firma de token a estados HTTP semánticos (401/403).
@@ -33,8 +29,6 @@ import { AppError } from "../types/app-error";
  * @return {Promise<boolean | void>} Retorna `true` si la autenticación falló y se envió una respuesta, de lo contrario no retorna nada para continuar el flujo.
  * @throws {AppError} Si el token es inválido o ha expirado.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function authMiddleware(req: HttpRequest, res: HttpResponse): Promise<boolean | void> {
   try {
     const payload = await requireAuth(req);
@@ -51,7 +45,6 @@ export async function authMiddleware(req: HttpRequest, res: HttpResponse): Promi
   }
 }
 
-<<<<<<< HEAD
 /**
  * Descripción: Implementa el control de acceso basado en permisos (RBAC).
  * POR QUÉ: Es una función de orden superior (HOC) que permite declarar requisitos de seguridad de forma legible en el enrutador. Ejecuta primero `authMiddleware` para garantizar que el usuario existe antes de evaluar su matriz de permisos. Esta jerarquía evita comprobaciones de permisos sobre usuarios anónimos.
@@ -59,8 +52,6 @@ export async function authMiddleware(req: HttpRequest, res: HttpResponse): Promi
  * @return {Function} Middleware asíncrono configurado para el permiso solicitado.
  * @throws {Ninguna} Las excepciones de identidad son manejadas por el middleware interno; las de autorización retornan un HTTP 403.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function requirePermission(requiredPermission: string) {
   return async (req: HttpRequest, res: HttpResponse): Promise<boolean | void> => {
     
@@ -82,7 +73,6 @@ export function requirePermission(requiredPermission: string) {
   };
 }
 
-<<<<<<< HEAD
 /**
  * Descripción: Middleware simplificado para rutas que solo requieren una sesión activa.
  * POR QUÉ: Provee una interfaz más limpia para el enrutador cuando no se necesita granularidad de permisos. Funciona como un alias semántico de `authMiddleware` para mejorar la legibilidad del mapa de rutas.
@@ -91,8 +81,6 @@ export function requirePermission(requiredPermission: string) {
  * @return {Promise<boolean | void>} Control de flujo para el router.
  * @throws {Ninguna}
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function requireLogin(req: HttpRequest, res: HttpResponse): Promise<boolean | void> {
   const isUnauthorized = await authMiddleware(req, res);
   

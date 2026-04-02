@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Repositorio de Categorías (categories.repository.ts)
@@ -27,16 +26,6 @@ export async function fetchAllCategoriesFromDb() {
     FROM categories 
     WHERE is_active = TRUE 
     ORDER BY name ASC
-=======
-import { pool } from "../config/db";
-
-export async function fetchAllCategoriesFromDb() {
-  const { rows } = await pool.query(`
-    SELECT category_id, legal_name 
-    FROM categories 
-    WHERE category_status = 'active' 
-    ORDER BY legal_name ASC
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   `);
   return rows;
 }

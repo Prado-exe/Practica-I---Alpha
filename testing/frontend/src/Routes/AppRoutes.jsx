@@ -12,6 +12,8 @@ import SessionExpiryManager from "../Components/SessionExpiryManager";
 const Home = lazy(() => import("../Pages/Public/Home"));
 const Formulario = lazy(() => import("../Pages/Public/Formulario"));
 const Datos = lazy(() => import("../Pages/Public/Datos"));
+const DatasetDetalle = lazy(() => import("../Pages/Public/DatasetDetalle"));
+
 const Publicaciones = lazy(() => import("../Pages/Public/Publicaciones"));
 const Instituciones = lazy(() => import("../Pages/Public/Instituciones"));
 const InstitucionDetalle = lazy(() => import("../Pages/Public/InstitucionDetalle.jsx"));
@@ -26,6 +28,7 @@ const GestionDatasets = lazy(() => import("../Pages/Admin/GestionDatasets"));
 const GestionUsuarios = lazy(() => import("../Pages/Admin/GestionUsuarios"));
 const GestionInstituciones = lazy(() => import("../Pages/Admin/GestionInstituciones"));
 const GestionRoles = lazy(() => import("../Pages/Admin/GestionRoles"));
+const CrearDatasetUsuario = lazy(() => import("../Pages/Admin/crear_datsets_usuarios"));
 
 // login, register, auth routes
 const Login = lazy(() => import("../Pages/Login"));
@@ -58,6 +61,12 @@ function AppRoutes() {
       >
         {/* El Dashboard queda abierto a cualquier usuario logueado en el panel */}
         <Route index element={<Dashboard />} />
+
+        <Route path="proponer-dataset" element={
+          <ProtectedRoute requiredPermission="user_management.write">
+            <CrearDatasetUsuario />
+          </ProtectedRoute>
+        } />
         
         {/* 👇 Seguridad granular en cada subpanel */}
         <Route path="usuarios" element={
@@ -105,6 +114,7 @@ function AppRoutes() {
         <Route path="/noticias" element={<Noticias />} />
         <Route path="/formulario" element={<Formulario />} />
         <Route path="/conjuntodatos" element={<Datos />} />
+        <Route path="/conjuntodatos/:id" element={<DatasetDetalle />} />
         <Route path="/publicaciones" element={<Publicaciones />} />
         <Route path="/instituciones" element={<Instituciones />} />
         <Route path="/instituciones/:id" element={<InstitucionDetalle />} />

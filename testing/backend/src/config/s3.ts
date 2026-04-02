@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Cliente de Almacenamiento S3 (s3.ts)
@@ -32,21 +31,10 @@ import { env } from "./env";
 
 export const s3Client = new S3Client({
   endpoint: env.S3_ENDPOINT, 
-=======
-import { S3Client } from "@aws-sdk/client-s3";
-import { env } from "./env"; // Tu archivo de variables de entorno
-
-export const s3Client = new S3Client({
-  endpoint: env.S3_ENDPOINT, // ESTA es la magia que lo redirige a tu MinIO local
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   region: env.S3_REGION,
   credentials: {
     accessKeyId: env.S3_ACCESS_KEY,
     secretAccessKey: env.S3_SECRET_KEY,
   },
-<<<<<<< HEAD
-=======
-  // ¡CRÍTICO PARA MINIO! AWS usa "bucket.url.com", MinIO usa "url.com/bucket"
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
   forcePathStyle: true, 
 });

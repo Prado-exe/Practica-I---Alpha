@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Etiquetas (tags.routes.ts)
@@ -15,14 +14,11 @@
  * formularios internos como para filtros de búsqueda en la web pública.
  * ============================================================================
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import { getTagsForDropdown } from "../services/tags.service";
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 
-<<<<<<< HEAD
 /**
  * Descripción: Controlador que procesa peticiones HTTP GET para listar todas las etiquetas registradas en el sistema.
  * POR QUÉ: Sirve la colección entera sin mecanismos de paginación. Esto es intencional, ya que el objetivo principal de este endpoint es alimentar componentes de interfaz de usuario como "Typeaheads", "Comboboxes" o campos "Multi-Select" en el frontend, los cuales necesitan tener el diccionario de datos completo en memoria para funcionar sin latencia al escribir.
@@ -66,8 +62,6 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * @return {Promise<void>} 
  * @throws {Ninguna} Los errores se envuelven y devuelven como respuestas HTTP.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getAllTagsAction(req: HttpRequest, res: HttpResponse) {
   try {
     const data = await getTagsForDropdown();

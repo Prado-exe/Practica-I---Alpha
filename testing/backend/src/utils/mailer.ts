@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Servicio de Mensajería SMTP (mailer.ts)
@@ -16,8 +15,6 @@
  * reconectarse una vez antes de fallar la petición del usuario.
  * ============================================================================
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import nodemailer from "nodemailer";
 import { env } from "../config/env";
 
@@ -34,7 +31,6 @@ const transporter = nodemailer.createTransport({
 let mailerReady = false;
 let lastMailerError: string | null = null;
 
-<<<<<<< HEAD
 /**
  * Descripción: Realiza una verificación de apretón de manos (handshake) con el servidor SMTP.
  * POR QUÉ: Se separa de la creación del transporte para permitir que el 
@@ -47,8 +43,6 @@ let lastMailerError: string | null = null;
  * @return {Promise<void>} 
  * @throws {Ninguna} Los errores se capturan internamente para gestionar el estado de salud.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function warmupMailer(): Promise<void> {
   try {
     await transporter.verify();
@@ -63,7 +57,6 @@ export async function warmupMailer(): Promise<void> {
   }
 }
 
-<<<<<<< HEAD
 /**
  * Descripción: Expone el estado actual del servicio de mensajería para monitoreo.
  * POR QUÉ: Permite que endpoints de "Health Check" o el panel administrativo 
@@ -71,8 +64,6 @@ export async function warmupMailer(): Promise<void> {
  * facilitando el diagnóstico preventivo de infraestructura.
  * @return {{ ready: boolean, lastError: string | null }} Objeto con el estado y el último error registrado.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function getMailerHealth() {
   return {
     ready: mailerReady,
@@ -80,7 +71,6 @@ export function getMailerHealth() {
   };
 }
 
-<<<<<<< HEAD
 /**
  * Descripción: Asegura que existe una conexión activa antes de proceder con un envío.
  * POR QUÉ: Actúa como un guardián de flujo. Si el servicio no está listo, 
@@ -90,8 +80,6 @@ export function getMailerHealth() {
  * @return {Promise<void>}
  * @throws {Error} Si tras el intento de reconexión el servicio sigue fallando.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 async function ensureMailerReady(): Promise<void> {
   if (mailerReady) {
     return;
@@ -104,7 +92,6 @@ async function ensureMailerReady(): Promise<void> {
   }
 }
 
-<<<<<<< HEAD
 /**
  * Descripción: Envía el código OTP para la validación de cuenta nueva.
  * POR QUÉ: Utiliza una plantilla minimalista con soporte para texto plano y 
@@ -115,8 +102,6 @@ async function ensureMailerReady(): Promise<void> {
  * @return {Promise<void>}
  * @throws {Error} Si el transporte SMTP falla o el destinatario es rechazado.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function sendVerificationEmail(
   to: string,
   code: string
@@ -132,7 +117,6 @@ export async function sendVerificationEmail(
   });
 }
 
-<<<<<<< HEAD
 /**
  * Descripción: Envía un correo estructurado con un botón de acción para restablecer la contraseña.
  * POR QUÉ: Incluye un diseño HTML con estilos in-line para garantizar la 
@@ -148,8 +132,6 @@ export async function sendVerificationEmail(
  * @return {Promise<void>}
  * @throws {Error} Si la infraestructura de correo no responde.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function sendPasswordResetEmail(
   to: string,
   resetLink: string

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Enrutador de Verificación (verify.routes.ts)
@@ -14,8 +13,6 @@
  * (como un código expirado o incorrecto) que son manejados dinámicamente.
  * ============================================================================
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { readJsonBody } from "../utils/body";
 import { sendJson } from "../utils/json";
@@ -24,7 +21,6 @@ import { verifyCodeSchema, resendVerificationSchema } from "../validators/auth.v
 import { verifyEmailCode, resendVerificationCode } from "../services/auth.service";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
 
-<<<<<<< HEAD
 
 /**
  * Descripción: Controlador para procesar la confirmación de una cuenta mediante un código OTP de 6 dígitos.
@@ -73,8 +69,6 @@ import { getErrorStatus, getErrorMessage } from "./auth.routes";
  * @return {Promise<void>}
  * @throws {Ninguna} Los errores se empaquetan en respuestas HTTP.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function verifyEmailAction(req: HttpRequest, res: HttpResponse) {
   try {
     const body = await readJsonBody<unknown>(req);
@@ -99,7 +93,6 @@ export async function verifyEmailAction(req: HttpRequest, res: HttpResponse) {
   }
 }
 
-<<<<<<< HEAD
 
 /**
  * Descripción: Controlador para solicitar la emisión y envío de un nuevo código OTP al correo del usuario.
@@ -141,8 +134,6 @@ export async function verifyEmailAction(req: HttpRequest, res: HttpResponse) {
  * @return {Promise<void>}
  * @throws {Ninguna} Los errores se mapean directamente al cuerpo de la respuesta.
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function resendVerificationAction(req: HttpRequest, res: HttpResponse) {
   try {
     const body = await readJsonBody<unknown>(req);

@@ -1,236 +1,173 @@
 import { useState, useEffect } from "react";
 import "../../Styles/Pages_styles/Admin/CrearDataset.css"; 
-import { useAuth } from "../../Context/AuthContext";
+import "../../Styles/Pages_styles/Admin/GestionDatasets.css"; 
+import { useAuth } from "../../Context/AuthContext"; 
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-// 1. Ahora recibimos 'dataset' (el objeto completo) en lugar de 'datasetId'
-function EditarDataset({ dataset, onCancel }) {
+function EditarDataset({ datasetId, onCancel }) {
   const [step, setStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth(); 
 
+  // OPCIONES DE SELECTS
   const [categories, setCategories] = useState([]);
   const [licenses, setLicenses] = useState([]);
   const [instituciones, setInstituciones] = useState([]);
+  const [originalStatus, setOriginalStatus] = useState(""); 
+
+  // ESTADOS DE ARCHIVOS (Lógica de la 2da versión)
+  const [existingFiles, setExistingFiles] = useState([]); 
+  const [deletedFileIds, setDeletedFileIds] = useState([]); 
+  const [newFiles, setNewFiles] = useState([]); 
 
   const [formData, setFormData] = useState({
-    title: "",
-    summary: "",
-    description: "",
-    category_id: "",
-    license_id: "",
-    institution_id: "", 
-    access_level: "public",
-    creation_date: "", 
-    temporal_coverage_start: "",
-    temporal_coverage_end: "",
-    geographic_coverage: "",
-    update_frequency: "",
-    source_url: ""
+    title: "", summary: "", description: "", category_id: "", license_id: "", institution_id: "", 
+    access_level: "public", creation_date: "", temporal_coverage_start: "", temporal_coverage_end: "",
+    geographic_coverage: "", update_frequency: "", source_url: "", dataset_status: ""
   });
 
-  const [selectedFiles, setSelectedFiles] = useState([]);
-
   useEffect(() => {
-    const fetchOptions = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Solo pedimos las opciones de los selects (Categorías, Licencias, Instituciones)
-        const [catRes, licRes, instRes] = await Promise.all([
+        const [catRes, licRes, instRes, dsRes] = await Promise.all([
           fetch(`${API_URL}/api/categories`),
           fetch(`${API_URL}/api/licenses`),
-          fetch(`${API_URL}/api/instituciones`, { headers: { "Authorization": `Bearer ${user.token}` } })
+          fetch(`${API_URL}/api/instituciones`, { headers: { "Authorization": `Bearer ${user.token}` } }),
+          fetch(`${API_URL}/api/datasets/${datasetId}`, { headers: { "Authorization": `Bearer ${user.token}` } })
         ]);
 
         if (catRes.ok) setCategories((await catRes.json()).data || []);
         if (licRes.ok) setLicenses((await licRes.json()).data || []);
         if (instRes.ok) setInstituciones((await instRes.json()).instituciones || []);
 
-        // 2. Usamos el objeto 'dataset' que llegó por props para pre-llenar todo
-        if (dataset) {
-          console.log("Precargando desde la tabla:", dataset);
+        if (dsRes.ok) {
+          const { data } = await dsRes.json();
+          setOriginalStatus(data.dataset_status);
+          if (data.files) setExistingFiles(data.files);
+
           setFormData({
-            title: dataset.title || dataset.nombre || "",
-            summary: dataset.summary || "",
-            description: dataset.description || "",
-            category_id: dataset.category_id || "",
-            license_id: dataset.license_id || "",
-            institution_id: dataset.institution_id || "", 
-            access_level: dataset.access_level || "public",
-            
-            // Manejamos las fechas con cuidado de que no sean nulas
-            creation_date: dataset.creation_date ? dataset.creation_date.split('T')[0] : (dataset.fecha ? dataset.fecha.split('T')[0] : ""), 
-            temporal_coverage_start: dataset.temporal_coverage_start ? dataset.temporal_coverage_start.split('T')[0] : "",
-            temporal_coverage_end: dataset.temporal_coverage_end ? dataset.temporal_coverage_end.split('T')[0] : "",
-            
-            geographic_coverage: dataset.geographic_coverage || "",
-            update_frequency: dataset.update_frequency || "",
-            source_url: dataset.source_url || ""
+            title: data.title || "",
+            summary: data.summary || "",
+            description: data.description || "",
+            category_id: data.category_id || "",
+            license_id: data.license_id || "",
+            institution_id: data.institution_id || "", 
+            access_level: data.access_level || "public",
+            creation_date: data.creation_date ? data.creation_date.split('T')[0] : "", 
+            temporal_coverage_start: data.temporal_coverage_start ? data.temporal_coverage_start.split('T')[0] : "",
+            temporal_coverage_end: data.temporal_coverage_end ? data.temporal_coverage_end.split('T')[0] : "",
+            geographic_coverage: data.geographic_coverage || "",
+            update_frequency: data.update_frequency || "",
+            source_url: data.source_url || "",
+            dataset_status: data.dataset_status || ""
           });
         }
-
       } catch (error) {
-        console.error("Error cargando opciones de selects:", error);
+        console.error("Error cargando datos:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    fetchOptions();
-  }, [user.token, dataset]); // Dependemos de que 'dataset' exista
+    fetchData();
+  }, [datasetId, user.token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setSelectedFiles(Array.from(e.target.files));
+  // MÉTODOS DE ARCHIVOS
+  const handleNewFileChange = (e) => setNewFiles(Array.from(e.target.files));
+  const removeNewFile = (indexToRemove) => setNewFiles(files => files.filter((_, index) => index !== indexToRemove));
+  const removeExistingFile = (fileId) => {
+    setDeletedFileIds(prev => [...prev, fileId]);
+    setExistingFiles(files => files.filter(f => f.aws_file_reference_id !== fileId));
   };
 
-  const removeFile = (indexToRemove) => {
-    setSelectedFiles(files => files.filter((_, index) => index !== indexToRemove));
-  };
+  const handleSubmit = async (e, forcedStatus = null) => {
+    if (e) e.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (existingFiles.length === 0 && newFiles.length === 0) {
+      return alert("El dataset debe tener al menos un archivo válido.");
+    }
+
     setIsSubmitting(true);
 
     try {
+      // 1. Subida de nuevos archivos
       const uploadedFilesData = [];
+      for (const file of newFiles) {
+        const presignedRes = await fetch(`${API_URL}/api/upload/presigned-url`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
+          body: JSON.stringify({ fileName: file.name, contentType: file.type })
+        });
+        const { uploadUrl, fileUrl, storageKey } = await presignedRes.json();
+        
+        await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
 
-      // Subida de archivos (solo si hay nuevos)
-      if (selectedFiles.length > 0) {
-        for (const file of selectedFiles) {
-          const presignedRes = await fetch(`${API_URL}/api/upload/presigned-url`, {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json", 
-              "Authorization": `Bearer ${user.token}` 
-            },
-            body: JSON.stringify({ fileName: file.name, contentType: file.type })
-          });
-          
-          if (!presignedRes.ok) throw new Error("Error obteniendo URL de subida");
-          const { uploadUrl, fileUrl, storageKey } = await presignedRes.json();
-
-          const uploadRes = await fetch(uploadUrl, {
-            method: "PUT",
-            headers: { "Content-Type": file.type },
-            body: file
-          });
-          
-          if (!uploadRes.ok) throw new Error(`Error subiendo el archivo ${file.name}`);
-
-          uploadedFilesData.push({
-            storage_key: storageKey,
-            file_url: fileUrl,
-            display_name: file.name,
-            file_format: file.name.split('.').pop().toLowerCase(),
-            mime_type: file.type,
-            file_size_bytes: file.size,
-            file_role: 'source',
-            is_primary: uploadedFilesData.length === 0 
-          });
-        }
+        uploadedFilesData.push({
+          storage_key: storageKey, file_url: fileUrl, display_name: file.name,
+          file_format: file.name.split('.').pop().toLowerCase(), mime_type: file.type,
+          file_size_bytes: file.size, file_role: 'source'
+        });
       }
 
+      // 2. Payload Unificado
       const payload = {
         ...formData,
         category_id: Number(formData.category_id),
         license_id: Number(formData.license_id),
         institution_id: formData.institution_id ? Number(formData.institution_id) : null,
-        source_url: formData.source_url?.trim() !== "" ? formData.source_url : null,
-        temporal_coverage_start: formData.temporal_coverage_start !== "" ? formData.temporal_coverage_start : null,
-        temporal_coverage_end: formData.temporal_coverage_end !== "" ? formData.temporal_coverage_end : null,
-        geographic_coverage: formData.geographic_coverage?.trim() !== "" ? formData.geographic_coverage : null,
-        update_frequency: formData.update_frequency !== "" ? formData.update_frequency : null,
+        dataset_status: forcedStatus || formData.dataset_status,
+        new_files: uploadedFilesData,
+        deleted_file_ids: deletedFileIds 
       };
 
-      if (uploadedFilesData.length > 0) {
-        payload.files = uploadedFilesData;
-      }
-
-      // 3. Obtenemos el ID del dataset original para hacer el PUT
-      const actualDatasetId = dataset.dataset_id || dataset.id;
-
-      const res = await fetch(`${API_URL}/api/datasets/${actualDatasetId}`, { 
+      const res = await fetch(`${API_URL}/api/datasets/${datasetId}`, { 
         method: "PUT", 
-        headers: { 
-          "Content-Type": "application/json", 
-          "Authorization": `Bearer ${user.token}` 
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
         body: JSON.stringify(payload) 
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        let errorMsg = "Error del servidor al actualizar el dataset";
-        if (Array.isArray(err.message)) {
-          errorMsg = err.message.map(e => e.message).join(", ");
-        } else if (err.message) {
-          errorMsg = err.message;
-        }
-        throw new Error(errorMsg);
-      }
+      if (!res.ok) throw new Error("Error al actualizar el dataset");
       
       alert("¡Dataset actualizado con éxito!");
       onCancel();
-
     } catch (error) {
-      console.error(error);
-      alert(error.message || "Ocurrió un error al procesar la solicitud.");
+      alert(error.message || "Ocurrió un error.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
-    return <div className="crear-dataset-container"><h2>Cargando opciones...</h2></div>;
-  }
+  if (isLoading) return <div className="crear-dataset-container"><h2>Cargando...</h2></div>;
 
   return (
     <div className="crear-dataset-container">
-      
       <div className="header">
         <button type="button" onClick={onCancel} className="btn-back-header">← Volver</button>
         <div>
-          <h1>Editar Dataset</h1>
-          <p>Paso {step} de 2: {step === 1 ? 'Actualizar Metadatos descriptivos' : 'Actualizar Archivos'}</p>
+          <h1>Editar Dataset #{datasetId}</h1>
+          <p>Paso {step} de 2: {step === 1 ? 'Metadatos' : 'Gestión de Archivos'}</p>
         </div>
       </div>
 
-      <div className="status-alert">
-        <strong>Editando:</strong> <span className="status-text">{formData.title || "Dataset"}</span>
+      <div className="status-alert" style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span><strong>Editando:</strong> {formData.title}</span>
+        <span><strong>Estado:</strong> <span className="status-text">{originalStatus}</span></span>
       </div>
 
-      <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : handleSubmit}>
+      <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : (e) => handleSubmit(e)}>
         
         {/* PASO 1: METADATOS */}
         <div className={step === 1 ? "d-block" : "d-none"}>
-          
           <div className="form-group">
             <label>Título del Dataset *</label>
             <input type="text" name="title" required value={formData.title} onChange={handleChange} className="form-control" />
-          </div>
-
-          <div className="form-row">
-            <div className="form-col">
-              <label>Fecha de Creación de los Datos *</label>
-              <input type="date" name="creation_date" required value={formData.creation_date} onChange={handleChange} className="form-control" />
-            </div>
-            <div className="form-col">
-              <label>Frecuencia de Actualización</label>
-              <select name="update_frequency" value={formData.update_frequency} onChange={handleChange} className="form-control">
-                <option value="">No definida</option>
-                <option value="Anual">Anual</option>
-                <option value="Semestral">Semestral</option>
-                <option value="Trimestral">Trimestral</option>
-                <option value="Mensual">Mensual</option>
-              </select>
-            </div>
           </div>
 
           <div className="form-row">
@@ -252,47 +189,20 @@ function EditarDataset({ dataset, onCancel }) {
 
           <div className="form-row">
             <div className="form-col">
-              <label>Institución Responsable</label>
+              <label>Institución</label>
               <select name="institution_id" value={formData.institution_id} onChange={handleChange} className="form-control">
                 <option value="">Seleccione...</option>
-                {instituciones.map(inst => (
-                  <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name || inst.name}</option>
-                ))}
+                {instituciones.map(inst => <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name || inst.name}</option>)}
               </select>
             </div>
             <div className="form-col">
-              <label>Nivel de Acceso</label>
-              <select name="access_level" value={formData.access_level} onChange={handleChange} className="form-control">
-                <option value="public">Público (Cualquiera)</option>
-                <option value="internal">Interno (Registrados)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-col">
-              <label>Cobertura Temporal (Inicio)</label>
-              <input type="date" name="temporal_coverage_start" value={formData.temporal_coverage_start} onChange={handleChange} className="form-control" />
-            </div>
-            <div className="form-col">
-              <label>Cobertura Temporal (Término)</label>
-              <input type="date" name="temporal_coverage_end" value={formData.temporal_coverage_end} onChange={handleChange} className="form-control" />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-col">
-              <label>Cobertura Geográfica</label>
-              <input type="text" name="geographic_coverage" placeholder="Ej: Chile, Regional..." value={formData.geographic_coverage} onChange={handleChange} className="form-control" />
-            </div>
-            <div className="form-col">
-              <label>URL de la Organización / Fuente</label>
-              <input type="url" name="source_url" placeholder="https://ejemplo.org" value={formData.source_url} onChange={handleChange} className="form-control" />
+              <label>Fecha Creación *</label>
+              <input type="date" name="creation_date" required value={formData.creation_date} onChange={handleChange} className="form-control" />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Resumen Corto (Máx 500 caract.) *</label>
+            <label>Resumen Corto *</label>
             <textarea name="summary" required maxLength="500" value={formData.summary} onChange={handleChange} className="form-control textarea-short" />
           </div>
 
@@ -302,47 +212,66 @@ function EditarDataset({ dataset, onCancel }) {
           </div>
 
           <div className="text-right">
-            <button type="submit" className="btn-primary">
-              Continuar a Archivos →
-            </button>
+            <button type="submit" className="btn-primary">Continuar a Archivos →</button>
           </div>
         </div>
 
         {/* PASO 2: ARCHIVOS */}
         <div className={step === 2 ? "d-block" : "d-none"}>
           
-          <div className="file-drop-area">
-            <input type="file" multiple onChange={handleFileChange} id="file-upload" className="d-none" />
-            <label htmlFor="file-upload" className="file-upload-label">
-              📁 Haz clic aquí para seleccionar NUEVOS archivos (Opcional)
-            </label>
-            <p style={{textAlign: "center", fontSize: "12px", color: "#666", marginTop: "5px"}}>
-              Si no seleccionas nada, se mantendrán los archivos actuales.
-            </p>
+          {/* Archivos Existentes */}
+          <div className="file-list-container">
+            <h3>Archivos Actuales:</h3>
+            <ul className="file-list">
+              {existingFiles.map((f) => (
+                <li key={f.aws_file_reference_id} className="file-item" style={{backgroundColor: '#e3f2fd'}}>
+                  <span>📄 {f.display_name}</span>
+                  <button type="button" onClick={() => removeExistingFile(f.aws_file_reference_id)} className="btn-remove-file">🗑️</button>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {selectedFiles.length > 0 && (
+          {/* Subir Nuevos */}
+          <div className="file-drop-area">
+            <input type="file" multiple onChange={handleNewFileChange} id="file-upload" className="d-none" />
+            <label htmlFor="file-upload" className="file-upload-label">📁 Añadir nuevos archivos</label>
+          </div>
+
+          {newFiles.length > 0 && (
             <div className="file-list-container">
-              <h3>Archivos a subir:</h3>
+              <h3>Nuevos para subir:</h3>
               <ul className="file-list">
-                {selectedFiles.map((f, i) => (
-                  <li key={i} className="file-item">
-                    <span>📄 {f.name} ({(f.size / 1024 / 1024).toFixed(2)} MB)</span>
-                    <button type="button" onClick={() => removeFile(i)} className="btn-remove-file">✖</button>
+                {newFiles.map((f, i) => (
+                  <li key={i} className="file-item" style={{backgroundColor: '#f1f8e9'}}>
+                    <span>🆕 {f.name}</span>
+                    <button type="button" onClick={() => removeNewFile(i)} className="btn-remove-file">✖</button>
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
-          <div className="form-actions">
+          <div className="form-actions" style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between' }}>
             <button type="button" onClick={() => setStep(1)} className="btn-secondary">← Atrás</button>
-            <button type="submit" disabled={isSubmitting} className="btn-primary">
-              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {originalStatus === 'draft' ? (
+                <>
+                  <button type="button" onClick={(e) => handleSubmit(e, 'draft')} disabled={isSubmitting} className="btn-primary" style={{backgroundColor: '#2196F3'}}>
+                    {isSubmitting ? '...' : 'Guardar Borrador'}
+                  </button>
+                  <button type="button" onClick={(e) => handleSubmit(e, 'pending_validation')} disabled={isSubmitting} className="btn-primary" style={{backgroundColor: '#ff9800'}}>
+                    🚀 Enviar a Validación
+                  </button>
+                </>
+              ) : (
+                <button type="submit" disabled={isSubmitting} className="btn-primary">
+                  {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
-
       </form>
     </div>
   );

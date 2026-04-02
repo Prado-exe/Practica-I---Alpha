@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Servicio de Categorías (categories.service.ts)
@@ -23,10 +22,6 @@ import { fetchAllCategoriesFromDb } from "../repositories/categories.repository"
  * @return {Promise<Array>} Lista de objetos que representan las categorías disponibles.
  * @throws {Ninguna} No lanza excepciones de negocio (los errores de base de datos burbujean al manejador global).
  */
-=======
-import { fetchAllCategoriesFromDb } from "../repositories/categories.repository";
-
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export async function getCategoriesForDropdown() {
   return await fetchAllCategoriesFromDb();
 }

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * ============================================================================
  * MÓDULO: Configuración de Seguridad HTTP (security-headers.ts)
@@ -28,11 +27,6 @@ import { env } from "../config/env";
  * @return {string} La directiva CSP completa y formateada.
  * @throws {Ninguna}
  */
-=======
-import type { ServerResponse } from "http";
-import { env } from "../config/env";
-
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 function buildCsp(): string {
   const frontendOrigin = env.FRONTEND_ORIGIN;
 
@@ -53,7 +47,6 @@ function buildCsp(): string {
   ].join("; ");
 }
 
-<<<<<<< HEAD
 /**
  * Descripción: Aplica un conjunto de cabeceras de seguridad a la respuesta HTTP saliente.
  * POR QUÉ: 
@@ -65,8 +58,6 @@ function buildCsp(): string {
  * @return {void} La función muta el objeto de respuesta directamente.
  * @throws {Ninguna}
  */
-=======
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
 export function applySecurityHeaders(res: ServerResponse): void {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");

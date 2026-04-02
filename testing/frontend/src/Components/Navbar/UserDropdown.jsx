@@ -5,11 +5,11 @@ import { FaUser } from "react-icons/fa";
 import "../../styles/ComponentStyle/Navbar/UserDropdown.css";
 
 function UserDropdown({ user, logout }) {
-    if (!user) return null;
+  if (!user) return null;
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef();
 
-  // cerrar al hacer click fuera
+  // Cerrar al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -17,7 +17,7 @@ function UserDropdown({ user, logout }) {
       }
     };
 
-    document.addEventListener("click", handleClickOutside); // 🔥 CAMBIO AQUÍ
+    document.addEventListener("click", handleClickOutside); 
 
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
@@ -37,6 +37,9 @@ function UserDropdown({ user, logout }) {
       {/* MENÚ DESPLEGABLE */}
       {open && (
         <div className="user-dropdown-menu">
+          {/* 👇 NUEVO ENLACE AÑADIDO AQUÍ 👇 */}
+          <Link to="/administracion/proponer-dataset" onClick={() => setOpen(false)}>Proponer Dataset</Link>
+          
           <Link to="/administracion" onClick={() => setOpen(false)}>Panel Admin</Link>
           <Link to="/administracion/datasets" onClick={() => setOpen(false)}>Gestion de Datasets</Link>
           <Link to="/administracion/configuracion" onClick={() => setOpen(false)}>Configuración</Link>

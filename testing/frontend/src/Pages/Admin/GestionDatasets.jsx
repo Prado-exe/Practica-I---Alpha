@@ -1,112 +1,3 @@
-<<<<<<< HEAD
-import { useState } from "react";
-import "../../styles/pages_styles/Admin/GestionDatasets.css";
-import CanView from "../../Components/Common/CanView";
-
-function GestionDatasets() {
-
-  const [filters, setFilters] = useState({
-    nombre: "",
-    categoria: "",
-    estado: "",
-    fecha: ""
-  });
-
-  const [datasets, setDatasets] = useState([
-    {
-      id: 1,
-      nombre: "Dataset Salud 2024",
-      categoria: "Salud",
-      institucion: "Ministerio de Salud",
-      fecha: "2024-03-10",
-      estado: "Publicado"
-    },
-    {
-      id: 2,
-      nombre: "Educación Escolar",
-      categoria: "Educación",
-      institucion: "MINEDUC",
-      fecha: "2023-11-22",
-      estado: "Pendiente"
-    }
-  ]);
-
-  const handleChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSearch = () => {
-    console.log("Aplicar filtros:", filters);
-    // Aquí luego conectas con backend
-  };
-
-  const handleClear = () => {
-    setFilters({
-      nombre: "",
-      categoria: "",
-      estado: "",
-      fecha: ""
-    });
-  };
-
-  return (
-    <div className="gestion-datasets">
-
-      {/* HEADER */}
-      <div className="header">
-        <h1>Gestión de Conjunto de Datos</h1>
-        <p>Administra, filtra y gestiona los datasets disponibles en el sistema.</p>
-      </div>
-
-      {/* FILTROS */}
-      <div className="filters-container">
-
-        <input
-          type="text"
-          name="nombre"
-          placeholder="Buscar por nombre"
-          value={filters.nombre}
-          onChange={handleChange}
-        />
-
-        <select
-          name="categoria"
-          value={filters.categoria}
-          onChange={handleChange}
-        >
-          <option value="">Categoría</option>
-          <option value="Salud">Salud</option>
-          <option value="Educación">Educación</option>
-        </select>
-
-        <select
-          name="estado"
-          value={filters.estado}
-          onChange={handleChange}
-        >
-          <option value="">Estado</option>
-          <option value="Publicado">Publicado</option>
-          <option value="Pendiente">Pendiente</option>
-        </select>
-
-        <input
-          type="date"
-          name="fecha"
-          value={filters.fecha}
-          onChange={handleChange}
-        />
-
-        <div className="filter-buttons">
-          <button className="btn-search" onClick={handleSearch}>
-            Buscar
-          </button>
-          <button className="btn-clear" onClick={handleClear}>
-            Limpiar
-          </button>
-=======
 import { useState, useEffect } from "react";
 import "../../styles/pages_styles/Admin/GestionDatasets.css";
 import { FiSearch, FiEdit, FiList, FiTrash2, FiSend, FiEye, FiPlusCircle } from "react-icons/fi"; 
@@ -114,6 +5,9 @@ import CanView from "../../Components/Common/CanView";
 import CrearDataset from "./CrearDataset";
 import EditarDataset from "./EditarDataset"; 
 import { useNavigate } from "react-router-dom";
+import RevisarDataset from "./RevisarDataset";
+import ValidarDataset from "./ValidarDataset";
+
 import { useAuth } from "../../Context/AuthContext";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -122,7 +16,7 @@ function GestionDatasets() {
   const navigate = useNavigate();
   const { user } = useAuth(); 
 
-  // Estados
+  // --- ESTADOS ---
   const [filters, setFilters] = useState({ 
     nombre: "", 
     category_id: "", 
@@ -132,13 +26,16 @@ function GestionDatasets() {
   });
   
   const [isCreating, setIsCreating] = useState(false);
-  const [editingDataset, setEditingDataset] = useState(null); 
-  
   const [datasets, setDatasets] = useState([]);
   const [instituciones, setInstituciones] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  
+  // IDs para vistas modales/condicionales
+  const [reviewingDatasetId, setReviewingDatasetId] = useState(null);
+  const [editingDatasetId, setEditingDatasetId] = useState(null);
+  const [validatingDatasetId, setValidatingDatasetId] = useState(null);
 
-  // Carga inicial
+  // --- CARGA DE DATOS ---
   useEffect(() => {
     if (user?.token) {
       fetchDatasets();
@@ -175,87 +72,90 @@ function GestionDatasets() {
         const data = await res.json();
         setDatasets(data.data || data || []); 
       } else {
-        console.error("Error al obtener los datasets del backend");
+        console.error("Error al obtener los datasets");
       }
     } catch (error) {
       console.error("Error de red:", error);
     }
   };
 
-  // Funciones auxiliares para nombres
-  const getCategoryName = (id) => {
-    const category = categorias.find(c => c.category_id === id);
-    return category ? category.name : 'Desconocida';
-  };
-
-  const getInstitutionName = (id) => {
-    if (!id) return 'Sin Institución';
-    const institution = instituciones.find(i => i.institution_id === id);
-    return institution ? (institution.legal_name || institution.name) : 'Desconocida';
-  };
-
-  // Manejo de filtros
+  // --- MANEJO DE EVENTOS ---
   const handleChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   const handleSearch = () => {
     console.log("Aplicando filtros:", filters);
-    // Lógica para enviar filtros al backend o filtrar localmente
+    // Aquí podrías implementar la lógica de filtrado hacia el API
   };
 
   const handleClear = () => {
     setFilters({ nombre: "", category_id: "", estado: "", fecha: "", institucion_id: "" });
   };
-  
-  // ---> NUEVA FUNCIÓN PARA ELIMINAR <---
-  const handleDelete = async (id) => {
-    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar este dataset? Esta acción no se puede deshacer.");
-    
-    if (!confirmacion) return;
 
+  const handleEliminar = async (id, nombre) => {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente "${nombre}"?`)) {
+      return;
+    }
+    
     try {
       const res = await fetch(`${API_URL}/api/datasets/${id}`, {
         method: "DELETE",
-        headers: { 
-          "Authorization": `Bearer ${user.token}` 
-        }
+        headers: { "Authorization": `Bearer ${user.token}` }
       });
-
+      
       if (res.ok) {
         alert("Dataset eliminado con éxito.");
-        fetchDatasets(); // Recargamos la tabla
+        fetchDatasets();
       } else {
-        const errorData = await res.json().catch(() => ({}));
-        console.error("Error del servidor al eliminar:", errorData);
-        alert(`No se pudo eliminar: ${errorData.message || 'Error del servidor (Posible 404)'}`);
+        const err = await res.json();
+        alert(`Error al eliminar: ${err.message}`);
       }
     } catch (error) {
-      console.error("Error de red al eliminar:", error);
-      alert("Ocurrió un error al intentar comunicar con el servidor.");
+      console.error("Error al eliminar:", error);
+      alert("Error de red.");
     }
   };
 
-  // Renderizados condicionales para las vistas de Crear y Editar
+  // --- RENDERIZADOS CONDICIONALES (VISTAS) ---
   if (isCreating) {
     return <CrearDataset onCancel={() => { setIsCreating(false); fetchDatasets(); }} />;
   }
 
-  if (editingDataset) {
-    return <EditarDataset 
-      dataset={editingDataset} 
-      onCancel={() => { setEditingDataset(null); fetchDatasets(); }} 
-    />;
+  if (reviewingDatasetId) {
+    return (
+      <RevisarDataset 
+        datasetId={reviewingDatasetId} 
+        onCancel={() => { setReviewingDatasetId(null); fetchDatasets(); }} 
+      />
+    );
   }
 
-  // Vista principal de Gestión
+  if (editingDatasetId) {
+    return (
+      <EditarDataset 
+        datasetId={editingDatasetId} 
+        onCancel={() => { setEditingDatasetId(null); fetchDatasets(); }} 
+      />
+    );
+  }
+
+  if (validatingDatasetId) {
+    return (
+      <ValidarDataset 
+        datasetId={validatingDatasetId} 
+        onCancel={() => { setValidatingDatasetId(null); fetchDatasets(); }} 
+      />
+    );
+  }
+
   return (
     <div className="gestion-datasets">
       {/* HEADER */}
       <div className="header">
         <div className="header-info">
           <h1>Gestión de Conjuntos de Datos</h1>
-          <p>Crea, edita y elimina conjuntos de datos del observatorio de datos sostenible y gestiona las distribuciones de los conjuntos de datos</p>
+          <p>Crea, edita y gestiona los conjuntos de datos del observatorio.</p>
         </div>
         <button className="btn-create" onClick={() => setIsCreating(true)}>
           <FiPlusCircle size={18} /> Agregar Dataset
@@ -269,7 +169,7 @@ function GestionDatasets() {
             <label>Buscar</label>
             <div className="input-with-icon">
               <FiSearch className="icon" />
-              <input type="text" name="nombre" placeholder="Buscar por el nombre del dataset" value={filters.nombre} onChange={handleChange} />
+              <input type="text" name="nombre" placeholder="Nombre del dataset..." value={filters.nombre} onChange={handleChange} />
             </div>
           </div>
 
@@ -285,7 +185,11 @@ function GestionDatasets() {
             <label>Institución</label>
             <select name="institucion_id" value={filters.institucion_id} onChange={handleChange}>
               <option value="">Cualquier</option>
-              {instituciones.map(inst => <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name || inst.name}</option>)}
+              {instituciones.map(inst => (
+                <option key={inst.institution_id} value={inst.institution_id}>
+                  {inst.legal_name || inst.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -308,7 +212,6 @@ function GestionDatasets() {
           </div>
           <button className="btn-aplicar" onClick={handleSearch}>APLICAR</button>
           <button className="btn-limpiar" onClick={handleClear}>LIMPIAR</button>
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
         </div>
       </div>
 
@@ -320,45 +223,6 @@ function GestionDatasets() {
               <th>Nombre</th>
               <th>Categoría</th>
               <th>Institución</th>
-<<<<<<< HEAD
-              <th>Fecha Registro</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {datasets.map((data) => (
-              <tr key={data.id}>
-                <td>{data.nombre}</td>
-                <td>{data.categoria}</td>
-                <td>{data.institucion}</td>
-                <td>{data.fecha}</td>
-                <td>
-                  <span className={`estado ${data.estado.toLowerCase()}`}>
-                    {data.estado}
-                  </span>
-                </td>
-                <td className="acciones">
-                  <CanView requiredPermission="data_management.write">
-                    <button className="btn-edit">Editar</button>
-                  </CanView>
-
-                  <CanView requiredPermission="data_validation.execute">
-                    <button className="btn-view">Revisar</button>
-                  </CanView>
-
-                  <CanView requiredPermission="data_management.delete">
-                    <button className="btn-delete">Eliminar</button>
-                  </CanView>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-=======
               <th>Fecha de Registro</th>
               <th style={{ textAlign: 'center' }}>Estado</th>
               <th style={{ textAlign: 'center' }}>Acciones</th>
@@ -366,74 +230,89 @@ function GestionDatasets() {
           </thead>
           <tbody>
             {datasets.map((data) => {
-              const currentStatus = (data.dataset_status || data.status || 'draft').toLowerCase();
-              
-              let statusClass = 'borrador';
-              let displayStatus = 'Borrador';
-
-              if (currentStatus === 'published' || currentStatus === 'publicado') {
-                statusClass = 'publicado';
-                displayStatus = 'Publicado';
-              } else if (currentStatus === 'rejected' || currentStatus === 'rechazado') {
-                statusClass = 'rechazado';
-                displayStatus = 'Rechazado';
-              } else if (currentStatus === 'pending_validation') {
-                statusClass = 'revision';
-                displayStatus = 'En Revisión';
-              }
-
-              const displayNombre = data.title || data.nombre || 'Sin título';
-              const displayFecha = data.fecha || (data.creation_date ? new Date(data.creation_date).toLocaleDateString() : 'Sin fecha');
+              const status = (data.dataset_status || 'draft').toLowerCase();
+              const id = data.dataset_id || data.id;
 
               return (
-                <tr key={data.dataset_id || data.id}>
-                  <td>{displayNombre}</td>
-                  <td>{data.categoria || getCategoryName(data.category_id)}</td>
-                  <td>{data.institucion || getInstitutionName(data.institution_id)}</td>
-                  <td>{displayFecha}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    <span className={`estado-badge ${statusClass}`}>
-                      {displayStatus}
+                <tr key={id}>
+                  <td>{data.nombre}</td>
+                  <td>{data.categoria}</td>
+                  <td>{data.institucion}</td>
+                  <td>{data.fecha}</td>
+                  <td>
+                    <span className={`estado ${status}`}>
+                      {status === 'published' ? 'Publicado' : 
+                       status === 'pending_validation' ? 'En Revisión' : 
+                       status === 'archived' ? 'Archivado' :
+                       status === 'rejected' ? 'Rechazado' :
+                       status === 'draft' ? 'Borrador' :
+                       status === 'deleted' ? 'Eliminado' : 'Desconocido'}
                     </span>
                   </td>
-                  <td className="acciones">
-                    {/* Botones condicionales según estado */}
-                    {statusClass === 'borrador' && <FiSend className="action-icon" title="Enviar a Validación" />}
-                    {statusClass === 'rechazado' && <FiEye className="action-icon" title="Ver Motivo de Rechazo" />}
+                  <td className="acciones" style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', justifyContent: 'center' }}>
                     
-                    {/* Botón de Editar */}
-                    <FiEdit 
-                      className="action-icon" 
-                      title="Editar" 
-                      onClick={() => setEditingDataset(data)} 
-                    />
-                    
-                    {/* Botón de Distribuciones */}
-                    <FiList className="action-icon" title="Distribuciones" />
-                    
-                    {/* Botón de Eliminar */}
-                    <FiTrash2 
-                      className="action-icon" 
-                      title="Eliminar" 
-                      onClick={() => handleDelete(data.dataset_id || data.id)} 
-                      style={{ color: '#dc3545' }}
-                    />
+                    <CanView requiredPermission="data_management.write">
+                      <button 
+                        className="btn-edit"
+                        onClick={() => setEditingDatasetId(id)}
+                        disabled={status === 'deleted'}
+                      >
+                        Editar
+                      </button>
+                    </CanView>
+
+                    <CanView requiredPermission="data_validation.execute">
+                      <button 
+                        className="btn-view" 
+                        onClick={() => setReviewingDatasetId(id)}
+                      >
+                        Información
+                      </button>
+                    </CanView>
+
+                    <CanView requiredPermission="data_management.delete">
+                      <button 
+                        className="btn-delete" 
+                        style={{ 
+                          backgroundColor: status === 'deleted' ? '#cccccc' : '#f44336', 
+                          cursor: status === 'deleted' ? 'not-allowed' : 'pointer'
+                        }}
+                        onClick={() => handleEliminar(id, data.nombre)}
+                        disabled={status === 'deleted'}
+                      >
+                        {status === 'deleted' ? 'Eliminado' : 'Eliminar'}
+                      </button>
+                    </CanView>
+
+                    {/* Botones Especiales */}
+                    {status === 'pending_validation' && (
+                      <CanView requiredPermission="data_validation.execute">
+                        <button 
+                          className="btn-validate"
+                          style={{ backgroundColor: '#ff9800', color: 'white', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold' }}
+                          onClick={() => setValidatingDatasetId(id)}
+                        >
+                          📋 Validación
+                        </button>
+                      </CanView>
+                    )}
+
+                    {status === 'rejected' && (
+                      <button 
+                        className="btn-rejected-reason"
+                        style={{ backgroundColor: '#d32f2f', color: 'white', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold' }}
+                        onClick={() => alert(`Motivo de rechazo del dataset ID: ${id}`)}
+                      >
+                        Motivo Rechazo
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
             })}
-            
-            {datasets.length === 0 && (
-              <tr>
-                <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                  No se encontraron datasets registrados.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
->>>>>>> refactorizacion-y-testeo-de-algunas-cosas
     </div>
   );
 }
