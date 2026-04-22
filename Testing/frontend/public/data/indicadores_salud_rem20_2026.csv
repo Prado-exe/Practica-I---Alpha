@@ -1,0 +1,49 @@
+REGION,ESTABLECIMIENTO,PERIODO,INDICADOR,VALOR,TIPO_ATENCION,VARIACION_PCT
+Arica y Parinacota,Hospital Regional Arica,2026-01,Consultas odontológicas,1240,Programada,5.2
+Arica y Parinacota,Hospital Regional Arica,2026-01,Extracciones,380,Programada,-2.1
+Arica y Parinacota,UEH Arica,2026-01,Urgencias dentales,210,Urgencia,8.3
+Tarapacá,Hospital Dr. Ernesto Torres,2026-01,Consultas odontológicas,980,Programada,3.1
+Tarapacá,Hospital Dr. Ernesto Torres,2026-01,Extracciones,320,Programada,-1.5
+Tarapacá,UEH Tarapacá,2026-01,Urgencias dentales,175,Urgencia,6.2
+Antofagasta,Hospital Regional Antofagasta,2026-01,Consultas odontológicas,2450,Programada,7.8
+Antofagasta,Hospital Regional Antofagasta,2026-01,Extracciones,720,Programada,2.3
+Antofagasta,UEH Antofagasta,2026-01,Urgencias dentales,410,Urgencia,11.5
+Atacama,Hospital Regional Copiapó,2026-01,Consultas odontológicas,1120,Programada,-1.2
+Atacama,Hospital Regional Copiapó,2026-01,Extracciones,340,Programada,-4.5
+Atacama,UEH Atacama,2026-01,Urgencias dentales,190,Urgencia,2.1
+Coquimbo,Hospital San Pablo,2026-01,Consultas odontológicas,1850,Programada,4.6
+Coquimbo,Hospital San Pablo,2026-01,Extracciones,510,Programada,-0.8
+Coquimbo,UEH Coquimbo,2026-01,Urgencias dentales,295,Urgencia,9.4
+Valparaíso,Hospital Carlos Van Buren,2026-01,Consultas odontológicas,3780,Programada,6.2
+Valparaíso,Hospital Carlos Van Buren,2026-01,Extracciones,1120,Programada,1.7
+Valparaíso,UEH Valparaíso,2026-01,Urgencias dentales,630,Urgencia,13.2
+Metropolitana,Hospital Barros Luco,2026-01,Consultas odontológicas,8920,Programada,9.1
+Metropolitana,Hospital Barros Luco,2026-01,Extracciones,2650,Programada,3.8
+Metropolitana,UEH Santiago,2026-01,Urgencias dentales,1840,Urgencia,15.6
+O'Higgins,Hospital Regional Rancagua,2026-01,Consultas odontológicas,2100,Programada,2.9
+O'Higgins,Hospital Regional Rancagua,2026-01,Extracciones,630,Programada,-1.9
+O'Higgins,UEH O'Higgins,2026-01,Urgencias dentales,350,Urgencia,5.7
+Maule,Hospital Regional Talca,2026-01,Consultas odontológicas,1980,Programada,1.4
+Maule,Hospital Regional Talca,2026-01,Extracciones,580,Programada,-3.2
+Maule,UEH Maule,2026-01,Urgencias dentales,320,Urgencia,4.8
+Ñuble,Hospital Herminda Martín,2026-01,Consultas odontológicas,1250,Programada,8.3
+Ñuble,Hospital Herminda Martín,2026-01,Extracciones,380,Programada,2.1
+Ñuble,UEH Ñuble,2026-01,Urgencias dentales,215,Urgencia,10.4
+Biobío,Hospital Las Higueras,2026-01,Consultas odontológicas,3420,Programada,5.7
+Biobío,Hospital Las Higueras,2026-01,Extracciones,1050,Programada,-0.4
+Biobío,UEH Biobío,2026-01,Urgencias dentales,580,Urgencia,8.9
+La Araucanía,Hospital Dr. Víctor Ríos,2026-01,Consultas odontológicas,2150,Programada,-2.3
+La Araucanía,Hospital Dr. Víctor Ríos,2026-01,Extracciones,660,Programada,-6.1
+La Araucanía,UEH Araucanía,2026-01,Urgencias dentales,385,Urgencia,1.2
+Los Ríos,Hospital Base Valdivia,2026-01,Consultas odontológicas,1480,Programada,3.5
+Los Ríos,Hospital Base Valdivia,2026-01,Extracciones,450,Programada,-2.8
+Los Ríos,UEH Los Ríos,2026-01,Urgencias dentales,260,Urgencia,6.9
+Los Lagos,Hospital Base Puerto Montt,2026-01,Consultas odontológicas,2380,Programada,4.2
+Los Lagos,Hospital Base Puerto Montt,2026-01,Extracciones,720,Programada,-1.3
+Los Lagos,UEH Los Lagos,2026-01,Urgencias dentales,415,Urgencia,7.6
+Aysén,Hospital de Coyhaique,2026-01,Consultas odontológicas,520,Programada,-0.9
+Aysén,Hospital de Coyhaique,2026-01,Extracciones,160,Programada,-5.2
+Aysén,UEH Aysén,2026-01,Urgencias dentales,95,Urgencia,3.1
+Magallanes,Hospital Clínico Magallanes,2026-01,Consultas odontológicas,680,Programada,2.7
+Magallanes,Hospital Clínico Magallanes,2026-01,Extracciones,210,Programada,-1.8
+Magallanes,UEH Magallanes,2026-01,Urgencias dentales,125,Urgencia,5.4

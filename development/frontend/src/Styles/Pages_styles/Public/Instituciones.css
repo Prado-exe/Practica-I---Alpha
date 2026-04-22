@@ -1,0 +1,177 @@
+/* ===============================
+   CONTENEDOR GENERAL
+   =============================== */
+.instituciones-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* BUSCADOR FULL WIDTH */
+.instituciones-page .search-bar-advanced {
+  width: 100%;
+}
+
+/* ===============================
+   HEADER
+   =============================== */
+.instituciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.instituciones-header h1 {
+  font-size: 26px;
+  margin: 0;
+}
+
+.instituciones-header span {
+  font-size: 14px;
+  color: #666;
+}
+
+/* ===============================
+   SEPARADOR
+   =============================== */
+.instituciones-separator {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 10px 0;
+}
+
+/* ===============================
+   GRID 3x3 🔥
+   =============================== */
+.instituciones-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 🔥 clave */
+  gap: 1.6rem;
+  align-items: stretch;
+}
+
+/* ===============================
+   CARDS
+   =============================== */
+.institucion-card {
+  height: 100%; /* 🔥 todas iguales */
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  border: 1px solid #e0e0e0;
+  transition: all 0.25s ease;
+}
+
+.institucion-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* HEADER CARD */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-header img {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.card-header h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* DESCRIPCIÓN */
+.descripcion {
+  font-size: 0.9rem;
+  color: #666;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* FOOTER */
+.card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dataset-count {
+  font-size: 0.85rem;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.ver-btn {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ver-btn:hover {
+  background: #125ea2;
+}
+
+/* ===============================
+   ESTADOS
+   =============================== */
+.loading-state,
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 0;
+  color: #666;
+}
+
+/* ===============================
+   PAGINACIÓN
+   =============================== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+@media (max-width: 900px) {
+  .instituciones-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .instituciones-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===============================
+   PANTALLAS GRANDES
+   =============================== */
+@media (min-width: 1400px) {
+  .instituciones-page {
+    max-width: calc(100% - 300px);
+    padding: 2rem 0;
+  }
+}

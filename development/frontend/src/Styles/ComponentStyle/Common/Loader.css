@@ -1,0 +1,57 @@
+.loader-container {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+
+  background: transparent; /* ✅ importante */
+}
+
+/* ❌ puedes eliminar spinner si usarás logo */
+.spinner {
+  display: none;
+}
+
+/* Logo girando */
+.loader-logo {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 5px;
+
+  animation: spin 1.2s linear infinite;
+}
+
+/* Texto */
+.loader-container p {
+  font-size: 0.9rem;
+  color: var(--text-color); /* usa tu sistema */
+  opacity: 0.8;
+
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Animación principal (unificada) */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animación texto */
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .loader-logo {
+    animation: none;
+  }
+
+  .loader-container p {
+    animation: none;
+  }
+}

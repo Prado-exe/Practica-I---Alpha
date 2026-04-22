@@ -1,0 +1,50 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.applySecurityHeaders = applySecurityHeaders;
+const env_1 = require("../config/env");
+/**
+ * Descripción: Construye la cadena de política para la cabecera Content-Security-Policy (CSP).
+ * POR QUÉ: Centraliza la lógica de orígenes permitidos. Se utiliza `unsafe-inline` para estilos únicamente por compatibilidad con librerías de UI que inyectan CSS dinámico, pero se mantiene `script-src` restringido a `self` para prevenir la ejecución de scripts maliciosos externos. Incluye comodines para regiones de S3 para asegurar que la aplicación pueda escalar geográficamente su almacenamiento sin romper la visualización de imágenes.
+ * @param {void} No requiere parámetros.
+ * @return {string} La directiva CSP completa y formateada.
+ * @throws {Ninguna}
+ */
+function buildCsp() {
+    const frontendOrigin = env_1.env.FRONTEND_ORIGIN;
+    const s3Origins = "https://*.s3.amazonaws.com https://*.s3.*.amazonaws.com";
+    return [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "frame-ancestors 'none'",
+        "object-src 'none'",
+        "form-action 'self'",
+        `connect-src 'self' ${frontendOrigin} ${s3Origins}`,
+        `img-src 'self' data: blob: ${s3Origins}`,
+        "font-src 'self' data:",
+        "style-src 'self' 'unsafe-inline'",
+        "script-src 'self'",
+        "upgrade-insecure-requests",
+    ].join("; ");
+}
+/**
+ * Descripción: Aplica un conjunto de cabeceras de seguridad a la respuesta HTTP saliente.
+ * POR QUÉ:
+ * - `X-Content-Type-Options: nosniff`: Evita que el navegador intente adivinar el tipo de contenido, mitigando ataques de ejecución de scripts disfrazados de imágenes.
+ * - `X-Frame-Options: DENY`: Previene ataques de Clickjacking prohibiendo que la aplicación sea embebida en iframes.
+ * - `Permissions-Policy`: Restringe el acceso a hardware del dispositivo (cámara/micro) por el principio de mínimo privilegio.
+ * - `Strict-Transport-Security`: Forzado solo en producción para asegurar que el navegador solo se comunique vía HTTPS durante el tiempo de vida especificado (1 año).
+ * @param {ServerResponse} res Objeto de respuesta nativo de Node.js donde se inyectarán las cabeceras.
+ * @return {void} La función muta el objeto de respuesta directamente.
+ * @throws {Ninguna}
+ */
+function applySecurityHeaders(res) {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    res.setHeader("Content-Security-Policy", buildCsp());
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    if (env_1.env.NODE_ENV === "production") {
+        res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    }
+}

@@ -1,0 +1,108 @@
+/* Variables globales */
+:root {
+  --font-scale: 1;
+
+  /* Colores principales */
+  --bg-color: #fafafa;
+  --text-color: #000000;
+  --heading-color: #000000;
+  --link-color: #1565c0;
+
+  /* Colores secundarios */
+  --border-color: #e0e0e0;
+  --card-bg: #ffffff;
+
+  /* Tipografía */
+  --font-body: "Roboto", Arial, sans-serif;
+  --font-heading: "Roboto", Arial, sans-serif;
+
+  /* Espaciado (usando rem) */
+  --space-xs: 0.25rem;   
+  --space-sm: 0.5rem;  
+  --space-md: 1rem;    
+  --space-lg: 1.5rem; 
+  --space-xl: 2rem;    
+
+  /* Bordes */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;   
+}
+
+/* reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: calc(100% * var(--font-scale));
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+
+  background-color: var(--bg-color);
+  color: var(--text-color);
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+/* tipografia base */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--heading-color);
+  font-family: var(--font-heading);
+  margin-top: 0;
+}
+
+p {
+  margin-bottom: var(--space-md);
+}
+
+/* links accesibles */
+a:hover,
+a:focus {
+  text-decoration: none;
+}
+
+a:visited {
+  opacity: 0.8;
+}
+
+
+/* accesibilidad con tab */
+:focus-visible {
+  outline: 0.1875rem solid var(--link-color); 
+  outline-offset: 0.125rem;
+}
+
+/* modo alto contraste */
+html.high-contrast {
+
+  --bg-color: #000000;
+  --text-color: #ffffff;
+
+  --heading-color: #ffff00;
+  --link-color: #00ffff;
+
+  --border-color: #ffffff;
+  --card-bg: #000000;
+}
+
+/* soporte con animaciones reducidas */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

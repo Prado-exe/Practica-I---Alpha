@@ -1,0 +1,49 @@
+REGION,PARAMETRO_AMBIENTAL,ESTACION,PERIODO,PROMEDIO,MAXIMO,ESTADO_CALIDAD
+Arica y Parinacota,PM2.5,Arica Centro,2025-Q1,8.2,22.1,Buena
+Arica y Parinacota,PM10,Arica Centro,2025-Q1,18.5,45.2,Buena
+Arica y Parinacota,NO2,Arica Centro,2025-Q1,12.3,28.4,Buena
+Arica y Parinacota,O3,Arica Centro,2025-Q1,35.8,72.1,Regular
+Antofagasta,PM2.5,Antofagasta Norte,2025-Q1,10.4,31.5,Regular
+Antofagasta,PM10,Antofagasta Norte,2025-Q1,24.8,58.3,Regular
+Antofagasta,NO2,Antofagasta Norte,2025-Q1,18.7,42.5,Buena
+Antofagasta,O3,Antofagasta Norte,2025-Q1,38.2,80.4,Regular
+Atacama,PM2.5,Copiapó Centro,2025-Q1,14.6,38.2,Regular
+Atacama,PM10,Copiapó Centro,2025-Q1,32.4,74.6,Regular
+Atacama,NO2,Copiapó Centro,2025-Q1,15.8,34.2,Buena
+Atacama,O3,Copiapó Centro,2025-Q1,29.5,61.3,Buena
+Valparaíso,PM2.5,Valparaíso Puerto,2025-Q1,18.3,48.5,Regular
+Valparaíso,PM10,Valparaíso Puerto,2025-Q1,42.1,98.4,Regular
+Valparaíso,NO2,Valparaíso Puerto,2025-Q1,28.6,58.7,Regular
+Valparaíso,O3,Valparaíso Puerto,2025-Q1,44.2,88.5,Regular
+Metropolitana,PM2.5,Santiago Centro,2025-Q1,28.7,65.4,Mala
+Metropolitana,PM10,Santiago Centro,2025-Q1,58.4,128.6,Mala
+Metropolitana,NO2,Santiago Centro,2025-Q1,42.5,88.3,Regular
+Metropolitana,O3,Santiago Centro,2025-Q1,52.8,108.4,Mala
+O'Higgins,PM2.5,Rancagua Centro,2025-Q1,16.4,42.8,Regular
+O'Higgins,PM10,Rancagua Centro,2025-Q1,38.5,84.2,Regular
+O'Higgins,NO2,Rancagua Centro,2025-Q1,22.3,48.7,Regular
+O'Higgins,O3,Rancagua Centro,2025-Q1,38.6,78.4,Regular
+Maule,PM2.5,Talca Norte,2025-Q1,19.8,52.3,Regular
+Maule,PM10,Talca Norte,2025-Q1,44.6,98.7,Regular
+Maule,NO2,Talca Norte,2025-Q1,18.4,38.6,Buena
+Maule,O3,Talca Norte,2025-Q1,36.2,72.8,Regular
+Biobío,PM2.5,Concepción Centro,2025-Q1,22.5,58.4,Regular
+Biobío,PM10,Concepción Centro,2025-Q1,48.3,104.6,Mala
+Biobío,NO2,Concepción Centro,2025-Q1,32.5,68.4,Regular
+Biobío,O3,Concepción Centro,2025-Q1,41.5,84.6,Regular
+La Araucanía,PM2.5,Temuco Norte,2025-Q1,26.8,72.4,Regular
+La Araucanía,PM10,Temuco Norte,2025-Q1,58.2,128.5,Mala
+La Araucanía,NO2,Temuco Norte,2025-Q1,20.4,44.2,Regular
+La Araucanía,O3,Temuco Norte,2025-Q1,34.8,70.5,Regular
+Los Lagos,PM2.5,Puerto Montt Centro,2025-Q1,18.6,48.4,Regular
+Los Lagos,PM10,Puerto Montt Centro,2025-Q1,42.5,92.8,Regular
+Los Lagos,NO2,Puerto Montt Centro,2025-Q1,16.8,36.4,Buena
+Los Lagos,O3,Puerto Montt Centro,2025-Q1,30.4,62.8,Buena
+Aysén,PM2.5,Coyhaique Centro,2025-Q1,32.4,88.6,Mala
+Aysén,PM10,Coyhaique Centro,2025-Q1,68.5,148.4,Mala
+Aysén,NO2,Coyhaique Centro,2025-Q1,14.2,30.5,Buena
+Aysén,O3,Coyhaique Centro,2025-Q1,22.4,48.6,Buena
+Magallanes,PM2.5,Punta Arenas Centro,2025-Q1,12.4,32.8,Buena
+Magallanes,PM10,Punta Arenas Centro,2025-Q1,28.6,64.5,Regular
+Magallanes,NO2,Punta Arenas Centro,2025-Q1,10.5,24.6,Buena
+Magallanes,O3,Punta Arenas Centro,2025-Q1,28.4,58.4,Buena

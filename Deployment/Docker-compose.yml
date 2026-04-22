@@ -1,0 +1,38 @@
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    restart: always
+
+  backend:
+    build:
+      context: ./backend-src
+      dockerfile: Dockerfile
+    image: app-backend:prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend-src/.env
+    depends_on:
+      - postgres-dev
+    restart: always
+
+  postgres-dev:
+    image: postgres:16
+    env_file:
+      - ./backend-src/.env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    restart: always
