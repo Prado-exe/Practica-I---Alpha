@@ -18,10 +18,37 @@ export function useDataset() {
     setState(s => ({ ...s, loading: true, error: null, data: [], columns: [], mapping: null, metadata: null }));
 
     try {
-      const resp = await fetch(manifest.url);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status} — no se pudo cargar el archivo.`);
+      if (!manifest.url) throw new Error("La URL del archivo CSV está vacía.");
 
+      console.log(`🚀 [RAYOS X] Iniciando descarga desde: ${manifest.url}`);
+      
+      const resp = await fetch(manifest.url);
+      
+      if (!resp.ok) {
+        throw new Error(`Error de red HTTP ${resp.status}: No se pudo acceder al archivo en MinIO.`);
+      }
+
+      // 1. OBTENEMOS EL TEXTO CRUDO
       const text = await resp.text();
+      
+      // 2. IMPRIMIMOS LO QUE LLEGÓ PARA VER EL ERROR REAL
+      console.log("📦 [RAYOS X] Contenido real descargado (Primeros 300 caracteres):");
+      console.log(text.substring(0, 300));
+
+      // 3. DETECTORES DE ERRORES SILENCIOSOS
+      if (text.trim().startsWith("<?xml") || text.trim().includes("<Error>")) {
+        throw new Error("MinIO bloqueó la descarga. Está devolviendo un error XML. Verifica que el Bucket sea PÚBLICO y que la ruta sea correcta.");
+      }
+      
+      if (text.trim().startsWith("<!DOCTYPE html>") || text.trim().startsWith("<html")) {
+        throw new Error("El servidor devolvió una página web (HTML) en lugar de un CSV. La ruta del archivo está mal armada.");
+      }
+
+      if (text.trim() === "") {
+        throw new Error("El archivo se descargó, pero está completamente en blanco.");
+      }
+
+      // 4. PROCESAMIENTO NORMAL CON PAPA PARSE
       const { data, meta, errors } = Papa.parse(text, {
         header: true,
         skipEmptyLines: true,
@@ -33,6 +60,11 @@ export function useDataset() {
       }
 
       const columns = meta.fields ?? [];
+      
+      if (columns.length === 0) {
+         throw new Error("No se detectaron columnas. Asegúrate de que el archivo descargado realmente sea un CSV separado por comas.");
+      }
+
       const mapping = mapColumns(columns, data);
 
       setState({
@@ -55,7 +87,12 @@ export function useDataset() {
         error: null,
       });
     } catch (err) {
-      setState(s => ({ ...s, loading: false, error: err.message ?? "Error desconocido." }));
+      console.error("❌ [RAYOS X] El hook falló:", err);
+      setState({
+        ...INITIAL, // Reseteamos todo a valores vacíos
+        loading: false, 
+        error: err.message ?? "Error desconocido." 
+      });
     }
   }, []);
 
