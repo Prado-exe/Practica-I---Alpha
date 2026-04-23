@@ -5,8 +5,8 @@ import {
   LineChart, Line,
 } from "recharts";
 import {
-  Database, Globe, TrendingUp, TrendingDown,
-  Minus, FileText, Layers, ChevronDown, AlertCircle, Loader2,
+  Database, Globe, TrendingUp,
+  FileText, Layers, ChevronDown, AlertCircle, Loader2,
   BarChart2, Table2, RefreshCcw,
 } from "lucide-react";
 
@@ -72,102 +72,74 @@ function groupBySum(data, groupCol, valueCol, limit = 20) {
     .slice(0, limit);
 }
 
-function computeKpis(data, mapping) {
-  if (!data.length || !mapping) return [];
-  const { primaryNumericCol, categoryCol, regionCol, variationCol } = mapping;
-  const kpis = [];
+function computeGeneralStats(data, columns) {
+  if (!data.length || !columns.length) return [];
 
-  kpis.push({
+  const stats = [];
+
+  const numericCols = [];
+  const categoricalCols = [];
+
+  for (const col of columns) {
+    const vals = data.map(r => r[col]).filter(v => v != null && v !== "");
+    if (!vals.length) continue;
+    const numericVals = vals.map(cleanNumeric).filter(v => !isNaN(v) && isFinite(v));
+    if (numericVals.length >= vals.length * 0.6) {
+      numericCols.push({ col, vals: numericVals });
+    } else {
+      categoricalCols.push({ col, vals });
+    }
+  }
+
+  stats.push({
     id: "total",
     label: "Total registros",
     value: data.length.toLocaleString("es-CL"),
-    rawValue: data.length,
-    sub: `${mapping.numericCols?.length || 0} columna(s) numéricas detectadas`,
-    trend: "neutral",
+    sub: `${numericCols.length} col. numérica(s) · ${categoricalCols.length} categórica(s)`,
     icon: Database,
     color: "#0056b3",
   });
 
-  if (primaryNumericCol) {
-    const nums = data.map(r => cleanNumeric(r[primaryNumericCol])).filter(v => !isNaN(v));
-    const sum  = nums.reduce((a, b) => a + b, 0);
-    const avg  = nums.length ? sum / nums.length : 0;
-
-    kpis.push({
-      id: "sum",
-      label: `Total — ${primaryNumericCol}`,
-      value: Math.round(sum).toLocaleString("es-CL"),
-      rawValue: sum,
-      sub: "suma del período",
-      trend: "up",
+  for (const { col, vals } of numericCols.slice(0, 3)) {
+    const sum = vals.reduce((a, b) => a + b, 0);
+    const avg = sum / vals.length;
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    stats.push({
+      id: `num_${col}`,
+      label: `Promedio — ${col}`,
+      value: avg.toLocaleString("es-CL", { maximumFractionDigits: 1 }),
+      sub: `Mín: ${formatAxisNumber(min)} · Máx: ${formatAxisNumber(max)}`,
       icon: TrendingUp,
       color: "#1b7a4a",
     });
+  }
 
-    kpis.push({
-      id: "avg",
-      label: `Promedio — ${primaryNumericCol}`,
-      value: avg.toFixed(1).toLocaleString("es-CL"),
-      rawValue: avg,
-      sub: "por registro",
-      trend: "neutral",
-      icon: Minus,
+  for (const { col, vals } of categoricalCols.slice(0, 2)) {
+    const unique = new Set(vals.map(v => String(v))).size;
+    stats.push({
+      id: `cat_${col}`,
+      label: `Únicos — ${col}`,
+      value: unique.toLocaleString("es-CL"),
+      sub: `de ${vals.length.toLocaleString("es-CL")} registros con valor`,
+      icon: Layers,
       color: "#6a1b9a",
     });
   }
 
-  if (variationCol) {
-    const vars = data.map(r => cleanNumeric(r[variationCol])).filter(v => !isNaN(v));
-    const avgVar = vars.length ? vars.reduce((a, b) => a + b, 0) / vars.length : 0;
-    kpis.push({
-      id: "variation",
-      label: `Variación media — ${variationCol}`,
-      value: `${avgVar >= 0 ? "+" : ""}${avgVar.toFixed(1)}%`,
-      rawValue: avgVar,
-      sub: "respecto período anterior",
-      trend: avgVar >= 0 ? "up" : "down",
-      icon: avgVar >= 0 ? TrendingUp : TrendingDown,
-      color: avgVar >= 0 ? "#1b7a4a" : "#c62828",
-    });
-  } else if (categoryCol) {
-    const unique = new Set(data.map(r => r[categoryCol])).size;
-    kpis.push({
-      id: "categories",
-      label: `Categorías — ${categoryCol}`,
-      value: unique.toLocaleString("es-CL"),
-      rawValue: unique,
-      sub: "valores únicos",
-      trend: "neutral",
-      icon: Layers,
-      color: "#c62828",
-    });
-  } else if (regionCol) {
-    const unique = new Set(data.map(r => r[regionCol])).size;
-    kpis.push({
-      id: "regions",
-      label: "Regiones cubiertas",
-      value: unique.toLocaleString("es-CL"),
-      rawValue: unique,
-      sub: "en este dataset",
-      trend: "neutral",
-      icon: Globe,
-      color: "#c62828",
-    });
-  }
-
-  return kpis;
+  return stats;
 }
 
 /* ─── sub-components ─── */
-function KpiCard({ kpi }) {
-  const Icon = kpi.icon;
+function StatCard({ stat }) {
+  const Icon = stat.icon;
   return (
-    <article className="ind-kpi-card" style={{ "--kpi-color": kpi.color }}>
+    <article className="ind-kpi-card" style={{ "--kpi-color": stat.color }}>
       <div className="kpi-icon-wrap"><Icon size={26} /></div>
       <div className="kpi-body">
-        <p className="kpi-label">{kpi.label}</p>
-        <p className="kpi-value">{kpi.value}</p>
-        <p className={`kpi-sub ${kpi.trend}`}>{kpi.sub}</p>
+        <p className="kpi-label">{stat.label}</p>
+        <p className="kpi-value">{stat.value}</p>
+        <p className="kpi-sub neutral">{stat.sub}</p>
       </div>
     </article>
   );
@@ -398,7 +370,7 @@ function Indicadores() {
   }, [data, columns, mapping]);
 
   // Utilizamos safeMapping para calcular las agrupaciones
-  const kpis    = useMemo(() => computeKpis(data, safeMapping), [data, safeMapping]);
+  const generalStats = useMemo(() => computeGeneralStats(data, columns), [data, columns]);
   const pieData = useMemo(() => groupBySum(data, safeMapping?.categoryCol, safeMapping?.primaryNumericCol, 8), [data, safeMapping]);
   const barData = useMemo(() => groupBySum(data, safeMapping?.regionCol || safeMapping?.categoryCol, safeMapping?.primaryNumericCol, 16), [data, safeMapping]);
   const lineData = useMemo(() => {
@@ -468,8 +440,8 @@ function Indicadores() {
 
           {hasData && (
             <>
-              <section className="ind-kpis" aria-label="KPIs calculados">
-                {kpis.map(kpi => <KpiCard key={kpi.id} kpi={kpi} />)}
+              <section className="ind-kpis" aria-label="Estadísticas generales">
+                {generalStats.map(s => <StatCard key={s.id} stat={s} />)}
               </section>
 
               <div className="ind-charts-row">
