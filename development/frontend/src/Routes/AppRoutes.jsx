@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 //layouts and protected routes
 import AdminLayout from "../Layouts/AdminLayout";
 import MainLayout from "../Layouts/MainLayout";
+import AuthLayout from "../Layouts/AuthLayout";
 import ProtectedRoute from "../Pages/Admin/ProtectedRoute";
 
 import SessionExpiryManager from "../Components/SessionExpiryManager";
@@ -19,7 +20,10 @@ const Instituciones = lazy(() => import("../Pages/Public/Instituciones"));
 const InstitucionDetalle = lazy(() => import("../Pages/Public/InstitucionDetalle.jsx"));
 const Noticias = lazy(() => import("../Pages/Public/Noticias"));
 const Nosotros = lazy(() => import("../Pages/Public/Nosotros"));
-const Indicadores = lazy(() => import("../Pages/Public/Indicadores"));
+//nuevas inportaciones
+const IndicadoresDefault = lazy(() => import("../Pages/Public/IndicadoresDefault"));
+const IndicadoresAnalisis = lazy(() => import("../Pages/Public/Indicadores")); // Tu componente anterior
+
 
 //Admin Routes
 const Dashboard = lazy(() => import("../Pages/Admin/Dashboard"));
@@ -120,16 +124,22 @@ function AppRoutes() {
         <Route path="/instituciones" element={<Instituciones />} />
         <Route path="/instituciones/:id" element={<InstitucionDetalle />} />
         <Route path="/nosotros/:section" element={<Nosotros />} />
-        <Route path="/indicadores" element={<Indicadores />} />
+        <Route path="/indicadores" element={<IndicadoresDefault />} />
+        <Route path="/indicadores/analisis" element={<IndicadoresAnalisis />} />
         <Route path="*" element={<Error404 />} />
       </Route>
-
-      {/* Rutas sin layout */}
+      
+      {/* Rutas Auth */}
+      <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verificacion" element={<VerificacionSeguridad />} />
         <Route path="/recuperar-password" element={<RecuperarContrasena />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="*" element={<Error404 />} />
+      </Route>
+
+      {/* Rutas sin layout */}
         <Route path="*" element={<Error404 />} />
 
     </Routes>
