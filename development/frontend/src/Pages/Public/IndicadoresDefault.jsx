@@ -11,11 +11,58 @@ import {
 } from "lucide-react";
 
 import Breadcrumb from "../../Components/Common/Breadcrumb";
-import { getDatasets } from "../../Services/DatasetService"; 
+import { getDatasets } from "../../Services/DatasetService";
 import "../../Styles/Pages_styles/Public/IndicadoresDefault.css";
 
 const GLOBAL_COLORS = ["#0056b3","#1976d2","#1b7a4a","#388e3c","#ef6c00","#c62828","#6a1b9a","#00838f"];
 const TIME_COLORS = ["#1976d2", "#e53935", "#43a047", "#fb8c00", "#8e24aa", "#00acc1", "#3949ab", "#f4511e"];
+
+const resolveCategory = (ds) =>
+  ds.category?.name ||
+  ds.categoria ||
+  ds.category_name ||
+  "Sin Categoría";
+
+const resolveInstitution = (ds) =>
+  ds.institution?.name ||
+  ds.institucion?.nombre ||
+  ds.institution_name ||
+  ds.institucion ||
+  "Institución Desconocida";
+
+const resolveDate = (ds) =>
+  ds.created_at || ds.creation_date || ds.updated_at || null;
+
+const generateRealTrend = (categoryName, allDatasets) => {
+  const dayCount = {};
+
+  allDatasets
+    .filter(ds => resolveCategory(ds) === categoryName)
+    .forEach(ds => {
+      const dateStr = resolveDate(ds);
+      if (!dateStr) return;
+      const date = new Date(dateStr);
+      if (isNaN(date)) return;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      dayCount[key] = (dayCount[key] || 0) + 1;
+    });
+
+  const keys = Object.keys(dayCount).sort();
+  if (keys.length === 0) return [];
+
+  const start = new Date(keys[0]);
+  const end = new Date();
+
+  const trend = [];
+  const cursor = new Date(start);
+  while (cursor <= end) {
+    const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
+    trend.push({ year: key, value: dayCount[key] || 0 });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return trend;
+};
 
 const getCategoryIcon = (categoryName) => {
   const name = categoryName.toLowerCase();
@@ -27,15 +74,6 @@ const getCategoryIcon = (categoryName) => {
   if (name.includes("trabajo") || name.includes("empleo")) return Briefcase;
   return Layers;
 };
-
-// SIMULADOR DE TENDENCIAS PARA LAS TABLAS 
-const generateDummyTrend = () => [
-  { year: '2020', value: Math.floor(Math.random() * 20) + 5 },
-  { year: '2021', value: Math.floor(Math.random() * 30) + 10 },
-  { year: '2022', value: Math.floor(Math.random() * 40) + 15 },
-  { year: '2023', value: Math.floor(Math.random() * 50) + 20 },
-  { year: '2024', value: Math.floor(Math.random() * 60) + 25 },
-];
 
 function CircularProgress({ percentage, color, size = 46 }) {
   const strokeWidth = 4;
@@ -69,14 +107,10 @@ function IndicadoresDefault() {
   const navigate = useNavigate();
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // ==========================================
-  // NUEVO: Estado de la vista principal (Botones Arriba)
-  // ==========================================
-  const [mainView, setMainView] = useState("estado"); // 'estado' o 'evolucion'
 
+  const [mainView, setMainView] = useState("estado");
   const [activeTab, setActiveTab] = useState("tematico");
-  const [timeFilter, setTimeFilter] = useState("general"); 
+  const [timeFilter, setTimeFilter] = useState("general");
 
   useEffect(() => {
     async function fetchDatasets() {
@@ -92,21 +126,20 @@ function IndicadoresDefault() {
     fetchDatasets();
   }, []);
 
-  // Lógica de Series de Tiempo
   const timeSeriesStats = useMemo(() => {
-    if (!datasets.length) return { data: [], keys: [] };
+    if (!datasets.length) return { data: [], categoryKeys: [], originKeys: [] };
 
     const timeMap = {};
     const allCategories = new Set();
     const allOrigins = new Set();
 
     datasets.forEach(ds => {
-      const dateStr = ds.created_at || ds.updated_at || "2023-01-01T00:00:00Z";
+      const dateStr = resolveDate(ds) || "2023-01-01T00:00:00Z";
       const date = new Date(dateStr);
       const timeKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
-      const catName = ds.categoria || ds.category?.name || "Sin Categoría";
-      const originName = ds.institucion?.nombre || ds.institucion || "Institución Desconocida";
+
+      const catName = resolveCategory(ds);
+      const originName = resolveInstitution(ds);
 
       allCategories.add(catName);
       allOrigins.add(originName);
@@ -126,7 +159,10 @@ function IndicadoresDefault() {
       const [year, month] = item.period.split('-');
       const dateObj = new Date(year, parseInt(month) - 1);
       const formattedPeriod = dateObj.toLocaleDateString('es-CL', { month: 'short', year: 'numeric' });
-      return { ...item, displayPeriod: formattedPeriod.charAt(0).toUpperCase() + formattedPeriod.slice(1) };
+      return {
+        ...item,
+        displayPeriod: formattedPeriod.charAt(0).toUpperCase() + formattedPeriod.slice(1)
+      };
     });
 
     let accumTotal = 0;
@@ -135,13 +171,13 @@ function IndicadoresDefault() {
 
     data = data.map(item => {
       accumTotal += item.Total || 0;
-      const newItem = { ...item, TotalAcumulado: accumTotal, displayPeriod: item.displayPeriod };
-      
+      const newItem = { ...item, TotalAcumulado: accumTotal };
+
       allCategories.forEach(cat => {
         accumCategories[cat] = (accumCategories[cat] || 0) + (item[cat] || 0);
         newItem[`${cat}_acum`] = accumCategories[cat];
       });
-      
+
       allOrigins.forEach(org => {
         accumOrigins[org] = (accumOrigins[org] || 0) + (item[org] || 0);
         newItem[`${org}_acum`] = accumOrigins[org];
@@ -150,30 +186,30 @@ function IndicadoresDefault() {
       return newItem;
     });
 
-    return { 
-      data, 
+    return {
+      data,
       categoryKeys: Array.from(allCategories),
       originKeys: Array.from(allOrigins)
     };
   }, [datasets]);
 
-  // Lógica Tabular
   const thematicStats = useMemo(() => {
     if (!datasets.length) return { total: 0, data: [] };
     const total = datasets.length;
     const categoryCount = {};
-    
+
     datasets.forEach(ds => {
-      const cat = ds.categoria || ds.category?.name || "Sin Categoría";
+      const cat = resolveCategory(ds);
       categoryCount[cat] = (categoryCount[cat] || 0) + 1;
     });
 
     const data = Object.entries(categoryCount)
-      .map(([name, count], index) => ({ 
-        name, count, 
+      .map(([name, count], index) => ({
+        name,
+        count,
         percentage: (count / total) * 100,
         color: GLOBAL_COLORS[index % GLOBAL_COLORS.length],
-        trend: generateDummyTrend() 
+        trend: generateRealTrend(name, datasets)
       }))
       .sort((a, b) => b.count - a.count);
 
@@ -186,9 +222,9 @@ function IndicadoresDefault() {
     const instMap = {};
 
     datasets.forEach(ds => {
-      const instName = ds.institucion?.nombre || ds.institucion || "Institución Desconocida";
-      const catName = ds.categoria || ds.category?.name || "Sin Categoría";
-      const dateStr = ds.updated_at || ds.created_at;
+      const instName = resolveInstitution(ds);
+      const catName = resolveCategory(ds);
+      const dateStr = resolveDate(ds);
 
       if (!instMap[instName]) {
         instMap[instName] = { count: 0, categories: {}, latestDate: null };
@@ -198,27 +234,27 @@ function IndicadoresDefault() {
       instMap[instName].categories[catName] = (instMap[instName].categories[catName] || 0) + 1;
 
       if (dateStr) {
-         const current = new Date(dateStr);
-         if (!instMap[instName].latestDate || current > instMap[instName].latestDate) {
-           instMap[instName].latestDate = current;
-         }
+        const current = new Date(dateStr);
+        if (!isNaN(current) && (!instMap[instName].latestDate || current > instMap[instName].latestDate)) {
+          instMap[instName].latestDate = current;
+        }
       }
     });
 
     const data = Object.entries(instMap).map(([name, info], index) => {
-       const topCat = Object.entries(info.categories).sort((a, b) => b[1] - a[1])[0][0];
-       const formattedDate = info.latestDate 
-          ? info.latestDate.toLocaleDateString("es-CL", { year: 'numeric', month: 'short', day: 'numeric' })
-          : "N/A";
+      const topCat = Object.entries(info.categories).sort((a, b) => b[1] - a[1])[0][0];
+      const formattedDate = info.latestDate
+        ? info.latestDate.toLocaleDateString("es-CL", { year: 'numeric', month: 'short', day: 'numeric' })
+        : "N/A";
 
-       return {
-          name,
-          count: info.count,
-          percentage: (info.count / total) * 100,
-          topCategory: topCat,
-          lastUpdated: formattedDate,
-          color: GLOBAL_COLORS[index % GLOBAL_COLORS.length]
-       };
+      return {
+        name,
+        count: info.count,
+        percentage: (info.count / total) * 100,
+        topCategory: topCat,
+        lastUpdated: formattedDate,
+        color: GLOBAL_COLORS[index % GLOBAL_COLORS.length]
+      };
     }).sort((a, b) => b.count - a.count);
 
     return { total, data };
@@ -255,20 +291,17 @@ function IndicadoresDefault() {
           <h1>Dashboard de Indicadores Globales</h1>
           <p>Visión general del estado de los datos en el Observatorio. Selecciona el tipo de análisis que deseas visualizar.</p>
         </div>
-        
-        {/* ==========================================
-            NUEVO: Controles principales (Reemplaza el badge estático)
-            ========================================== */}
+
         <div className="ind-hero-controls">
-          <button 
+          <button
             className={`hero-toggle-btn ${mainView === 'estado' ? 'active' : ''}`}
             onClick={() => setMainView('estado')}
           >
             <Activity size={32} strokeWidth={1.5} />
             <span>Estado Actual</span>
           </button>
-          
-          <button 
+
+          <button
             className={`hero-toggle-btn ${mainView === 'evolucion' ? 'active' : ''}`}
             onClick={() => setMainView('evolucion')}
           >
@@ -287,10 +320,7 @@ function IndicadoresDefault() {
         </div>
       ) : (
         <div className="ind-global-content fade-in">
-          
-          {/* ==========================================
-              VISTA 1: EVOLUCIÓN CON EL TIEMPO
-              ========================================== */}
+
           {mainView === 'evolucion' && (
             <section className="time-analysis-section chart-card fade-in">
               <div className="chart-header-row time-header">
@@ -298,12 +328,12 @@ function IndicadoresDefault() {
                   <h2 className="chart-title">Evolución de Publicaciones en el Tiempo</h2>
                   <p className="chart-subtitle">Crecimiento acumulado de conjuntos de datos en la plataforma.</p>
                 </div>
-                
+
                 <div className="time-filter-wrap">
                   <Filter size={16} className="filter-icon" />
-                  <select 
-                    className="time-select" 
-                    value={timeFilter} 
+                  <select
+                    className="time-select"
+                    value={timeFilter}
                     onChange={(e) => setTimeFilter(e.target.value)}
                   >
                     <option value="general">Crecimiento General</option>
@@ -336,7 +366,7 @@ function IndicadoresDefault() {
                       <YAxis tick={{fontSize: 11, fill: '#666'}} width={40} />
                       <Tooltip content={<TimeTooltip />} />
                       <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '13px' }} />
-                      
+
                       {timeFilter === "categoria" && timeSeriesStats.categoryKeys.map((key, index) => (
                         <Line key={key} type="monotone" dataKey={`${key}_acum`} name={key} stroke={TIME_COLORS[index % TIME_COLORS.length]} strokeWidth={2.5} dot={false} activeDot={{ r: 6 }} />
                       ))}
@@ -351,21 +381,18 @@ function IndicadoresDefault() {
             </section>
           )}
 
-          {/* ==========================================
-              VISTA 2: ESTADO ACTUAL (Tablas)
-              ========================================== */}
           {mainView === 'estado' && (
             <div className="estado-actual-section fade-in">
               <div className="ind-tabs-container" style={{ marginTop: 0 }}>
                 <div className="ind-tabs">
-                  <button 
+                  <button
                     className={`tab-btn ${activeTab === 'tematico' ? 'active' : ''}`}
                     onClick={() => setActiveTab('tematico')}
                   >
                     <Layers size={18} />
                     Análisis Temático
                   </button>
-                  <button 
+                  <button
                     className={`tab-btn ${activeTab === 'origen' ? 'active' : ''}`}
                     onClick={() => setActiveTab('origen')}
                   >
@@ -383,7 +410,7 @@ function IndicadoresDefault() {
                       <th>Datasets</th>
                       <th>Porcentaje</th>
                       {activeTab === 'tematico' ? (
-                        <th>Tendencia por Año</th>
+                        <th>Tendencia por Día</th>
                       ) : (
                         <>
                           <th>Categoría Principal</th>
@@ -412,8 +439,16 @@ function IndicadoresDefault() {
                           <td className="col-tendencia">
                             <div className="sparkline-wrapper">
                               <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={cat.trend}>
-                                  <Line type="monotone" dataKey="value" stroke={cat.color} strokeWidth={2.5} dot={false} isAnimationActive={true}/>
+                                <LineChart data={cat.trend.length > 0 ? cat.trend : [{ year: 'a', value: 0 }, { year: 'b', value: 0 }]}>
+                                  <Line
+                                    type="monotone"
+                                    dataKey="value"
+                                    stroke={cat.trend.length > 0 ? cat.color : '#ddd'}
+                                    strokeWidth={2.5}
+                                    dot={false}
+                                    isAnimationActive={false}
+                                    connectNulls={true}
+                                  />
                                 </LineChart>
                               </ResponsiveContainer>
                             </div>
@@ -457,7 +492,6 @@ function IndicadoresDefault() {
 
           <hr className="ind-separator" />
 
-          {/* Explorador de datasets (Siempre visible al final) */}
           <div className="chart-card ds-explorer">
             <div className="chart-header-row">
               <div>
@@ -465,18 +499,18 @@ function IndicadoresDefault() {
                 <p className="chart-subtitle">Selecciona un conjunto de datos del catálogo para extraer gráficos y mapeos internos.</p>
               </div>
             </div>
-            
+
             <div className="dataset-grid-links">
               {datasets.map(ds => (
-                <button 
-                  key={ds.dataset_id} 
-                  className="ds-link-card" 
+                <button
+                  key={ds.dataset_id}
+                  className="ds-link-card"
                   onClick={() => handleDatasetClick(ds.dataset_id)}
                   style={{ "--ds-color": ds.color || '#0056b3' }}
                 >
                   <div className="ds-link-content">
-                    <span className="ds-cat">{ds.categoria || "Dataset"}</span>
-                    <h3 className="ds-name">{ds.nombre}</h3>
+                    <span className="ds-cat">{resolveCategory(ds)}</span>
+                    <h3 className="ds-name">{ds.title || ds.nombre}</h3>
                   </div>
                   <div className="ds-link-icon">
                     <ArrowRight size={20} />
