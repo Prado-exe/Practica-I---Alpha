@@ -18,6 +18,7 @@
  * ============================================================================
  */
 import { createDataset, getDatasets, getDatasetById, removeDataset, editDataset, submitDatasetRequest } from "../services/datasets.service";
+import { fetchDashboardStats } from "../repositories/datasets.repository";
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { readJsonBody } from "../utils/body";
@@ -216,6 +217,15 @@ export async function requestDatasetAction(req: HttpRequest, res: HttpResponse) 
 /**
  * Controlador para validar (publicar/rechazar) un dataset en pending_validation.
  */
+export async function getDashboardStatsAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const data = await fetchDashboardStats();
+    sendJson(res, 200, { ok: true, ...data });
+  } catch (error) {
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
 export async function validateDatasetAction(req: HttpRequest, res: HttpResponse) {
   try {
     const id = Number((req as any).params?.id);

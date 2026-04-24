@@ -53,16 +53,17 @@ import {
 } from "./instituciones.routes";
 
 import { getAllCategoriesAction } from "./categories.routes";
-import { 
-  getDatasetsAction, 
-  createDatasetAction, 
-  getDatasetByIdAction, 
-  deleteDatasetAction, 
-  updateDatasetAction, 
+import {
+  getDatasetsAction,
+  createDatasetAction,
+  getDatasetByIdAction,
+  deleteDatasetAction,
+  updateDatasetAction,
   getPublicDatasetsAction,
-  getPublicDatasetByIdAction,// esto fue lo que agregue
+  getPublicDatasetByIdAction,
   requestDatasetAction,
-  validateDatasetAction 
+  validateDatasetAction,
+  getDashboardStatsAction
 } from "./datasets.routes";
 import { getAllOdsAction } from "./ods.routes";
 import { getAllTagsAction } from "./tags.routes";
@@ -165,7 +166,8 @@ authRouter.add("GET", "/api/licenses", [], getAllLicensesAction);
 //---datasets
 // 2. Busca la sección de RUTAS DE DATASETS al final del archivo y déjalas así:
 
-authRouter.add("GET", "/api/public/datasets", [], getPublicDatasetsAction); // esto tambien agreguee
+authRouter.add("GET", "/api/dashboard/stats", [requirePermission("catalog.read")], getDashboardStatsAction);
+authRouter.add("GET", "/api/public/datasets", [], getPublicDatasetsAction);
 authRouter.add("GET", "/api/public/datasets/:id", [], getPublicDatasetByIdAction);
 authRouter.add("GET", "/api/datasets", [requirePermission("catalog.read")], getDatasetsAction);
 authRouter.add("POST", "/api/datasets", [requirePermission("data_management.write")], createDatasetAction);
