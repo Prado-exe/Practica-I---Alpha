@@ -30,12 +30,13 @@ import { requirePermission, requireLogin } from "../middlewares/auth.middleware"
 
 import { loginAction } from "./login.routes";
 import { logoutAction } from "./logout.routes";
-import { registerAction } from "./register.routes";
+import { registerAction, adminCreateUserAction } from "./register.routes";
 import { verifyEmailAction, resendVerificationAction } from "./verify.routes";
 import { refreshAction } from "./refresh.routes";
 import { requestPasswordResetAction, resetPasswordAction } from "./password.routes";
 import { getUsuariosAction, toggleEstadoAction, deleteUsuarioAction, editUsuarioAction, getRolesAction } from "./usuarios-admin.routes";
 import { generateUploadUrlAction } from "./upload.routes";
+
 import { 
   getRolesDetailsAction, 
   getPermisosAction, 
@@ -64,7 +65,8 @@ import {
   getPublicDatasetByIdAction,
   requestDatasetAction,
   validateDatasetAction,
-  destroyDatasetAction 
+  destroyDatasetAction,
+  getDashboardStatsAction 
 } from "./datasets.routes";
 import { getAllOdsAction } from "./ods.routes";
 import { getAllTagsAction, createTagAction, deleteTagAction } from "./tags.routes";
@@ -145,6 +147,8 @@ authRouter.add("PATCH", "/api/usuarios/:id/estado", [requirePermission("user_man
 authRouter.add("DELETE", "/api/usuarios/:id", [requirePermission("user_management.delete")], deleteUsuarioAction);
 authRouter.add("PUT", "/api/usuarios/:id", [requirePermission("user_management.write")], editUsuarioAction);
 authRouter.add("GET", "/api/roles", [requirePermission("user_management.read")], getRolesAction);
+
+authRouter.add("POST", "/api/users/admin", [requirePermission("user_management.write")], adminCreateUserAction);
 // --- RUTAS DE GESTIÓN DE ROLES Y PERMISOS ---
 authRouter.add("GET", "/api/roles/detalles", [requirePermission("roles_permissions.read")], getRolesDetailsAction);
 authRouter.add("GET", "/api/permisos", [requirePermission("roles_permissions.read")], getPermisosAction);

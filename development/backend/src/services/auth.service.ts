@@ -64,7 +64,8 @@ import {
   getUserRoleCodeById, 
   deleteUserFromDb,
   updateUserAdminInDb,
-  fetchActiveRolesFromDb
+  fetchActiveRolesFromDb,
+  adminCreateUserInDb
 } from "../repositories/auth.repository";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/mailer";
@@ -785,4 +786,32 @@ export async function editUserAdmin(userId: string | number, fullName: string, e
 export async function getActiveRoles() {
   const roles = await fetchActiveRolesFromDb();
   return roles;
+}
+
+/**
+ * Lógica de negocio para la creación administrativa de usuarios.
+ */
+export async function adminCreateUser(input: any) {
+  // 1. Verificar si el usuario o email ya existen
+  const existingUser = await findAccountByEmail(input.email);
+  if (existingUser) throw new AppError("El correo electrónico ya está registrado", 409);
+
+  // 2. Obtener el ID del rol basado en el código enviado (ej: 'data_admin')
+  const roleId = await findRoleIdByCode(input.role_code);
+  if (!roleId) throw new AppError("El rol especificado no es válido", 400);
+
+  // 3. Hashear la contraseña
+  const passwordHash = await hashPassword(input.password);
+
+  // 4. Persistir
+  const newUser = await adminCreateUserInDb({
+    ...input,
+    role_id: roleId,
+    password_hash: passwordHash
+  });
+
+  return { 
+    message: "Usuario creado y activado exitosamente", 
+    user: newUser 
+  };
 }

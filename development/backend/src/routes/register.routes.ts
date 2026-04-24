@@ -23,6 +23,7 @@ import { ZodError } from "zod";
 import { registerSchema } from "../validators/auth.validators";
 import { registerUser } from "../services/auth.service";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
+import { adminCreateUser } from "../services/auth.service";
 
 
 /**
@@ -110,5 +111,38 @@ export async function registerAction(req: HttpRequest, res: HttpResponse) {
       ok: false,
       message: getErrorMessage(error),
     });
+  }
+}
+
+/**
+ * Descripción: Controlador exclusivo para administradores. 
+ * Permite crear usuarios directamente con estado activo, saltando el OTP.
+ */
+export async function adminCreateUserAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const body = await readJsonBody<any>(req);
+
+    // 1. Validación de seguridad "Fail-Fast"
+    if (!body.email || !body.username || !body.password || !body.full_name || !body.role_code) {
+      return sendJson(res, 400, { ok: false, message: "Faltan campos obligatorios (nombre, email, usuario, contraseña, rol)." });
+    }
+
+    if (body.password.length < 8) {
+      return sendJson(res, 400, { ok: false, message: "La contraseña debe tener al menos 8 caracteres por seguridad." });
+    }
+
+    // 2. Llamada al servicio que creamos en auth.service.ts
+    const result = await adminCreateUser(body);
+
+    // 3. Respuesta de éxito
+    sendJson(res, 201, {
+      ok: true,
+      message: result.message,
+      user: result.user
+    });
+
+  } catch (error) {
+    // Reutilizamos tus funciones globales de error
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }
 }

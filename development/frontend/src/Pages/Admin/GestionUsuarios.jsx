@@ -21,6 +21,9 @@ function GestionUsuarios() {
   const [modalEditOpen, setModalEditOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({ id: null, full_name: "", email: "", password: "", role_code: "" });
 
+  const [modalCreateOpen, setModalCreateOpen] = useState(false);
+  const [createFormData, setCreateFormData] = useState({full_name: "", email: "", username: "", password: "", role_code: "registered_user"});
+  
   const usuariosPorPagina = 5;
 
   const fetchUsuarios = async () => {
@@ -87,6 +90,35 @@ function GestionUsuarios() {
       fetchRoles();
     }
   }, [user?.token]);
+
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/api/users/admin`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.token || user?.accessToken}` 
+        },
+        body: JSON.stringify(createFormData)
+      });
+
+      if (res.ok) {
+        alert("Usuario creado y activado con éxito.");
+        setModalCreateOpen(false);
+        // Limpiamos el formulario
+        setCreateFormData({ full_name: "", email: "", username: "", password: "", role_code: "registered_user" });
+        fetchUsuarios(); // Recargamos la tabla
+      } else {
+        const err = await res.json();
+        alert(err.message || "Error al crear usuario");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error de conexión");
+    }
+  };
   
 
   // 🔍 Filtrado local y Ocultar Usuario Actual
@@ -214,8 +246,18 @@ function GestionUsuarios() {
     <div className="gestion-usuarios">
       <header className="usuarios-header">
         <h1>Gestión de Usuarios</h1>
+        <p>Administra los roles, accesos y estados de las cuentas registradas.</p>
         <p>{usuariosFiltrados.length} usuarios encontrados</p>
       </header>
+      <CanView requiredPermission="user_management.write">
+          <button 
+            className="btn-create-user" 
+            onClick={() => setModalCreateOpen(true)}
+            style={{ padding: "10px 20px", backgroundColor: "#007bff", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}
+          >
+            + Nuevo Usuario
+          </button>
+        </CanView>
 
       {/* 🔎 FILTROS */}
       <div className="usuarios-filtros">
@@ -304,6 +346,39 @@ function GestionUsuarios() {
           totalPages={totalPaginas}
           onPageChange={setCurrentPage}
         />
+      )}
+
+      {/* 👇 MODAL DE CREACIÓN 👇 */}
+      {modalCreateOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Registrar Nuevo Usuario</h2>
+            <form onSubmit={handleCreateUser} className="edit-form" style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
+              
+              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Nombre Completo:</label>
+              <input type="text" value={createFormData.full_name} onChange={e => setCreateFormData({...createFormData, full_name: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
+              
+              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Nombre de Usuario (Username):</label>
+              <input type="text" value={createFormData.username} onChange={e => setCreateFormData({...createFormData, username: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
+
+              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Correo Electrónico:</label>
+              <input type="email" value={createFormData.email} onChange={e => setCreateFormData({...createFormData, email: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
+
+              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Contraseña Temporal:</label>
+              <input type="password" value={createFormData.password} onChange={e => setCreateFormData({...createFormData, password: e.target.value})} required placeholder="Mínimo 8 caracteres" style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
+
+              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Asignar Rol:</label>
+              <select value={createFormData.role_code} onChange={e => setCreateFormData({...createFormData, role_code: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc", background: "white" }}>
+                {rolesDb.map(rol => <option key={rol.code} value={rol.code}>{rol.name}</option>)}
+              </select>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
+                <button type="button" onClick={() => setModalCreateOpen(false)} style={{ background: "#f44336", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Cancelar</button>
+                <button type="submit" style={{ background: "#4CAF50", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Crear Usuario Activo</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/*MODAL DE EDICIÓN */}

@@ -1027,3 +1027,36 @@ export async function fetchActiveRolesFromDb() {
   const { rows } = await pool.query(query);
   return rows;
 }
+
+/**
+ * Inserta un nuevo usuario directamente con estado 'active' y email verificado.
+ * Utilizado por administradores para evitar el flujo de validación OTP.
+ */
+export async function adminCreateUserInDb(data: any) {
+  const query = `
+    INSERT INTO accounts (
+      role_id, 
+      institution_id, 
+      username, 
+      email, 
+      password_hash, 
+      full_name, 
+      account_status, 
+      email_verified,
+      registration_completed_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, 'active', TRUE, NOW())
+    RETURNING account_id, username, email, full_name;
+  `;
+  
+  const values = [
+    data.role_id,
+    data.institution_id || null,
+    data.username,
+    data.email,
+    data.password_hash,
+    data.full_name
+  ];
+
+  const { rows } = await pool.query(query, values);
+  return rows[0];
+}
