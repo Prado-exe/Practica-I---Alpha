@@ -1,0 +1,16 @@
+/* AuthLayout.css */
+.auth-layout {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center;     /* Centra verticalmente */
+  
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  background-color: rgba(0, 0, 0, 0.4); 
+  background-blend-mode: overlay;
+}
+/* ¡No pongas nada más aquí! */

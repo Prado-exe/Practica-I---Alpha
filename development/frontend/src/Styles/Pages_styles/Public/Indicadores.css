@@ -241,7 +241,7 @@
 /* ─── KPI CARDS ─── */
 .ind-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
 }
 
@@ -299,8 +299,8 @@
 
 /* ─── CHARTS ─── */
 .ind-charts-row {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  display: flex;
+  flex-direction: column;
   gap: 1.2rem;
 }
 
@@ -309,7 +309,10 @@
   border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 1.5rem;
+  /* 👇 NUEVO: Evita desbordes horizontales de recharts */
   min-width: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 .chart-card--full { grid-column: 1 / -1; }
@@ -444,6 +447,9 @@
   text-align: left;
   transition: border-color 0.15s, background 0.15s, transform 0.15s;
   font-family: var(--font-body);
+  /* 👇 NUEVO: Para asegurar que el botón contenga bien los textos */
+  overflow: hidden;
+  width: 100%;
 }
 
 .empty-ds-btn:hover {
@@ -458,6 +464,11 @@
   text-transform: uppercase;
   color: var(--ds-color);
   letter-spacing: 0.05em;
+  /* 👇 NUEVO: Evita desbordes horizontales y pone puntos suspensivos */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .ds-name {
@@ -465,6 +476,13 @@
   color: var(--text-color);
   font-weight: 500;
   line-height: 1.3;
+  /* 👇 NUEVO: Trunca el título a un máximo de 2 líneas */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 /* loading spinner */

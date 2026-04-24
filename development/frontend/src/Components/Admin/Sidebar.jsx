@@ -1,5 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { 
+  LayoutDashboard, 
+  Database, 
+  Newspaper, 
+  Users, 
+  ShieldCheck, 
+  Building2, 
+  Settings, 
+  Menu, 
+  LogOut 
+} from "lucide-react";
 import "../../Styles/ComponentStyle/Admin/Sidebar.css";
 
 // Importamos las herramientas reales de seguridad
@@ -16,18 +27,16 @@ function Sidebar() {
   const userName = authUser?.full_name || "Usuario";
   const userRole = authUser?.role || "Sin Rol";
 
-  // Agregamos el "requiredPermission" a cada opción del menú
+  // Reemplazamos los emojis por componentes de iconos
   const menu = [
-    // El Dashboard no tiene requiredPermission, por lo que CanView lo dejará pasar siempre
-    { name: "Dashboard", path: "/administracion", icon: "📊" }, 
-    
-    { name: "Datasets", path: "/administracion/datasets", icon: "📁", requiredPermission: "data_management.read" },
-    { name: "Publicaciones", path: "/administracion/publicaciones", icon: "📰", requiredPermission: "catalog.write" },
-    { name: "Usuarios", path: "/administracion/usuarios", icon: "👥", requiredPermission: "user_management.read" },
-    { name: "Roles", path: "/administracion/roles", icon: "🔐", requiredPermission: "roles_permissions.read" },
-    { name: "Instituciones", path: "/administracion/instituciones", icon: "🏢", requiredPermission: "admin_general.manage" },
+    { name: "Dashboard", path: "/administracion", icon: LayoutDashboard }, 
+    { name: "Datasets", path: "/administracion/datasets", icon: Database, requiredPermission: "data_management.read" },
+    { name: "Publicaciones", path: "/administracion/publicaciones", icon: Newspaper, requiredPermission: "catalog.write" },
+    { name: "Usuarios", path: "/administracion/usuarios", icon: Users, requiredPermission: "user_management.read" },
+    { name: "Roles", path: "/administracion/roles", icon: ShieldCheck, requiredPermission: "roles_permissions.read" },
+    { name: "Instituciones", path: "/administracion/instituciones", icon: Building2, requiredPermission: "admin_general.manage" },
     { name: "Etiquetas", path: "/administracion/etiquetas", icon: "🏷️", requiredPermission: "admin_general.manage" },
-    { name: "Configuración", path: "/administracion/configuracion", icon: "⚙️", requiredPermission: "admin_general.manage" }
+    { name: "Configuración", path: "/administracion/configuracion", icon: Settings, requiredPermission: "admin_general.manage" }
   ];
 
   const isActive = (path) => {
@@ -42,9 +51,12 @@ function Sidebar() {
       
       {/* HEADER */}
       <div className="sidebar-header">
-        <h2>{collapsed ? "ADM" : "Administración"}</h2>
-        <button onClick={() => setCollapsed(!collapsed)} aria-label="Toggle sidebar">
-          ☰
+        <div className="brand">
+          <div className="brand-logo">AD</div>
+          {!collapsed && <h2>Administración</h2>}
+        </div>
+        <button onClick={() => setCollapsed(!collapsed)} aria-label="Toggle sidebar" className="toggle-btn">
+          <Menu size={20} />
         </button>
       </div>
 
@@ -61,27 +73,34 @@ function Sidebar() {
 
       {/* NAV CON PERMISOS */}
       <nav className="sidebar-nav">
-        {menu.map((item) => (
-          /* Envolvemos cada iteración con CanView para ocultar lo no autorizado */
-          <CanView key={item.path} requiredPermission={item.requiredPermission}>
-            <Link
-              to={item.path}
-              className={`sidebar-link ${isActive(item.path) ? "active" : ""}`}
-            >
-              <span className="icon">{item.icon}</span>
-              {!collapsed && <span>{item.name}</span>}
-            </Link>
-          </CanView>
-        ))}
+        {menu.map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <CanView key={item.path} requiredPermission={item.requiredPermission}>
+              <Link
+                to={item.path}
+                className={`sidebar-link ${isActive(item.path) ? "active" : ""}`}
+                title={collapsed ? item.name : ""} // Muestra tooltip nativo si está colapsado
+              >
+                <div className="icon">
+                  <IconComponent size={20} strokeWidth={isActive(item.path) ? 2.5 : 2} />
+                </div>
+                {!collapsed && <span>{item.name}</span>}
+              </Link>
+            </CanView>
+          );
+        })}
       </nav>
 
       {/* ESPACIADOR */}
       <div className="sidebar-spacer" />
 
       {/* LOGOUT REAL */}
-      <button className="sidebar-logout" onClick={logout}>
-        <span className="icon">🚪</span>
-        {!collapsed && <span>Salir</span>}
+      <button className="sidebar-logout" onClick={logout} title={collapsed ? "Salir" : ""}>
+        <div className="icon">
+          <LogOut size={20} />
+        </div>
+        {!collapsed && <span>Cerrar Sesión</span>}
       </button>
 
     </aside>

@@ -1,25 +1,46 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import {
-  PieChart, Pie, Cell, Tooltip, BarChart, Bar,
+  PieChart, Pie, Cell, Tooltip,
   XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend,
   LineChart, Line,
 } from "recharts";
 import {
-  Database, CheckCircle, Hash, Globe, TrendingUp, TrendingDown,
-  Minus, FileText, Layers, ChevronDown, AlertCircle, Loader2,
-  BarChart2, Table2, RefreshCcw, FileBox
+  Database, Globe, TrendingUp,
+  FileText, Layers, ChevronDown, AlertCircle, Loader2,
+  BarChart2, Table2, RefreshCcw,
 } from "lucide-react";
+import { useLocation } from "react-router-dom"; // Añade esta importación arriba
 import Breadcrumb from "../../Components/Common/Breadcrumb";
-// ❌ Borramos import { DATASETS }
 import { useDataset } from "../../hooks/useDataset";
 import { TYPE_LABELS } from "../../utils/columnMapper";
-import { useAuth } from "../../Context/AuthContext"; // ✅ Agregamos Auth
+import { getDatasets } from "../../Services/DatasetService"; 
 import "../../Styles/Pages_styles/Public/Indicadores.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"; // ✅ Agregamos API
+
 
 /* ─── palette for charts ─── */
 const CHART_COLORS = ["#0056b3","#1976d2","#1b7a4a","#388e3c","#6a1b9a","#c62828","#ef6c00","#00838f"];
+
+/* ─── formatters para evitar desbordes y limpiar números ─── */
+function formatAxisNumber(num) {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+  return num;
+}
+
+function formatAxisText(text) {
+  if (!text) return "";
+  const str = String(text);
+  return str.length > 12 ? str.substring(0, 12) + "…" : str;
+}
+
+// NUEVO: Limpia símbolos de moneda y comas para poder sumar los números
+function cleanNumeric(val) {
+  if (val == null || val === "") return 0;
+  if (typeof val === "number") return val;
+  const cleaned = String(val).replace(/[^0-9.-]+/g, "");
+  return Number(cleaned) || 0;
+}
 
 /* ─── aggregation helpers ─── */
 function groupBySum(data, groupCol, valueCol, limit = 20) {
@@ -27,7 +48,8 @@ function groupBySum(data, groupCol, valueCol, limit = 20) {
   const acc = {};
   for (const row of data) {
     const key = String(row[groupCol] ?? "Sin valor");
-    acc[key] = (acc[key] ?? 0) + (Number(row[valueCol]) || 0);
+    // Usamos cleanNumeric para asegurar que no falle con números como "$1.000"
+    acc[key] = (acc[key] ?? 0) + cleanNumeric(row[valueCol]);
   }
   return Object.entries(acc)
     .map(([name, value]) => ({ name, value: Math.round(value) }))
@@ -35,103 +57,74 @@ function groupBySum(data, groupCol, valueCol, limit = 20) {
     .slice(0, limit);
 }
 
-function computeKpis(data, mapping) {
-  if (!data.length || !mapping) return [];
-  const { primaryNumericCol, categoryCol, regionCol, variationCol, numericCols } = mapping;
-  const kpis = [];
+function computeGeneralStats(data, columns) {
+  if (!data.length || !columns.length) return [];
 
-  kpis.push({
+  const stats = [];
+
+  const numericCols = [];
+  const categoricalCols = [];
+
+  for (const col of columns) {
+    const vals = data.map(r => r[col]).filter(v => v != null && v !== "");
+    if (!vals.length) continue;
+    const numericVals = vals.map(cleanNumeric).filter(v => !isNaN(v) && isFinite(v));
+    if (numericVals.length >= vals.length * 0.6) {
+      numericCols.push({ col, vals: numericVals });
+    } else {
+      categoricalCols.push({ col, vals });
+    }
+  }
+
+  stats.push({
     id: "total",
     label: "Total registros",
     value: data.length.toLocaleString("es-CL"),
-    rawValue: data.length,
-    sub: `${mapping.numericCols.length} columna(s) numéricas detectadas`,
-    trend: "neutral",
+    sub: `${numericCols.length} col. numérica(s) · ${categoricalCols.length} categórica(s)`,
     icon: Database,
     color: "#0056b3",
   });
 
-  if (primaryNumericCol) {
-    const nums = data.map(r => Number(r[primaryNumericCol])).filter(v => !isNaN(v));
-    const sum  = nums.reduce((a, b) => a + b, 0);
-    const avg  = nums.length ? sum / nums.length : 0;
-
-    kpis.push({
-      id: "sum",
-      label: `Total — ${primaryNumericCol}`,
-      value: Math.round(sum).toLocaleString("es-CL"),
-      rawValue: sum,
-      sub: "suma del período",
-      trend: "up",
+  for (const { col, vals } of numericCols.slice(0, 3)) {
+    const sum = vals.reduce((a, b) => a + b, 0);
+    const avg = sum / vals.length;
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    stats.push({
+      id: `num_${col}`,
+      label: `Promedio — ${col}`,
+      value: avg.toLocaleString("es-CL", { maximumFractionDigits: 1 }),
+      sub: `Mín: ${formatAxisNumber(min)} · Máx: ${formatAxisNumber(max)}`,
       icon: TrendingUp,
       color: "#1b7a4a",
     });
+  }
 
-    kpis.push({
-      id: "avg",
-      label: `Promedio — ${primaryNumericCol}`,
-      value: avg.toFixed(1).toLocaleString("es-CL"),
-      rawValue: avg,
-      sub: "por registro",
-      trend: "neutral",
-      icon: Minus,
+  for (const { col, vals } of categoricalCols.slice(0, 2)) {
+    const unique = new Set(vals.map(v => String(v))).size;
+    stats.push({
+      id: `cat_${col}`,
+      label: `Únicos — ${col}`,
+      value: unique.toLocaleString("es-CL"),
+      sub: `de ${vals.length.toLocaleString("es-CL")} registros con valor`,
+      icon: Layers,
       color: "#6a1b9a",
     });
   }
 
-  if (variationCol) {
-    const vars = data.map(r => Number(r[variationCol])).filter(v => !isNaN(v));
-    const avgVar = vars.length ? vars.reduce((a, b) => a + b, 0) / vars.length : 0;
-    kpis.push({
-      id: "variation",
-      label: `Variación media — ${variationCol}`,
-      value: `${avgVar >= 0 ? "+" : ""}${avgVar.toFixed(1)}%`,
-      rawValue: avgVar,
-      sub: "respecto período anterior",
-      trend: avgVar >= 0 ? "up" : "down",
-      icon: avgVar >= 0 ? TrendingUp : TrendingDown,
-      color: avgVar >= 0 ? "#1b7a4a" : "#c62828",
-    });
-  } else if (categoryCol) {
-    const unique = new Set(data.map(r => r[categoryCol])).size;
-    kpis.push({
-      id: "categories",
-      label: `Categorías — ${categoryCol}`,
-      value: unique.toLocaleString("es-CL"),
-      rawValue: unique,
-      sub: "valores únicos",
-      trend: "neutral",
-      icon: Layers,
-      color: "#c62828",
-    });
-  } else if (regionCol) {
-    const unique = new Set(data.map(r => r[regionCol])).size;
-    kpis.push({
-      id: "regions",
-      label: "Regiones cubiertas",
-      value: unique.toLocaleString("es-CL"),
-      rawValue: unique,
-      sub: "en este dataset",
-      trend: "neutral",
-      icon: Globe,
-      color: "#c62828",
-    });
-  }
-
-  return kpis;
+  return stats;
 }
 
 /* ─── sub-components ─── */
-
-function KpiCard({ kpi }) {
-  const Icon = kpi.icon;
+function StatCard({ stat }) {
+  const Icon = stat.icon;
   return (
-    <article className="ind-kpi-card" style={{ "--kpi-color": kpi.color }}>
+    <article className="ind-kpi-card" style={{ "--kpi-color": stat.color }}>
       <div className="kpi-icon-wrap"><Icon size={26} /></div>
       <div className="kpi-body">
-        <p className="kpi-label">{kpi.label}</p>
-        <p className="kpi-value">{kpi.value}</p>
-        <p className={`kpi-sub ${kpi.trend}`}>{kpi.sub}</p>
+        <p className="kpi-label">{stat.label}</p>
+        <p className="kpi-value">{stat.value}</p>
+        <p className="kpi-sub neutral">{stat.sub}</p>
       </div>
     </article>
   );
@@ -153,8 +146,8 @@ function MappingPanel({ mapping, columns }) {
       <p className="panel-title"><Layers size={13} /> Mapeo de columnas</p>
       <ul className="mapping-list">
         {columns.map(col => {
-          const type  = mapping.all[col] ?? "unknown";
-          const meta  = TYPE_LABELS[type];
+          const type  = mapping.all?.[col] ?? "unknown";
+          const meta  = TYPE_LABELS[type] || TYPE_LABELS.unknown;
           const isPrimary = col === mapping.primaryNumericCol || col === mapping.regionCol || col === mapping.timeCol || col === mapping.categoryCol;
           return (
             <li key={col} className={`mapping-row ${isPrimary ? "primary" : ""}`}>
@@ -177,7 +170,7 @@ function MetadataPanel({ metadata }) {
         <dt>Archivo</dt>      <dd>{metadata.file}</dd>
         <dt>Formato</dt>      <dd><span className="meta-badge">{metadata.format}</span></dd>
         <dt>Categoría</dt>    <dd>{metadata.category}</dd>
-        <dt>Registros</dt>    <dd>{metadata.rows.toLocaleString("es-CL")}</dd>
+        <dt>Registros</dt>    <dd>{metadata.rows?.toLocaleString("es-CL")}</dd>
         <dt>Columnas</dt>     <dd>{metadata.cols}</dd>
         <dt>Tamaño</dt>       <dd>{metadata.sizeKb} KB</dd>
         <dt>Actualización</dt><dd>{metadata.lastUpdated}</dd>
@@ -187,13 +180,20 @@ function MetadataPanel({ metadata }) {
   );
 }
 
-// ✅ Actualizamos el EmptyState para quitar la dependencia del archivo local
-function EmptyState({ selectedDataset }) {
+function EmptyState({ onSelect, datasets }) {
   return (
     <div className="ind-empty">
       <BarChart2 size={56} strokeWidth={1} />
-      <h3>{selectedDataset ? "Ahora selecciona un archivo" : "Selecciona un dataset para comenzar"}</h3>
-      <p>Elige uno de los conjuntos de datos disponibles en el panel lateral y luego el archivo que deseas analizar para visualizar sus indicadores y gráficos de forma automática.</p>
+      <h3>Selecciona un dataset para comenzar</h3>
+      <p>Elige uno de los conjuntos de datos disponibles en el panel lateral para visualizar sus indicadores y gráficos de forma automática.</p>
+      <div className="empty-dataset-grid">
+        {datasets.slice(0, 6).map(ds => (
+          <button key={ds.dataset_id} className="empty-ds-btn" onClick={() => onSelect(ds.dataset_id)} style={{ "--ds-color": ds.color || '#0056b3' }}>
+            <span className="ds-cat">{ds.categoria || "Dataset"}</span>
+            <span className="ds-name">{ds.nombre}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -252,70 +252,137 @@ function DataTable({ data, columns }) {
 /* ─── Main component ─── */
 
 function Indicadores() {
-  const { user } = useAuth(); // Para manejar público vs privado
-  const [catalog, setCatalog] = useState([]);
-  const [selectedDataset, setSelectedDataset] = useState(null);
-  const [selectedFileId, setSelectedFileId] = useState("");
+  const location = useLocation();
+  const [selectedId, setSelectedId] = useState(location.state?.selectedDatasetId || null);
+  const [lastManifest, setLastManifest] = useState(null);
+  const [availableDatasets, setAvailableDatasets] = useState([]);
+  const [loadingList, setLoadingList] = useState(true);
 
-  const { data, columns, mapping, metadata, loading, error, loadFileContent } = useDataset();
+  const { data, columns, mapping, metadata, loading, error, loadDataset } = useDataset();
 
-  // ✅ Cargar catálogo dinámico al entrar a la página
+  // Cargar lista de Datasets desde la API al montar
   useEffect(() => {
-    const fetchCatalog = async () => {
+    async function fetchDatasets() {
+      setLoadingList(true);
       try {
-        const headers = user?.token ? { "Authorization": `Bearer ${user.token}` } : {};
-        const endpoint = user?.token ? '/api/datasets?limit=100' : '/api/public/datasets?limit=100';
-        
-        const res = await fetch(`${API_URL}${endpoint}`, { headers });
-        if (res.ok) {
-          const json = await res.json();
-          setCatalog(json.data || []);
-        }
-      } catch (error) {
-        console.error("Error al cargar el catálogo:", error);
+        const response = await getDatasets({ limit: 100 });
+        setAvailableDatasets(response.data || []);
+      } catch (err) {
+        console.error("Error al cargar la lista de datasets:", err);
+      } finally {
+        setLoadingList(false);
       }
+    }
+    fetchDatasets();
+  }, []);
+
+  const handleSelect = useCallback(async (id) => {
+  if (!id) return;
+  setSelectedId(id);
+
+  try {
+    // 1. Buscamos el detalle completo del dataset por ID
+    // Esto es necesario porque el listado general no trae el array 'files'
+    const { getPublicDatasetById } = await import("../../Services/DatasetService");
+    const fullDs = await getPublicDatasetById(id);
+
+    console.log(`👀 Procesando Dataset: ${fullDs.nombre || fullDs.title}`);
+    console.log("📦 Detalle completo recuperado:", fullDs);
+
+    // 🚨 CONFIGURACIÓN DE MINIO
+    const MINIO_ENDPOINT = "http://localhost:9000";
+    const MINIO_BUCKET = "observatory-files";
+
+    /**
+     * 🔍 DETECCIÓN DINÁMICA:
+     * El objeto devuelto por el backend tiene un array 'files'.
+     * Buscamos el archivo marcado como principal (is_primary) o el primero disponible.
+     */
+    const primaryFile = fullDs.files?.find(f => f.is_primary) || fullDs.files?.[0];
+    
+    if (!primaryFile) {
+      throw new Error("Este dataset no tiene archivos cargados.");
+    }
+
+    // Extraemos la URL (el backend ya debería haber reemplazado 'storage' por 'localhost')
+    let finalUrl = primaryFile.file_url || "";
+
+    // Si por alguna razón la URL viene con el nombre interno de la red de Docker:
+    if (finalUrl.includes('storage:9000')) {
+      finalUrl = finalUrl.replace('storage:9000', 'localhost:9000');
+    }
+
+    // PLAN B: Si no hay URL pero hay una 'storage_key', la armamos manualmente
+    if (!finalUrl && primaryFile.storage_key) {
+      finalUrl = `${MINIO_ENDPOINT}/${MINIO_BUCKET}/${primaryFile.storage_key.replace(/^\//, '')}`;
+    }
+
+    console.log("🔗 URL Generada Dinámicamente:", finalUrl);
+
+    if (!finalUrl) {
+      throw new Error("No se pudo determinar una URL de descarga válida.");
+    }
+
+    // Preparamos el objeto para el hook useDataset
+    const formattedManifest = {
+      ...fullDs,
+      url: finalUrl,
+      name: fullDs.nombre || fullDs.title,
+      category: fullDs.categoria || (fullDs.category?.name),
+      description: fullDs.descripcion || fullDs.summary,
+      format: primaryFile.file_format || "CSV",
+      file: primaryFile.display_name || "archivo.csv"
     };
-    fetchCatalog();
-  }, [user]);
 
-  // ✅ Obtener detalles del dataset y sus archivos firmados
-  const handleDatasetChange = async (datasetId) => {
-    if (!datasetId) return;
-    try {
-      const headers = user?.token ? { "Authorization": `Bearer ${user.token}` } : {};
-      const endpoint = user?.token ? `/api/datasets/${datasetId}` : `/api/public/datasets/${datasetId}`;
-      
-      const res = await fetch(`${API_URL}${endpoint}`, { headers });
-      const { data: dbDataset } = await res.json();
-      
-      setSelectedDataset(dbDataset);
-      setSelectedFileId(""); // Reseteamos el archivo al cambiar de dataset
-    } catch (err) {
-      console.error("Error al obtener detalle del dataset:", err);
-    }
-  };
+    // 🚀 Cargamos los datos reales del CSV
+    loadDataset(formattedManifest);
 
-  // ✅ Mandar a procesar el archivo seleccionado
-  const handleFileChange = useCallback((fileId) => {
-    const file = selectedDataset.files.find(f => String(f.aws_file_reference_id) === String(fileId));
-    if (file) {
-      setSelectedFileId(fileId);
-      loadFileContent(file, selectedDataset);
-    }
-  }, [selectedDataset, loadFileContent]);
+  } catch (err) {
+    console.error("❌ Error al procesar el dataset:", err.message);
+    // Notificamos al hook para que muestre el error en la interfaz
+    loadDataset({ url: "", error: err.message });
+  }
+}, [loadDataset]);
 
   const handleRetry = useCallback(() => {
-    if (selectedFileId) handleFileChange(selectedFileId);
-  }, [selectedFileId, handleFileChange]);
+    if (lastManifest) loadDataset(lastManifest);
+  }, [lastManifest, loadDataset]);
 
-  const kpis    = useMemo(() => computeKpis(data, mapping), [data, mapping]);
-  const pieData = useMemo(() => groupBySum(data, mapping?.categoryCol, mapping?.primaryNumericCol, 8), [data, mapping]);
-  const barData = useMemo(() => groupBySum(data, mapping?.regionCol, mapping?.primaryNumericCol, 16), [data, mapping]);
+  // 🚨 2. AUTO-MAPEO SEGURO (Garantiza que siempre haya columnas para graficar)
+  const safeMapping = useMemo(() => {
+    if (!data || !data.length || !columns || !columns.length) return mapping;
+    
+    let bestCat = columns.find(c => 
+      c.toLowerCase().includes("categor") || c.toLowerCase().includes("tipo") || 
+      c.toLowerCase().includes("nombre") || c.toLowerCase().includes("region")
+    );
+    if (!bestCat) {
+       bestCat = columns.find(c => typeof data[0][c] === "string" && isNaN(Number(data[0][c]))) || columns[0];
+    }
+
+    let bestNum = columns.find(c => 
+      c.toLowerCase().includes("valor") || c.toLowerCase().includes("monto") || 
+      c.toLowerCase().includes("total") || c.toLowerCase().includes("cantidad")
+    );
+    if (!bestNum) {
+      bestNum = columns.find(c => {
+         const val = data[0][c];
+         return typeof val === "number" || !isNaN(cleanNumeric(val));
+      }) || columns[1] || columns[0];
+    }
+
+    return { ...mapping, categoryCol: bestCat, primaryNumericCol: bestNum };
+  }, [data, columns, mapping]);
+
+  // Utilizamos safeMapping para calcular las agrupaciones
+  const generalStats = useMemo(() => computeGeneralStats(data, columns), [data, columns]);
+  const pieData = useMemo(() => groupBySum(data, safeMapping?.categoryCol, safeMapping?.primaryNumericCol, 8), [data, safeMapping]);
+  const barData = useMemo(() => groupBySum(data, safeMapping?.regionCol || safeMapping?.categoryCol, safeMapping?.primaryNumericCol, 16), [data, safeMapping]);
   const lineData = useMemo(() => {
-    if (!mapping?.timeCol) return [];
-    const raw = groupBySum(data, mapping.timeCol, mapping.primaryNumericCol, 24);
+    if (!safeMapping?.timeCol) return [];
+    const raw = groupBySum(data, safeMapping.timeCol, safeMapping.primaryNumericCol, 24);
     return raw.sort((a, b) => String(a.name).localeCompare(String(b.name)));
-  }, [data, mapping]);
+  }, [data, safeMapping]);
 
   const hasData    = !loading && !error && data.length > 0;
   const hasBarData = hasData && barData.length > 0;
@@ -326,7 +393,6 @@ function Indicadores() {
     <main className="indicadores-page">
       <Breadcrumb paths={["Inicio", "Indicadores"]} />
 
-      {/* HERO */}
       <section className="ind-hero">
         <div className="ind-hero-text">
           <h1>Dashboard de Indicadores</h1>
@@ -337,13 +403,8 @@ function Indicadores() {
 
       <hr className="ind-separator" />
 
-      {/* LAYOUT */}
       <div className="ind-dashboard">
-
-        {/* SIDEBAR */}
         <aside className="ind-sidebar">
-
-          {/* Dataset selector */}
           <div className="sidebar-section">
             <p className="panel-title"><Database size={13} /> 1. Seleccionar dataset</p>
             <div className="select-wrap">
@@ -352,82 +413,60 @@ function Indicadores() {
                 value={selectedDataset?.dataset_id ?? ""}
                 onChange={e => handleDatasetChange(e.target.value)}
                 aria-label="Seleccionar dataset"
+                disabled={loadingList}
               >
-                <option value="" disabled>-- Elige un dataset --</option>
-                {catalog.map(ds => (
+                <option value="" disabled>
+                  {loadingList ? "Cargando datasets..." : "-- Elige un dataset --"}
+                </option>
+                {availableDatasets.map(ds => (
                   <option key={ds.dataset_id} value={ds.dataset_id}>{ds.nombre}</option>
                 ))}
               </select>
               <ChevronDown size={16} className="select-chevron" />
             </div>
+            {selectedId && (
+              <p className="dataset-desc">
+                {availableDatasets.find(d => String(d.dataset_id) === String(selectedId))?.descripcion}
+              </p>
+            )}
           </div>
 
-          {/* File selector */}
-          {selectedDataset && (
-            <div className="sidebar-section">
-              <p className="panel-title"><FileBox size={13} /> 2. Seleccionar archivo</p>
-              <div className="select-wrap">
-                <select 
-                  className="dataset-select" 
-                  value={selectedFileId} 
-                  onChange={e => handleFileChange(e.target.value)}
-                  aria-label="Seleccionar archivo"
-                >
-                  <option value="" disabled>-- Elige un archivo --</option>
-                  {selectedDataset.files?.map(f => (
-                    <option key={f.aws_file_reference_id} value={f.aws_file_reference_id}>
-                      {f.display_name} {f.file_format ? `(${f.file_format.toUpperCase()})` : ""}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="select-chevron" />
-              </div>
-            </div>
-          )}
-
-          {/* Metadata */}
           {metadata && <MetadataPanel metadata={metadata} />}
-
-          {/* Column mapping */}
-          {mapping && columns.length > 0 && (
-            <MappingPanel mapping={mapping} columns={columns} />
-          )}
-
+          {safeMapping && columns.length > 0 && <MappingPanel mapping={safeMapping} columns={columns} />}
         </aside>
 
-        {/* MAIN CONTENT */}
         <div className="ind-main">
-
           {loading && <LoadingState />}
-
           {!loading && error && <ErrorState error={error} onRetry={handleRetry} />}
-
-          {!loading && !error && !selectedFileId && <EmptyState selectedDataset={selectedDataset} />}
-
-          {!loading && !error && selectedFileId && !data.length && !loading && (
-            <div className="ind-loading"><p>Sin datos numéricos o geográficos para graficar en este archivo.</p></div>
+          {!loading && !error && !selectedId && <EmptyState onSelect={handleSelect} datasets={availableDatasets} />}
+          {!loading && !error && selectedId && !data.length && !loading && (
+            <div className="ind-loading"><p>Sin datos para mostrar.</p></div>
           )}
 
           {hasData && (
             <>
-              {/* KPI CARDS */}
-              <section className="ind-kpis" aria-label="KPIs calculados">
-                {kpis.map(kpi => <KpiCard key={kpi.id} kpi={kpi} />)}
+              <section className="ind-kpis" aria-label="Estadísticas generales">
+                {generalStats.map(s => <StatCard key={s.id} stat={s} />)}
               </section>
 
-              {/* PIE + BAR */}
               <div className="ind-charts-row">
                 {hasPieData && (
                   <div className="chart-card">
-                    <h2 className="chart-title">Distribución por {mapping.categoryCol}</h2>
-                    <p className="chart-subtitle">Suma de {mapping.primaryNumericCol} agrupada por categoría</p>
+                    <h2 className="chart-title">Distribución por {safeMapping.categoryCol}</h2>
+                    <p className="chart-subtitle">Suma de {safeMapping.primaryNumericCol} agrupada por categoría</p>
                     <ResponsiveContainer width="100%" height={270}>
-                      <PieChart>
-                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="value">
+                      <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                        <Pie data={pieData} cx="35%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} dataKey="value">
                           {pieData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                         </Pie>
                         <Tooltip content={<ChartTooltip />} />
-                        <Legend formatter={v => <span style={{ fontSize: "0.78rem", color: "#444" }}>{v}</span>} />
+                        <Legend 
+                          layout="vertical" 
+                          verticalAlign="middle" 
+                          align="right"
+                          wrapperStyle={{ width: "55%", paddingLeft: "10px", lineHeight: "24px" }} 
+                          formatter={v => <span style={{ fontSize: "0.75rem", color: "#444" }}>{v}</span>} 
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -435,28 +474,41 @@ function Indicadores() {
 
                 {hasBarData && (
                   <div className={`chart-card ${hasPieData ? "" : "chart-card--full"}`}>
-                    <h2 className="chart-title">Por {mapping.regionCol ?? mapping.categoryCol}</h2>
-                    <p className="chart-subtitle">Suma de {mapping.primaryNumericCol} por dimensión regional</p>
+                    <h2 className="chart-title">Por {safeMapping.regionCol ?? safeMapping.categoryCol}</h2>
+                    <p className="chart-subtitle">Suma de {safeMapping.primaryNumericCol} por dimensión regional</p>
                     <ResponsiveContainer width="100%" height={270}>
-                      <BarChart data={barData} margin={{ top: 4, right: 12, left: -16, bottom: 60 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#555" }} angle={-35} textAnchor="end" interval={0} />
-                        <YAxis tick={{ fontSize: 11, fill: "#555" }} />
+                      <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                        <Pie
+                          data={barData}
+                          cx="35%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={85}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {barData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        </Pie>
                         <Tooltip content={<ChartTooltip />} />
-                        <Bar dataKey="value" fill="#0056b3" radius={[4,4,0,0]} />
-                      </BarChart>
+                        <Legend
+                          layout="vertical"
+                          verticalAlign="middle"
+                          align="right"
+                          wrapperStyle={{ width: "55%", paddingLeft: "10px", lineHeight: "24px" }}
+                          formatter={v => <span style={{ fontSize: "0.75rem", color: "#444" }}>{formatAxisText(v)}</span>}
+                        />
+                      </PieChart>
                     </ResponsiveContainer>
                   </div>
                 )}
               </div>
 
-              {/* LINE CHART */}
               {hasLine && (
                 <div className="chart-card">
                   <div className="chart-header-row">
                     <div>
-                      <h2 className="chart-title">Evolución temporal — {mapping.timeCol}</h2>
-                      <p className="chart-subtitle">Suma de {mapping.primaryNumericCol} por período</p>
+                      <h2 className="chart-title">Evolución temporal — {safeMapping.timeCol}</h2>
+                      <p className="chart-subtitle">Suma de {safeMapping.primaryNumericCol} por período</p>
                     </div>
                     <div className="chart-stat-inline">
                       <TrendingUp size={16} color="#1b7a4a" />
@@ -464,10 +516,10 @@ function Indicadores() {
                     </div>
                   </div>
                   <ResponsiveContainer width="100%" height={220}>
-                    <LineChart data={lineData} margin={{ top: 4, right: 20, left: -16, bottom: 0 }}>
+                    <LineChart data={lineData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
-                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#555" }} />
-                      <YAxis tick={{ fontSize: 11, fill: "#555" }} />
+                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#555" }} tickFormatter={formatAxisText} />
+                      <YAxis tick={{ fontSize: 11, fill: "#555" }} tickFormatter={formatAxisNumber} width={45} />
                       <Tooltip content={<ChartTooltip />} />
                       <Line type="monotone" dataKey="value" stroke="#0056b3" strokeWidth={2.5}
                         dot={{ r: 4, fill: "#0056b3" }} activeDot={{ r: 6 }} />
@@ -476,7 +528,6 @@ function Indicadores() {
                 </div>
               )}
 
-              {/* DATA TABLE */}
               <DataTable data={data} columns={columns} />
             </>
           )}

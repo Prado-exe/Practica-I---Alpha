@@ -111,3 +111,71 @@ color:#444;
 .nosotros-table tr:nth-child(even) {
   background-color: #fafafa;
 }
+.member-image-container {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%; /* Esto las hace circulares */
+    overflow: hidden;
+    margin: 0 auto 15px auto;
+    border: 4px solid #f0f0f0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.member-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* MUY IMPORTANTE: evita que se deformen */
+    display: block;
+}
+
+/* =========================================
+   GRILLA DE EQUIPO (Agrega esto al final)
+   ========================================= */
+
+.equipo-grid {
+    display: grid;
+    /* Esto crea columnas automáticas que se adaptan al ancho. 
+       Si caben 3, pone 3. Si es celular, pone 1 o 2. */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 2rem; /* Espacio entre las tarjetas */
+    padding: 20px 0;
+}
+
+.member-card {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.member-card:hover {
+    transform: translateY(-5px); /* Pequeño efecto al pasar el mouse */
+}
+
+/* Tipografía de las tarjetas */
+.member-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0.5rem 0 0.2rem 0;
+}
+
+.member-role {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+    margin: 0;
+}
+
+/* Ajuste específico para celulares */
+@media (max-width: 600px) {
+    .equipo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+    .member-image-container {
+        width: 120px;
+        height: 120px;
+    }
+}

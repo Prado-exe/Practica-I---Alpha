@@ -82,53 +82,49 @@ function Login() {
   };
 
   return (
-    <div className="login-bg">
-      <form
-        className="login-container"
-        onSubmit={handleLogin}
-        aria-label="Formulario de inicio de sesión"
-      >
-        <img src={logo} alt="Logo del sitio" className="login-logo" />
+    <form
+      className="login-container"
+      onSubmit={handleLogin}
+      aria-label="Formulario de inicio de sesión"
+    >
+      <img src={logo} alt="Logo del sitio" className="login-logo" />
 
-        <label htmlFor="email">Correo electrónico</label>
-        <input
-          id="email"
-          type="email"
-          placeholder="correo@ejemplo.cl"
-          className="login-input"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+      <label htmlFor="email">Correo electrónico</label>
+      <input
+        id="email"
+        type="email"
+        placeholder="correo@ejemplo.cl"
+        className="login-input"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
 
-        <label htmlFor="password">Contraseña</label>
-        <input
-          id="password"
-          type="password"
-          placeholder="••••••••"
-          className="login-input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+      <label htmlFor="password">Contraseña</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="••••••••"
+        className="login-input"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
 
-        {/* 6. Renderizamos el Captcha para que el usuario pueda validarlo 
-         Asegúrate de que tu componente Captcha use la prop onChange o setToken 
-        <div style={{ margin: "10px 0" }}>
-          <Captcha onChange={(token) => setCaptchaToken(token)} />
-        </div>
-*/}
-        <button className="login-btn" disabled={loading}>
-          {loading ? "Validando..." : "Iniciar sesión"}
-        </button>
+      <button className="login-btn" disabled={loading}>
+        {loading ? "Validando..." : "Iniciar sesión"}
+      </button>
 
-        <div className="login-links">
-          <Link to="/register">Registrarse</Link>
-          <Link to="/recuperar-password">¿Olvidaste tu contraseña?</Link>
-        </div>
-      </form>
-    </div>
-  );
+      <div className="login-links">
+        <Link to="/register">Registrarse  </Link>
+        <Link to="/recuperar-password"> ¿Olvidaste tu contraseña?</Link>
+      </div>
+
+      <div className="back-to-home">
+        <Link to="/">Volver al inicio</Link>
+      </div>
+    </form>
+  );
 }
 
 export default Login;

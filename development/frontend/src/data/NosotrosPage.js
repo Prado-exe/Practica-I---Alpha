@@ -1,6 +1,13 @@
 import imagen1 from "../assets/nosotrosv1.png"
 import imagen2 from "../assets/nosotros.png"
 
+import img1 from "../assets/brax.png";
+import img2 from "../assets/basti.jpeg";
+import img3 from "../assets/dani.jpeg";
+import img4 from "../assets/mati.png";
+import img5 from "../assets/brian.jpeg";
+
+
 export const nosotrosPages = [
   {
     id: "quienes-somos",
@@ -119,9 +126,25 @@ export const nosotrosPages = [
   },
   {
     id: "equipo",
-    title: "Equipo",
-    content:
-      "Nuestro equipo está compuesto por profesionales en datos, desarrollo web, investigación social y gestión pública."
+    title: "Nuestro Equipo",
+    content: [
+      {
+        type: "text",
+        value: "Conoce a los especialistas que lideran el desarrollo de soluciones basadas en datos en nuestro observatorio."
+      },
+      {
+        type: "grid-equipo", 
+        members: [
+          { name: "Basti", role: "gestion del proyecto (PMO)", image: img2 },
+          { name: "Dani", role: "Diseño UI/UX", image: img3 },
+          { name: "Mati ", role: "Desarrollo backend", image: img4 },
+          { name: "brian", role: "Desarrollo frontend", image: img5 },
+          { name: "Brax", role: "QA - control de calidad", image: img1 }
+          
+          
+
+        ]
+      }
+    ]
   }
-  
 ];
