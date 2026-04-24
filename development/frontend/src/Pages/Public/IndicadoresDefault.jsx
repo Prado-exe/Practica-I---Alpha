@@ -2,12 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
-  LineChart, Line
+  LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area
 } from "recharts";
 import {
   Database, Globe, Layers, ArrowRight, Loader2,
   BookOpen, HeartPulse, Landmark, TreePine, TrendingUp, Briefcase, Activity,
-  Building2, Calendar
+  Building2, Calendar, Filter, LineChart as LineChartIcon
 } from "lucide-react";
 
 import Breadcrumb from "../../Components/Common/Breadcrumb";
@@ -15,8 +15,8 @@ import { getDatasets } from "../../Services/DatasetService";
 import "../../Styles/Pages_styles/Public/IndicadoresDefault.css";
 
 const GLOBAL_COLORS = ["#0056b3","#1976d2","#1b7a4a","#388e3c","#ef6c00","#c62828","#6a1b9a","#00838f"];
+const TIME_COLORS = ["#1976d2", "#e53935", "#43a047", "#fb8c00", "#8e24aa", "#00acc1", "#3949ab", "#f4511e"];
 
-// Función auxiliar para iconos temáticos
 const getCategoryIcon = (categoryName) => {
   const name = categoryName.toLowerCase();
   if (name.includes("educaci")) return BookOpen;
@@ -28,7 +28,7 @@ const getCategoryIcon = (categoryName) => {
   return Layers;
 };
 
-// SIMULADOR DE TENDENCIAS
+// SIMULADOR DE TENDENCIAS PARA LAS TABLAS 
 const generateDummyTrend = () => [
   { year: '2020', value: Math.floor(Math.random() * 20) + 5 },
   { year: '2021', value: Math.floor(Math.random() * 30) + 10 },
@@ -37,7 +37,6 @@ const generateDummyTrend = () => [
   { year: '2024', value: Math.floor(Math.random() * 60) + 25 },
 ];
 
-// Componente CircularProgress
 function CircularProgress({ percentage, color, size = 46 }) {
   const strokeWidth = 4;
   const radius = (size - strokeWidth) / 2;
@@ -71,8 +70,13 @@ function IndicadoresDefault() {
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // NUEVO: Estado para controlar la pestaña activa
+  // ==========================================
+  // NUEVO: Estado de la vista principal (Botones Arriba)
+  // ==========================================
+  const [mainView, setMainView] = useState("estado"); // 'estado' o 'evolucion'
+
   const [activeTab, setActiveTab] = useState("tematico");
+  const [timeFilter, setTimeFilter] = useState("general"); 
 
   useEffect(() => {
     async function fetchDatasets() {
@@ -88,7 +92,72 @@ function IndicadoresDefault() {
     fetchDatasets();
   }, []);
 
-  // 1. Estadísticas para la pestaña "Análisis Temático"
+  // Lógica de Series de Tiempo
+  const timeSeriesStats = useMemo(() => {
+    if (!datasets.length) return { data: [], keys: [] };
+
+    const timeMap = {};
+    const allCategories = new Set();
+    const allOrigins = new Set();
+
+    datasets.forEach(ds => {
+      const dateStr = ds.created_at || ds.updated_at || "2023-01-01T00:00:00Z";
+      const date = new Date(dateStr);
+      const timeKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      const catName = ds.categoria || ds.category?.name || "Sin Categoría";
+      const originName = ds.institucion?.nombre || ds.institucion || "Institución Desconocida";
+
+      allCategories.add(catName);
+      allOrigins.add(originName);
+
+      if (!timeMap[timeKey]) {
+        timeMap[timeKey] = { period: timeKey, Total: 0 };
+      }
+
+      timeMap[timeKey].Total += 1;
+      timeMap[timeKey][catName] = (timeMap[timeKey][catName] || 0) + 1;
+      timeMap[timeKey][originName] = (timeMap[timeKey][originName] || 0) + 1;
+    });
+
+    let data = Object.values(timeMap).sort((a, b) => a.period.localeCompare(b.period));
+
+    data = data.map(item => {
+      const [year, month] = item.period.split('-');
+      const dateObj = new Date(year, parseInt(month) - 1);
+      const formattedPeriod = dateObj.toLocaleDateString('es-CL', { month: 'short', year: 'numeric' });
+      return { ...item, displayPeriod: formattedPeriod.charAt(0).toUpperCase() + formattedPeriod.slice(1) };
+    });
+
+    let accumTotal = 0;
+    const accumCategories = {};
+    const accumOrigins = {};
+
+    data = data.map(item => {
+      accumTotal += item.Total || 0;
+      const newItem = { ...item, TotalAcumulado: accumTotal, displayPeriod: item.displayPeriod };
+      
+      allCategories.forEach(cat => {
+        accumCategories[cat] = (accumCategories[cat] || 0) + (item[cat] || 0);
+        newItem[`${cat}_acum`] = accumCategories[cat];
+      });
+      
+      allOrigins.forEach(org => {
+        accumOrigins[org] = (accumOrigins[org] || 0) + (item[org] || 0);
+        newItem[`${org}_acum`] = accumOrigins[org];
+      });
+
+      return newItem;
+    });
+
+    return { 
+      data, 
+      categoryKeys: Array.from(allCategories),
+      originKeys: Array.from(allOrigins)
+    };
+  }, [datasets]);
+
+  // Lógica Tabular
   const thematicStats = useMemo(() => {
     if (!datasets.length) return { total: 0, data: [] };
     const total = datasets.length;
@@ -111,17 +180,15 @@ function IndicadoresDefault() {
     return { total, data };
   }, [datasets]);
 
-  // 2. NUEVO: Estadísticas para la pestaña "Análisis por Origen" (Instituciones)
   const originStats = useMemo(() => {
     if (!datasets.length) return { total: 0, data: [] };
     const total = datasets.length;
     const instMap = {};
 
     datasets.forEach(ds => {
-      // Ajusta esto según cómo venga la institución en tu API (ds.institucion.nombre o ds.institucion)
       const instName = ds.institucion?.nombre || ds.institucion || "Institución Desconocida";
       const catName = ds.categoria || ds.category?.name || "Sin Categoría";
-      const dateStr = ds.updated_at || ds.created_at; // Ajusta según el campo de fecha de tu API
+      const dateStr = ds.updated_at || ds.created_at;
 
       if (!instMap[instName]) {
         instMap[instName] = { count: 0, categories: {}, latestDate: null };
@@ -139,10 +206,7 @@ function IndicadoresDefault() {
     });
 
     const data = Object.entries(instMap).map(([name, info], index) => {
-       // Calcular la categoría principal (la que más se repite para esta institución)
        const topCat = Object.entries(info.categories).sort((a, b) => b[1] - a[1])[0][0];
-       
-       // Formatear la fecha
        const formattedDate = info.latestDate 
           ? info.latestDate.toLocaleDateString("es-CL", { year: 'numeric', month: 'short', day: 'numeric' })
           : "N/A";
@@ -164,6 +228,24 @@ function IndicadoresDefault() {
     navigate(`/indicadores/analisis`, { state: { selectedDatasetId: datasetId } });
   };
 
+  const TimeTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="time-chart-tooltip">
+          <p className="tooltip-date">{label}</p>
+          {payload.map((entry, index) => (
+            <div key={index} className="tooltip-row">
+              <span className="tooltip-color" style={{ backgroundColor: entry.color }}></span>
+              <span className="tooltip-name">{entry.name.replace('_acum', '')}:</span>
+              <span className="tooltip-value">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <main className="indicadores-default-page">
       <Breadcrumb paths={["Inicio", "Indicadores Globales"]} />
@@ -171,35 +253,32 @@ function IndicadoresDefault() {
       <section className="ind-hero">
         <div className="ind-hero-text">
           <h1>Dashboard de Indicadores Globales</h1>
-          <p>Visión general del estado de los datos en el Observatorio. Explora la distribución temática y selecciona un conjunto de datos para un análisis detallado.</p>
+          <p>Visión general del estado de los datos en el Observatorio. Selecciona el tipo de análisis que deseas visualizar.</p>
         </div>
-        <div className="ind-hero-badge">
-          <Activity size={44} strokeWidth={1.4} />
-          <span>Estado Actual</span>
+        
+        {/* ==========================================
+            NUEVO: Controles principales (Reemplaza el badge estático)
+            ========================================== */}
+        <div className="ind-hero-controls">
+          <button 
+            className={`hero-toggle-btn ${mainView === 'estado' ? 'active' : ''}`}
+            onClick={() => setMainView('estado')}
+          >
+            <Activity size={32} strokeWidth={1.5} />
+            <span>Estado Actual</span>
+          </button>
+          
+          <button 
+            className={`hero-toggle-btn ${mainView === 'evolucion' ? 'active' : ''}`}
+            onClick={() => setMainView('evolucion')}
+          >
+            <LineChartIcon size={32} strokeWidth={1.5} />
+            <span>Evolución con el tiempo</span>
+          </button>
         </div>
       </section>
 
-      {/* NUEVO: Controles de Pestañas */}
-      <div className="ind-tabs-container">
-        <div className="ind-tabs">
-          <button 
-            className={`tab-btn ${activeTab === 'tematico' ? 'active' : ''}`}
-            onClick={() => setActiveTab('tematico')}
-          >
-            <Layers size={18} />
-            Análisis Temático
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'origen' ? 'active' : ''}`}
-            onClick={() => setActiveTab('origen')}
-          >
-            <Building2 size={18} />
-            Análisis por Origen
-          </button>
-        </div>
-      </div>
-
-      <hr className="ind-separator" style={{ marginTop: 0 }} />
+      <hr className="ind-separator" />
 
       {loading ? (
         <div className="ind-loading">
@@ -209,99 +288,176 @@ function IndicadoresDefault() {
       ) : (
         <div className="ind-global-content fade-in">
           
-          <div className="section-header">
-            <h2 className="section-title">
-              {activeTab === 'tematico' ? 'Estado Actual por Categorías' : 'Análisis de Fuentes y Origen de Datos'}
-            </h2>
-            <p className="section-subtitle">
-              {activeTab === 'tematico' 
-                ? `Distribución, tendencias de publicación y volumen por categoría temática. (Total: ${thematicStats.total} Datasets)` 
-                : `Distribución de conjuntos de datos según las instituciones proveedoras. (Total: ${originStats.total} Datasets)`}
-            </p>
-          </div>
+          {/* ==========================================
+              VISTA 1: EVOLUCIÓN CON EL TIEMPO
+              ========================================== */}
+          {mainView === 'evolucion' && (
+            <section className="time-analysis-section chart-card fade-in">
+              <div className="chart-header-row time-header">
+                <div>
+                  <h2 className="chart-title">Evolución de Publicaciones en el Tiempo</h2>
+                  <p className="chart-subtitle">Crecimiento acumulado de conjuntos de datos en la plataforma.</p>
+                </div>
+                
+                <div className="time-filter-wrap">
+                  <Filter size={16} className="filter-icon" />
+                  <select 
+                    className="time-select" 
+                    value={timeFilter} 
+                    onChange={(e) => setTimeFilter(e.target.value)}
+                  >
+                    <option value="general">Crecimiento General</option>
+                    <option value="categoria">Por Categoría Temática</option>
+                    <option value="origen">Por Institución (Origen)</option>
+                  </select>
+                </div>
+              </div>
 
-          <div className="status-table-container">
-            <table className="status-table">
-              <thead>
-                <tr>
-                  <th>{activeTab === 'tematico' ? 'Categoría' : 'Institución'}</th>
-                  <th>Datasets</th>
-                  <th>Porcentaje</th>
-                  {activeTab === 'tematico' ? (
-                    <th>Tendencia por Año</th>
+              <div className="main-time-chart">
+                <ResponsiveContainer width="100%" height={400}>
+                  {timeFilter === "general" ? (
+                    <AreaChart data={timeSeriesStats.data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#0056b3" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#0056b3" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                      <XAxis dataKey="displayPeriod" tick={{fontSize: 11, fill: '#666'}} tickMargin={10} />
+                      <YAxis tick={{fontSize: 11, fill: '#666'}} width={40} />
+                      <Tooltip content={<TimeTooltip />} />
+                      <Area type="monotone" dataKey="TotalAcumulado" name="Total Datasets" stroke="#0056b3" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" activeDot={{ r: 6 }} />
+                    </AreaChart>
                   ) : (
-                    <>
-                      <th>Categoría Principal</th>
-                      <th>Última Actualización</th>
-                    </>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {activeTab === 'tematico' && thematicStats.data.map((cat, i) => {
-                  const IconComponent = getCategoryIcon(cat.name);
-                  return (
-                    <tr key={i}>
-                      <td className="col-categoria">
-                        <div className="cat-icon-text">
-                          <div className="status-icon" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>
-                            <IconComponent size={20} />
-                          </div>
-                          <span className="cat-name">{cat.name}</span>
-                        </div>
-                      </td>
-                      <td className="col-cantidad">{cat.count}</td>
-                      <td className="col-porcentaje">
-                        <CircularProgress percentage={cat.percentage} color={cat.color} />
-                      </td>
-                      <td className="col-tendencia">
-                        <div className="sparkline-wrapper">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={cat.trend}>
-                              <Line type="monotone" dataKey="value" stroke={cat.color} strokeWidth={2.5} dot={false} isAnimationActive={true}/>
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                    <LineChart data={timeSeriesStats.data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                      <XAxis dataKey="displayPeriod" tick={{fontSize: 11, fill: '#666'}} tickMargin={10} />
+                      <YAxis tick={{fontSize: 11, fill: '#666'}} width={40} />
+                      <Tooltip content={<TimeTooltip />} />
+                      <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '13px' }} />
+                      
+                      {timeFilter === "categoria" && timeSeriesStats.categoryKeys.map((key, index) => (
+                        <Line key={key} type="monotone" dataKey={`${key}_acum`} name={key} stroke={TIME_COLORS[index % TIME_COLORS.length]} strokeWidth={2.5} dot={false} activeDot={{ r: 6 }} />
+                      ))}
 
-                {/* NUEVO: Filas para Análisis por Origen */}
-                {activeTab === 'origen' && originStats.data.map((inst, i) => (
-                  <tr key={i}>
-                    <td className="col-categoria">
-                      <div className="cat-icon-text">
-                        <div className="status-icon" style={{ backgroundColor: `${inst.color}15`, color: inst.color }}>
-                          <Building2 size={20} />
-                        </div>
-                        <span className="cat-name">{inst.name}</span>
-                      </div>
-                    </td>
-                    <td className="col-cantidad">{inst.count}</td>
-                    <td className="col-porcentaje">
-                      <CircularProgress percentage={inst.percentage} color={inst.color} />
-                    </td>
-                    <td className="col-top-cat">
-                      <span className="meta-badge" style={{ color: inst.color, backgroundColor: `${inst.color}10`, border: `1px solid ${inst.color}30` }}>
-                        {inst.topCategory}
-                      </span>
-                    </td>
-                    <td className="col-fecha">
-                      <div className="date-cell">
-                        <Calendar size={14} />
-                        <span>{inst.lastUpdated}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      {timeFilter === "origen" && timeSeriesStats.originKeys.map((key, index) => (
+                        <Line key={key} type="monotone" dataKey={`${key}_acum`} name={key} stroke={TIME_COLORS[index % TIME_COLORS.length]} strokeWidth={2.5} dot={false} activeDot={{ r: 6 }} />
+                      ))}
+                    </LineChart>
+                  )}
+                </ResponsiveContainer>
+              </div>
+            </section>
+          )}
+
+          {/* ==========================================
+              VISTA 2: ESTADO ACTUAL (Tablas)
+              ========================================== */}
+          {mainView === 'estado' && (
+            <div className="estado-actual-section fade-in">
+              <div className="ind-tabs-container" style={{ marginTop: 0 }}>
+                <div className="ind-tabs">
+                  <button 
+                    className={`tab-btn ${activeTab === 'tematico' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('tematico')}
+                  >
+                    <Layers size={18} />
+                    Análisis Temático
+                  </button>
+                  <button 
+                    className={`tab-btn ${activeTab === 'origen' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('origen')}
+                  >
+                    <Building2 size={18} />
+                    Análisis por Origen
+                  </button>
+                </div>
+              </div>
+
+              <div className="status-table-container mt-4">
+                <table className="status-table">
+                  <thead>
+                    <tr>
+                      <th>{activeTab === 'tematico' ? 'Categoría' : 'Institución'}</th>
+                      <th>Datasets</th>
+                      <th>Porcentaje</th>
+                      {activeTab === 'tematico' ? (
+                        <th>Tendencia por Año</th>
+                      ) : (
+                        <>
+                          <th>Categoría Principal</th>
+                          <th>Última Actualización</th>
+                        </>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeTab === 'tematico' && thematicStats.data.map((cat, i) => {
+                      const IconComponent = getCategoryIcon(cat.name);
+                      return (
+                        <tr key={i}>
+                          <td className="col-categoria">
+                            <div className="cat-icon-text">
+                              <div className="status-icon" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>
+                                <IconComponent size={20} />
+                              </div>
+                              <span className="cat-name">{cat.name}</span>
+                            </div>
+                          </td>
+                          <td className="col-cantidad">{cat.count}</td>
+                          <td className="col-porcentaje">
+                            <CircularProgress percentage={cat.percentage} color={cat.color} />
+                          </td>
+                          <td className="col-tendencia">
+                            <div className="sparkline-wrapper">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={cat.trend}>
+                                  <Line type="monotone" dataKey="value" stroke={cat.color} strokeWidth={2.5} dot={false} isAnimationActive={true}/>
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+
+                    {activeTab === 'origen' && originStats.data.map((inst, i) => (
+                      <tr key={i}>
+                        <td className="col-categoria">
+                          <div className="cat-icon-text">
+                            <div className="status-icon" style={{ backgroundColor: `${inst.color}15`, color: inst.color }}>
+                              <Building2 size={20} />
+                            </div>
+                            <span className="cat-name">{inst.name}</span>
+                          </div>
+                        </td>
+                        <td className="col-cantidad">{inst.count}</td>
+                        <td className="col-porcentaje">
+                          <CircularProgress percentage={inst.percentage} color={inst.color} />
+                        </td>
+                        <td className="col-top-cat">
+                          <span className="meta-badge" style={{ color: inst.color, backgroundColor: `${inst.color}10`, border: `1px solid ${inst.color}30` }}>
+                            {inst.topCategory}
+                          </span>
+                        </td>
+                        <td className="col-fecha">
+                          <div className="date-cell">
+                            <Calendar size={14} />
+                            <span>{inst.lastUpdated}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           <hr className="ind-separator" />
 
-          {/* Explorador de datasets */}
+          {/* Explorador de datasets (Siempre visible al final) */}
           <div className="chart-card ds-explorer">
             <div className="chart-header-row">
               <div>
