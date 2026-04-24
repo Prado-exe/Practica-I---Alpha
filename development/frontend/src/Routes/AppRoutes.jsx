@@ -69,7 +69,7 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
 
         <Route path="proponer-dataset" element={
-          <ProtectedRoute requiredPermission="user_management.write">
+          <ProtectedRoute requiredPermission="data_management.write">
             <CrearDatasetUsuario />
           </ProtectedRoute>
         } />

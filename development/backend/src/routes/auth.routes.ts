@@ -64,7 +64,8 @@ import {
   getPublicDatasetByIdAction,
   requestDatasetAction,
   validateDatasetAction,
-  destroyDatasetAction 
+  destroyDatasetAction ,
+  getDashboardStatsAction
 } from "./datasets.routes";
 import { getAllOdsAction } from "./ods.routes";
 import { getAllTagsAction, createTagAction, deleteTagAction } from "./tags.routes";

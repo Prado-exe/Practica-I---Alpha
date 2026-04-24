@@ -40,7 +40,8 @@ function UserDropdown({ user, logout }) {
           {/* SOLUCIÓN: Solo mostramos "Proponer Dataset" si NO es registered_user 
              (Es decir, si es cualquier tipo de Admin)
           */}
-          {isAdminAny && (
+          {/* SOLUCIÓN: Solo los administradores de DATOS pueden proponer datasets */}
+          {(isDataAdmin || isSuperAdmin) && (
             <Link to="/administracion/proponer-dataset" onClick={() => setOpen(false)}>
               Proponer Dataset
             </Link>
