@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import {
-  PieChart, Pie, Cell, Tooltip, BarChart, Bar,
+  PieChart, Pie, Cell, Tooltip,
   XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend,
   LineChart, Line,
 } from "recharts";
@@ -472,20 +472,27 @@ function Indicadores() {
                     <h2 className="chart-title">Por {safeMapping.regionCol ?? safeMapping.categoryCol}</h2>
                     <p className="chart-subtitle">Suma de {safeMapping.primaryNumericCol} por dimensión regional</p>
                     <ResponsiveContainer width="100%" height={270}>
-                      <BarChart data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 70 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
-                        <XAxis 
-                          dataKey="name" 
-                          tick={{ fontSize: 10, fill: "#555" }} 
-                          angle={-40} 
-                          textAnchor="end" 
-                          interval="preserveEnd" 
-                          tickFormatter={formatAxisText} 
-                        />
-                        <YAxis tick={{ fontSize: 11, fill: "#555" }} tickFormatter={formatAxisNumber} width={45} />
+                      <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                        <Pie
+                          data={barData}
+                          cx="35%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={85}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {barData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                        </Pie>
                         <Tooltip content={<ChartTooltip />} />
-                        <Bar dataKey="value" fill="#0056b3" radius={[4,4,0,0]} />
-                      </BarChart>
+                        <Legend
+                          layout="vertical"
+                          verticalAlign="middle"
+                          align="right"
+                          wrapperStyle={{ width: "55%", paddingLeft: "10px", lineHeight: "24px" }}
+                          formatter={v => <span style={{ fontSize: "0.75rem", color: "#444" }}>{formatAxisText(v)}</span>}
+                        />
+                      </PieChart>
                     </ResponsiveContainer>
                   </div>
                 )}

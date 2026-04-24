@@ -551,3 +551,80 @@ export async function resolveDatasetRequestInDb(datasetId: number, adminAccountI
     client.release();
   }
 }
+
+export async function fetchDashboardStats() {
+  const [statsRes, usersRes, categoryRes, statusRes, latestRes, pendingRes, activityRes] = await Promise.all([
+    pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE dataset_status != 'deleted') AS total,
+        COUNT(*) FILTER (WHERE dataset_status = 'published')           AS published,
+        COUNT(*) FILTER (WHERE dataset_status = 'pending_validation')  AS pending_validation,
+        COUNT(*) FILTER (WHERE dataset_status = 'rejected')            AS rejected,
+        COUNT(*) FILTER (WHERE dataset_status = 'draft')               AS draft
+      FROM datasets
+    `),
+    pool.query(`SELECT COUNT(*) AS total FROM accounts`),
+    pool.query(`
+      SELECT COALESCE(c.name, 'Sin categoría') AS name, COUNT(d.dataset_id) AS value
+      FROM datasets d
+      LEFT JOIN categories c ON d.category_id = c.category_id
+      WHERE d.dataset_status != 'deleted'
+      GROUP BY c.name
+      ORDER BY value DESC
+      LIMIT 8
+    `),
+    pool.query(`
+      SELECT dataset_status AS name, COUNT(*) AS value
+      FROM datasets
+      WHERE dataset_status != 'deleted'
+      GROUP BY dataset_status
+      ORDER BY value DESC
+    `),
+    pool.query(`
+      SELECT d.dataset_id, d.title, COALESCE(i.legal_name, '—') AS institucion,
+             TO_CHAR(d.created_at, 'DD-MM-YYYY') AS fecha, d.dataset_status
+      FROM datasets d
+      LEFT JOIN institutions i ON d.institution_id = i.institution_id
+      WHERE d.dataset_status != 'deleted'
+      ORDER BY d.created_at DESC
+      LIMIT 6
+    `),
+    pool.query(`
+      SELECT d.dataset_id, d.title, COALESCE(i.legal_name, '—') AS institucion,
+             TO_CHAR(d.created_at, 'DD-MM-YYYY') AS fecha
+      FROM datasets d
+      LEFT JOIN institutions i ON d.institution_id = i.institution_id
+      WHERE d.dataset_status = 'pending_validation'
+      ORDER BY d.created_at ASC
+      LIMIT 6
+    `),
+    pool.query(`
+      SELECT de.event_type, de.event_result,
+             TO_CHAR(de.created_at, 'DD-MM-YYYY HH24:MI') AS fecha,
+             COALESCE(acc.full_name, 'Sistema') AS usuario,
+             COALESCE(r.code, '—') AS rol
+      FROM dataset_events de
+      LEFT JOIN accounts acc ON de.actor_account_id = acc.account_id
+      LEFT JOIN roles r ON acc.role_id = r.role_id
+      ORDER BY de.created_at DESC
+      LIMIT 6
+    `)
+  ]);
+
+  const ds = statsRes.rows[0];
+  return {
+    stats: {
+      total:      parseInt(ds.total, 10),
+      publicados: parseInt(ds.published, 10),
+      validacion: parseInt(ds.pending_validation, 10),
+      rechazados: parseInt(ds.rejected, 10),
+      borradores: parseInt(ds.draft, 10),
+      usuarios:   parseInt(usersRes.rows[0].total, 10),
+    },
+    byCategory:         categoryRes.rows.map(r => ({ name: r.name,  value: parseInt(r.value, 10) })),
+    byStatus:           statusRes.rows.map(r =>   ({ name: r.name,  value: parseInt(r.value, 10) })),
+    latestDatasets:     latestRes.rows,
+    pendingValidations: pendingRes.rows,
+    recentActivity:     activityRes.rows,
+  };
+}
