@@ -60,7 +60,7 @@ function Footer() {
             <h4 id="footer-contacto">Contacto</h4>
             <ul role="list">
               <li><Link to="/formulario">Formulario de Contacto</Link></li>
-              <li><Link to="/faq">Preguntas Frecuentes</Link></li>
+              <li><Link to="/preguntas-frecuentes">Preguntas Frecuentes</Link></li>
             </ul>
           </nav>
         </div>

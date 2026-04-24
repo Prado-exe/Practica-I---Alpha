@@ -1,17 +1,31 @@
+/* VARIABLES GLOBALES - AZUL ESTÁNDAR DEL PROYECTO */
+:root {
+  --sidebar-bg: #1e40af; /* Tu azul original principal */
+  --sidebar-bg-gradient: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%); /* Degradado suave institucional */
+  --sidebar-text: #c7d2fe; /* Tu color de texto original (celeste pálido) */
+  --sidebar-text-hover: #ffffff;
+  --sidebar-active-bg: rgba(0, 0, 0, 0.15); /* Sombreado elegante para el botón activo */
+  --primary-color: #93c5fd; /* Tu celeste original para el indicador lateral */
+  --accent-color: #bfdbfe;
+}
+
 .sidebar {
-  width: 250px;
+  width: 260px;
   height: 100vh;
-  background: #1e40af;
-  color: white;
-  padding: 16px;
+  background: var(--sidebar-bg-gradient);
+  color: var(--sidebar-text);
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
+  z-index: 50;
 }
 
 /* COLAPSADO */
 .sidebar.collapsed {
   width: 80px;
+  padding: 20px 10px;
 }
 
 /* HEADER */
@@ -19,48 +33,90 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
+  padding: 0 4px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  background: white; /* Logo en blanco para contrastar con el fondo azul */
+  color: var(--sidebar-bg);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .sidebar-header h2 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.sidebar-header button {
+.toggle-btn {
   background: none;
   border: none;
-  color: white;
-  font-size: 18px;
+  color: var(--sidebar-text);
   cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
 }
 
 /* USUARIO */
 .sidebar-user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 12px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 24px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15); /* Efecto cristal oscuro sutil */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 /* AVATAR */
 .avatar {
   width: 40px;
   height: 40px;
-  background: #60a5fa;
+  min-width: 40px;
+  background: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente que queda muy bien sobre azul */
   color: white;
   font-weight: bold;
-  border-radius: 50%;
-
+  font-size: 16px;
+  border-radius: 10px; 
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* INFO */
+/* INFO DE USUARIO */
 .user-info {
   display: flex;
   flex-direction: column;
@@ -68,69 +124,86 @@
 
 .user-info .name {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  color: white;
 }
 
 .user-info .role {
   font-size: 12px;
-  color: #c7d2fe;
+  color: var(--primary-color);
+  text-transform: capitalize;
 }
 
 /* NAV */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+.sidebar-nav {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* LINKS */
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 12px 14px;
   border-radius: 10px;
-  color: #c7d2fe;
+  color: var(--sidebar-text);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   position: relative;
+  white-space: nowrap;
 }
 
-/* ICONO */
 .sidebar-link .icon {
-  font-size: 18px;
-  min-width: 20px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
 }
 
-/* HOVER */
+/* HOVER ANIMADO */
 .sidebar-link:hover {
-  background: #2563eb;
-  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--sidebar-text-hover);
+  transform: translateX(4px);
 }
 
 /* ACTIVO */
 .sidebar-link.active {
-  background: #1e3a8a;
+  background: var(--sidebar-active-bg);
   color: white;
   font-weight: 500;
+  transform: translateX(4px);
 }
 
-/* INDICADOR LATERAL 🔥 */
+/* INDICADOR LATERAL */
 .sidebar-link.active::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 6px;
-  bottom: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
   width: 4px;
-  background: #93c5fd;
-  border-radius: 4px;
+  background: var(--primary-color);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 8px rgba(147, 197, 253, 0.5); /* Brillo celeste suave */
 }
 
 /* CLICK */
 .sidebar-link:active {
-  transform: scale(0.98);
+  transform: scale(0.98) translateX(4px);
 }
 
 /* ESPACIADOR */
@@ -142,20 +215,37 @@
 .sidebar-logout {
   display: flex;
   align-items: center;
-  gap: 12px;
-
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 12px 14px;
   border-radius: 10px;
-
   background: none;
-  border: none;
-  color: #c7d2fe;
+  border: 1px solid transparent;
+  color: var(--sidebar-text);
   cursor: pointer;
-
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-size: 15px;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .sidebar-logout:hover {
-  background: #dc2626;
-  color: white;
+  background: rgba(239, 68, 68, 0.15); /* Fondo rojo suave */
+  color: #fca5a5;
+}
+
+/* AJUSTES PARA MODO COLAPSADO */
+.sidebar.collapsed .sidebar-link,
+.sidebar.collapsed .sidebar-logout {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar.collapsed .sidebar-link:hover,
+.sidebar.collapsed .sidebar-link.active {
+  transform: translateX(0);
+}
+
+.sidebar.collapsed .sidebar-user {
+  padding: 8px;
+  justify-content: center;
 }

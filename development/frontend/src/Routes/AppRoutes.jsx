@@ -20,9 +20,9 @@ const Instituciones = lazy(() => import("../Pages/Public/Instituciones"));
 const InstitucionDetalle = lazy(() => import("../Pages/Public/InstitucionDetalle.jsx"));
 const Noticias = lazy(() => import("../Pages/Public/Noticias"));
 const Nosotros = lazy(() => import("../Pages/Public/Nosotros"));
-//nuevas inportaciones
 const IndicadoresDefault = lazy(() => import("../Pages/Public/IndicadoresDefault"));
 const IndicadoresAnalisis = lazy(() => import("../Pages/Public/Indicadores")); // Tu componente anterior
+const PreguntasFrecuentes = lazy(() => import("../Pages/Public/PreguntasFrecuentes"));
 
 
 //Admin Routes
@@ -126,6 +126,7 @@ function AppRoutes() {
         <Route path="/nosotros/:section" element={<Nosotros />} />
         <Route path="/indicadores" element={<IndicadoresDefault />} />
         <Route path="/indicadores/analisis" element={<IndicadoresAnalisis />} />
+        <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
         <Route path="*" element={<Error404 />} />
       </Route>
       
