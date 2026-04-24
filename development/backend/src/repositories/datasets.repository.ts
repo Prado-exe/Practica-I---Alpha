@@ -34,37 +34,47 @@ export async function createFullDatasetInDb(accountId: number, isAdmin: boolean,
   try {
     await client.query('BEGIN');
 
+    // 👇 1. SE AGREGÓ ods_objective_id y $16
     const datasetQuery = `
       INSERT INTO datasets (
-        owner_account_id, institution_id, category_id, license_id, 
+        owner_account_id, institution_id, category_id, license_id, ods_objective_id,
         title, summary, description, dataset_status, access_level,
         creation_date, geographic_coverage, update_frequency, 
         source_url, temporal_coverage_start, temporal_coverage_end
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING dataset_id
     `;
     
     const datasetRes = await client.query(datasetQuery, [
-      accountId, data.institution_id || null, data.category_id, data.license_id,
-      data.title, data.summary, data.description, 'draft', data.access_level,
-      data.creation_date, data.geographic_coverage || null, data.update_frequency || null,
-      data.source_url || null, data.temporal_coverage_start || null, data.temporal_coverage_end || null
+      accountId, 
+      data.institution_id || null, 
+      data.category_id, 
+      data.license_id,
+      data.ods_objective_id || null, 
+      data.title, 
+      data.summary, 
+      data.description, 
+      'draft', 
+      data.access_level,
+      data.creation_date, 
+      data.geographic_coverage || null, 
+      data.update_frequency || null,
+      data.source_url || null, 
+      data.temporal_coverage_start || null, 
+      data.temporal_coverage_end || null
     ]);
 
     const dataset_id = datasetRes.rows[0].dataset_id;
 
     for (const file of data.files) {
-      // 1. Normalización de MIME types rebeldes (Ej: Windows ZIP)
       let safeMimeType = file.mime_type;
       if (safeMimeType === 'application/x-zip-compressed') safeMimeType = 'application/zip';
-      if (safeMimeType === 'application/vnd.ms-excel') safeMimeType = 'text/csv'; // Por si Windows lee los CSV como Excel
+      if (safeMimeType === 'application/vnd.ms-excel') safeMimeType = 'text/csv'; 
 
-      // 2. Extracción segura de la extensión para cumplir el CHECK de dataset_files
       const ext = file.display_name.split('.').pop()?.toLowerCase();
       const allowedFormats = ['csv', 'json', 'xml', 'xlsx', 'pdf', 'zip', 'txt'];
-      const finalFormat = allowedFormats.includes(ext) ? ext : 'txt'; // Fallback a txt si es un formato extraño
+      const finalFormat = allowedFormats.includes(ext) ? ext : 'txt'; 
 
-      // 3. Inserción con COALESCE para evitar el error "null value in column file_format_id"
       const fileRes = await client.query(`
         INSERT INTO aws_file_references (
           storage_key, file_url, file_format_id, file_size_bytes, mime_type, 
@@ -73,7 +83,7 @@ export async function createFullDatasetInDb(accountId: number, isAdmin: boolean,
           $1, $2, 
           COALESCE(
             (SELECT file_format_id FROM file_formats WHERE mime_type = $3 LIMIT 1),
-            (SELECT file_format_id FROM file_formats LIMIT 1) -- Salvavidas: toma el primer ID disponible si no hay match
+            (SELECT file_format_id FROM file_formats LIMIT 1) 
           ), 
           $4, $3, $5, $6, 'active'
         )
@@ -82,7 +92,6 @@ export async function createFullDatasetInDb(accountId: number, isAdmin: boolean,
       
       const aws_file_id = fileRes.rows[0].aws_file_reference_id;
 
-      // 4. Inserción en tabla relacional con el formato validado
       await client.query(`
         INSERT INTO dataset_files (
           dataset_id, aws_file_reference_id, file_role, display_name, file_format, mime_type, file_size_bytes
@@ -91,6 +100,14 @@ export async function createFullDatasetInDb(accountId: number, isAdmin: boolean,
         dataset_id, aws_file_id, file.file_role || 'source', file.display_name, 
         finalFormat, safeMimeType, file.file_size_bytes
       ]);
+    }
+
+    if (data.tags && data.tags.length > 0) {
+      for (const tagId of data.tags) {
+        await client.query(`
+          INSERT INTO dataset_tags (dataset_id, tag_id) VALUES ($1, $2)
+        `, [dataset_id, tagId]);
+      }
     }
 
     await client.query('COMMIT');
@@ -146,28 +163,64 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
   `;
   
   const queryParams: any[] = [];
-  
-  // 2. Filtro de búsqueda por texto
+
+  // 👇 LÓGICA DE SEGURIDAD Y ACCESO (Datos.jsx) 👇
+  if (filters.isPublicCatalog) {
+    // 1. En esta vista solo aparecen los validados/publicados
+    baseQuery += ` AND d.dataset_status = 'published'`;
+    
+    // 2. Control de Acceso:
+    // Si accountId > 0 (logeado), ve public e internal.
+    // Si accountId == 0 (anónimo), solo ve public.
+    if (accountId > 0) {
+      baseQuery += ` AND d.access_level IN ('public', 'internal')`;
+    } else {
+      baseQuery += ` AND d.access_level = 'public'`;
+    }
+  } else if (!isAdmin) {
+    // Si es la vista de gestión privada y no es admin, solo ve los suyos
+    baseQuery += ` AND d.owner_account_id = $${queryParams.length + 1}`;
+    queryParams.push(accountId);
+  }
+
+  // --- FILTROS DINÁMICOS ---
   if (search) {
     queryParams.push(`%${search}%`);
     baseQuery += ` AND (d.title ILIKE $${queryParams.length} OR d.description ILIKE $${queryParams.length})`;
   }
 
-  // 3. 🔹 FILTRADO POR IDs (Mucho más robusto que por nombres)
-  
-  // Categoría: Filtramos directamente por d.category_id
   if (filters.categoria) {
     queryParams.push(filters.categoria);
     baseQuery += ` AND d.category_id = ANY(string_to_array($${queryParams.length}, ',')::integer[])`;
   }
 
-  // Licencia: Filtramos directamente por d.license_id
+  // 👇 NUEVO: FILTRO ODS (Arreglado) 👇
+  if (filters.ods) {
+    queryParams.push(filters.ods);
+    // Usamos smallint[] porque ods_objective_id es SMALLINT en tu esquema
+    baseQuery += ` AND d.ods_objective_id = ANY(string_to_array($${queryParams.length}, ',')::smallint[])`;
+  }
+
+  if (filters.institucion) {
+    queryParams.push(filters.institucion);
+    baseQuery += ` AND d.institution_id = ANY(string_to_array($${queryParams.length}, ',')::integer[])`;
+  }
+
+  if (filters.estado) {
+    queryParams.push(filters.estado);
+    baseQuery += ` AND d.dataset_status = ANY(string_to_array($${queryParams.length}, ',')::varchar[])`;
+  }
+
+  if (filters.fecha) {
+    queryParams.push(filters.fecha);
+    baseQuery += ` AND d.created_at::date = $${queryParams.length}`;
+  }
+
   if (filters.licencia) {
     queryParams.push(filters.licencia);
     baseQuery += ` AND d.license_id = ANY(string_to_array($${queryParams.length}, ',')::integer[])`;
   }
 
-  // Etiquetas: Filtramos por dt.tag_id en la tabla relacional
   if (filters.etiqueta) {
     queryParams.push(filters.etiqueta);
     baseQuery += ` AND EXISTS (
@@ -177,7 +230,7 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
     )`;
   }
 
-  // 4. Conteo y Paginación
+  // 4. Conteo y Paginación (Se mantiene igual)
   const countQuery = `SELECT COUNT(DISTINCT d.dataset_id) ${baseQuery}`;
   const countRes = await pool.query(countQuery, queryParams);
   const total = parseInt(countRes.rows[0].count, 10);
@@ -191,14 +244,14 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
       c.name as categoria, 
       i.legal_name as institucion, 
       TO_CHAR(d.created_at, 'YYYY-MM-DD') as fecha, 
-      d.dataset_status
+      d.dataset_status,
+      d.access_level
     ${baseQuery}
     ORDER BY d.created_at DESC
     LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}
   `;
   
   const { rows } = await pool.query(dataQuery, queryParams);
-  
   return { total, data: rows };
 }
 
@@ -210,14 +263,18 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
  * @throws {Error} Excepciones generadas por fallos en el motor de base de datos.
  */
 export async function fetchDatasetDetailsFromDb(id: number) {
-  // A. Metadatos principales
+  // A. Metadatos principales (👇 Agregamos el JOIN de ods_objectives)
   const dsRes = await pool.query(`
-    SELECT d.*, c.name as category_name, i.legal_name as institution_name, l.name as license_name
-    FROM datasets d LEFT JOIN categories c ON d.category_id = c.category_id
+    SELECT d.*, c.name as category_name, i.legal_name as institution_name, l.name as license_name,
+           o.objective_code, o.objective_name
+    FROM datasets d 
+    LEFT JOIN categories c ON d.category_id = c.category_id
     LEFT JOIN institutions i ON d.institution_id = i.institution_id
     LEFT JOIN licenses l ON d.license_id = l.license_id
+    LEFT JOIN ods_objectives o ON d.ods_objective_id = o.ods_objective_id
     WHERE d.dataset_id = $1
   `, [id]);
+  
   if (dsRes.rowCount === 0) return null;
   const dataset = dsRes.rows[0];
 
@@ -241,70 +298,45 @@ export async function fetchDatasetDetailsFromDb(id: number) {
   `, [id]);
   dataset.events = eventsRes.rows;
 
+  // 👇 D. NUEVO: Etiquetas (Tags)
+  const tagsRes = await pool.query(`
+    SELECT t.tag_id, t.name 
+    FROM dataset_tags dt
+    INNER JOIN tags t ON dt.tag_id = t.tag_id
+    WHERE dt.dataset_id = $1
+  `, [id]);
+  dataset.tags = tagsRes.rows;
+
   return dataset;
 }
 
 /**
- * Descripción: Desactiva lógicamente un dataset de las visualizaciones públicas.
- * POR QUÉ: Altera el campo `dataset_status` en lugar de emitir un comando `DELETE`. Esta decisión arquitectónica se toma para mantener intactos los eventos históricos de la tabla `dataset_events` y las asociaciones referenciales con los bucket stores (AWS S3) sin dejar registros huérfanos. Se ejecuta dentro de una transacción para forzar el registro del evento de auditoría de borrado.
- * @param {number} datasetId ID del dataset objetivo.
- * @param {number} accountId ID del administrador/actor que ejecuta la acción.
- * @return {Promise<Object>} Registro del dataset afectado con su ID y título actualizado.
- * @throws {Error} Si el dataset ya estaba eliminado, no existe, o fallan las constraints.
+ * Descripción: Archiva un dataset (lo oculta del público) sin borrar sus archivos físicos.
  */
-/**
- * Descripción: Desactiva lógicamente un dataset y recupera las llaves de sus archivos 
- * para que el servicio pueda destruirlos físicamente en MinIO.
- */
-export async function softDeleteDatasetInDb(datasetId: number, accountId: number) {
+export async function archiveDatasetInDb(datasetId: number, accountId: number) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     
-    // 👇 1. NUEVO: Buscamos los archivos asociados ANTES de hacer nada 👇
-    const filesQuery = `
-      SELECT afr.aws_file_reference_id, afr.storage_key
-      FROM dataset_files df
-      INNER JOIN aws_file_references afr ON df.aws_file_reference_id = afr.aws_file_reference_id
-      WHERE df.dataset_id = $1
-    `;
-    const filesRes = await client.query(filesQuery, [datasetId]);
-    const filesToDelete = filesRes.rows;
-
-    // 2. Actualizamos el estado del dataset (Soft Delete)
+    // 1. Actualizamos el estado del dataset a 'archived'
     const updateQuery = `
       UPDATE datasets 
-      SET dataset_status = 'deleted', deleted_at = NOW(), updated_at = NOW()
-      WHERE dataset_id = $1 AND dataset_status != 'deleted'
+      SET dataset_status = 'archived', updated_at = NOW()
+      WHERE dataset_id = $1 AND dataset_status != 'archived'
       RETURNING dataset_id, title
     `;
     const res = await client.query(updateQuery, [datasetId]);
     
-    if (res.rowCount === 0) throw new Error("Dataset no encontrado o ya eliminado");
+    if (res.rowCount === 0) throw new Error("Dataset no encontrado o ya archivado");
 
-    // 3. Registramos el evento de auditoría
+    // 2. Registramos el evento de auditoría
     await client.query(`
       INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
-      VALUES ($1, $2, 'deleted', 'success', 'Dataset eliminado lógicamente por administrador')
+      VALUES ($1, $2, 'archived', 'success', 'Dataset archivado (oculto al público)')
     `, [datasetId, accountId]);
 
-    // 4. NUEVO: Marcamos los archivos físicos como 'deleted' en la BD por coherencia
-    if (filesToDelete.length > 0) {
-        const fileIds = filesToDelete.map(f => f.aws_file_reference_id);
-        await client.query(`
-            UPDATE aws_file_references 
-            SET status = 'deleted' 
-            WHERE aws_file_reference_id = ANY($1::bigint[])
-        `, [fileIds]);
-    }
-
     await client.query('COMMIT');
-    
-    // 👇 5. NUEVO: Retornamos el dataset y la lista de archivos al servicio 👇
-    return { 
-        dataset: res.rows[0], 
-        filesToDelete: filesToDelete 
-    };
+    return { dataset: res.rows[0] };
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -544,6 +576,85 @@ export async function resolveDatasetRequestInDb(datasetId: number, adminAccountI
 
     await client.query('COMMIT');
     return { message: `Dataset ${newDatasetStatus} exitosamente.` };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Descripción: Elimina físicamente un dataset y todas sus dependencias de la base de datos.
+ * Extrae las referencias S3 antes de borrar para permitir la limpieza en la nube.
+ */
+export async function hardDeleteDatasetInDb(datasetId: number) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // 1. Obtener archivos para borrarlos de S3 y limpiar la tabla maestra de archivos
+    const filesQuery = `
+      SELECT afr.aws_file_reference_id, afr.storage_key
+      FROM dataset_files df
+      INNER JOIN aws_file_references afr ON df.aws_file_reference_id = afr.aws_file_reference_id
+      WHERE df.dataset_id = $1
+    `;
+    const filesRes = await client.query(filesQuery, [datasetId]);
+    const filesToDelete = filesRes.rows;
+
+    // 2. Obtener título para el mensaje de retorno
+    const dsRes = await client.query(`SELECT title FROM datasets WHERE dataset_id = $1`, [datasetId]);
+    if (dsRes.rowCount === 0) throw new Error("Dataset no encontrado");
+    const title = dsRes.rows[0].title;
+
+    // 3. Destrucción Nuclear del Dataset (El CASCADE borra dataset_events, dataset_requests y dataset_files)
+    await client.query(`DELETE FROM datasets WHERE dataset_id = $1`, [datasetId]);
+
+    // 4. Limpiar los registros huérfanos de los archivos maestros
+    if (filesToDelete.length > 0) {
+      const fileIds = filesToDelete.map(f => f.aws_file_reference_id);
+      await client.query(`
+        DELETE FROM aws_file_references 
+        WHERE aws_file_reference_id = ANY($1::bigint[])
+      `, [fileIds]);
+    }
+
+    await client.query('COMMIT');
+    return { title, filesToDelete };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Descripción: Revierte el estado de archivado de un dataset, volviéndolo a publicar.
+ */
+export async function unarchiveDatasetInDb(datasetId: number, accountId: number) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    const updateQuery = `
+      UPDATE datasets 
+      SET dataset_status = 'published', updated_at = NOW()
+      WHERE dataset_id = $1 AND dataset_status = 'archived'
+      RETURNING dataset_id, title
+    `;
+    const res = await client.query(updateQuery, [datasetId]);
+    
+    if (res.rowCount === 0) throw new Error("Dataset no encontrado o no está archivado");
+
+    await client.query(`
+      INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
+      VALUES ($1, $2, 'published', 'success', 'Dataset restaurado: vuelve a ser visible al público')
+    `, [datasetId, accountId]);
+
+    await client.query('COMMIT');
+    return { dataset: res.rows[0] };
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;

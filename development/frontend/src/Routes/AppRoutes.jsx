@@ -30,6 +30,7 @@ const GestionUsuarios = lazy(() => import("../Pages/Admin/GestionUsuarios"));
 const GestionInstituciones = lazy(() => import("../Pages/Admin/GestionInstituciones"));
 const GestionRoles = lazy(() => import("../Pages/Admin/GestionRoles"));
 const CrearDatasetUsuario = lazy(() => import("../Pages/Admin/crear_datsets_usuarios"));
+const MantenedorTags = lazy(() => import("../Pages/Admin/MantenedorTags"));
 
 // login, register, auth routes
 const Login = lazy(() => import("../Pages/Login"));
@@ -103,6 +104,12 @@ function AppRoutes() {
         <Route path="roles" element={
           <ProtectedRoute requiredPermission="roles_permissions.read">
             <GestionRoles />
+          </ProtectedRoute>
+        } />
+
+        <Route path="etiquetas" element={
+          <ProtectedRoute requiredPermission="admin_general.manage">
+            <MantenedorTags />
           </ProtectedRoute>
         } />
         

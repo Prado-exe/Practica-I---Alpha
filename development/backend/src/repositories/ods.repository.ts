@@ -23,9 +23,9 @@ import { pool } from "../config/db";
  */
 export async function fetchAllOdsFromDb() {
   const { rows } = await pool.query(`
-    SELECT ods_id, ods_number, name 
+    SELECT ods_objective_id, objective_code, objective_name 
     FROM ods_objectives 
-    ORDER BY ods_number ASC
+    ORDER BY objective_code ASC
   `);
   return rows;
 }

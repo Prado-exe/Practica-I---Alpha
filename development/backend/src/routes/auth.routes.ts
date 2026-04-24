@@ -57,15 +57,17 @@ import {
   getDatasetsAction, 
   createDatasetAction, 
   getDatasetByIdAction, 
-  deleteDatasetAction, 
+  archiveDatasetAction,
+  unarchiveDatasetAction, 
   updateDatasetAction, 
   getPublicDatasetsAction,
   getPublicDatasetByIdAction,// esto fue lo que agregue
   requestDatasetAction,
-  validateDatasetAction 
+  validateDatasetAction,
+  destroyDatasetAction 
 } from "./datasets.routes";
 import { getAllOdsAction } from "./ods.routes";
-import { getAllTagsAction } from "./tags.routes";
+import { getAllTagsAction, createTagAction, deleteTagAction } from "./tags.routes";
 import { getAllLicensesAction} from "./licenses.routes";
 
 /**
@@ -160,7 +162,10 @@ authRouter.add("GET", "/api/public/instituciones", [], getPublicInstitucionesAct
 //---categorias---
 authRouter.add("GET", "/api/categories", [], getAllCategoriesAction); 
 authRouter.add("GET", "/api/tags", [], getAllTagsAction);
+authRouter.add("POST", "/api/tags", [requirePermission("admin_general.manage")], createTagAction);
+authRouter.add("DELETE", "/api/tags/:id", [requirePermission("admin_general.manage")], deleteTagAction);
 authRouter.add("GET", "/api/licenses", [], getAllLicensesAction);
+authRouter.add("GET", "/api/ods", [], getAllOdsAction);
 
 //---datasets
 // 2. Busca la sección de RUTAS DE DATASETS al final del archivo y déjalas así:
@@ -171,8 +176,9 @@ authRouter.add("GET", "/api/datasets", [requirePermission("catalog.read")], getD
 authRouter.add("POST", "/api/datasets", [requirePermission("data_management.write")], createDatasetAction);
 authRouter.add("GET", "/api/datasets/:id", [requirePermission("catalog.read")], getDatasetByIdAction);
 authRouter.add("PUT", "/api/datasets/:id", [requirePermission("data_management.write")], updateDatasetAction);
-authRouter.add("DELETE", "/api/datasets/:id", [requirePermission("data_management.delete")], deleteDatasetAction);
-
+authRouter.add("PATCH", "/api/datasets/:id/archive", [requirePermission("data_management.delete")], archiveDatasetAction);
+authRouter.add("PATCH", "/api/datasets/:id/unarchive", [requirePermission("data_management.delete")], unarchiveDatasetAction);
+authRouter.add("DELETE", "/api/datasets/:id/hard", [requirePermission("data_management.delete")], destroyDatasetAction);
 
 // 1. Busca donde tienes la ruta de presigned-url original y añade esta justo debajo:
 authRouter.add("POST", "/api/upload/presigned-url/user", [requirePermission("user_management.write")], generateUploadUrlAction);

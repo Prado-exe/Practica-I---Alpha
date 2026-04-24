@@ -13,7 +13,6 @@ function Sidebar() {
   // Obtenemos el usuario real y la función de logout del contexto
   const { user: authUser, logout } = useAuth();
 
-  // 👇 CORRECCIÓN: El usuario ya está aplanado, sacamos los datos directo de la raíz
   const userName = authUser?.full_name || "Usuario";
   const userRole = authUser?.role || "Sin Rol";
 
@@ -27,6 +26,7 @@ function Sidebar() {
     { name: "Usuarios", path: "/administracion/usuarios", icon: "👥", requiredPermission: "user_management.read" },
     { name: "Roles", path: "/administracion/roles", icon: "🔐", requiredPermission: "roles_permissions.read" },
     { name: "Instituciones", path: "/administracion/instituciones", icon: "🏢", requiredPermission: "admin_general.manage" },
+    { name: "Etiquetas", path: "/administracion/etiquetas", icon: "🏷️", requiredPermission: "admin_general.manage" },
     { name: "Configuración", path: "/administracion/configuracion", icon: "⚙️", requiredPermission: "admin_general.manage" }
   ];
 

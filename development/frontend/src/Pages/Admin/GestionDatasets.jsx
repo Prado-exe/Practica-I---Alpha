@@ -63,11 +63,24 @@ function GestionDatasets() {
     }
   };
 
-  const fetchDatasets = async () => {
+  const fetchDatasets = async (appliedFilters = filters) => {
     try {
-      const res = await fetch(`${API_URL}/api/datasets`, {
+      // 1. Construir los parámetros de la URL
+      const params = new URLSearchParams();
+      if (appliedFilters.nombre) params.append("search", appliedFilters.nombre);
+      if (appliedFilters.category_id) params.append("categoria", appliedFilters.category_id);
+      if (appliedFilters.institucion_id) params.append("institucion", appliedFilters.institucion_id);
+      if (appliedFilters.estado) params.append("estado", appliedFilters.estado);
+      if (appliedFilters.fecha) params.append("fecha", appliedFilters.fecha);
+
+      const queryString = params.toString();
+      const endpoint = `${API_URL}/api/datasets${queryString ? `?${queryString}` : ''}`;
+
+      // 2. Hacer la petición con los filtros
+      const res = await fetch(endpoint, {
         headers: { "Authorization": `Bearer ${user.token}` }
       });
+      
       if (res.ok) {
         const data = await res.json();
         setDatasets(data.data || data || []); 
@@ -85,34 +98,69 @@ function GestionDatasets() {
   };
 
   const handleSearch = () => {
-    console.log("Aplicando filtros:", filters);
-    // Aquí podrías implementar la lógica de filtrado hacia el API
+    // Llama a la API usando los filtros actuales del estado
+    fetchDatasets(filters);
   };
 
   const handleClear = () => {
-    setFilters({ nombre: "", category_id: "", estado: "", fecha: "", institucion_id: "" });
+    // Limpia los inputs visualmente y hace una petición limpia a la API
+    const emptyFilters = { nombre: "", category_id: "", estado: "", fecha: "", institucion_id: "" };
+    setFilters(emptyFilters);
+    fetchDatasets(emptyFilters);
   };
 
-  const handleEliminar = async (id, nombre) => {
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente "${nombre}"?`)) {
+  const handleOcultar = async (id, nombre) => {
+    if (!window.confirm(`¿Estás seguro de que deseas ocultar "${nombre}"?\nEl público ya no podrá verlo.`)) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/api/datasets/${id}/archive`, {
+        method: "PATCH",
+        headers: { "Authorization": `Bearer ${user.token}` }
+      });
+      
+      if (res.ok) {
+        alert("Dataset ocultado.");
+        fetchDatasets();
+      }
+    } catch (error) { console.error("Error al ocultar:", error); }
+  };
+  
+  const handleMostrar = async (id, nombre) => {
+    if (!window.confirm(`¿Deseas volver a hacer visible "${nombre}"?`)) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/api/datasets/${id}/unarchive`, {
+        method: "PATCH",
+        headers: { "Authorization": `Bearer ${user.token}` }
+      });
+      
+      if (res.ok) {
+        alert("El dataset ahora es visible para el público.");
+        fetchDatasets();
+      }
+    } catch (error) { console.error("Error al mostrar:", error); }
+  };
+
+  const handleDestruir = async (id, nombre) => {
+    if (!window.confirm(`⚠️ ADVERTENCIA CRÍTICA ⚠️\n\n¿Estás absolutamente seguro de que deseas DESTRUIR permanentemente "${nombre}"?\n\nEsta acción borrará el dataset de la base de datos, incluyendo su historial, métricas y archivos físicos.\n\nESTA ACCIÓN NO SE PUEDE DESHACER.`)) {
       return;
     }
     
     try {
-      const res = await fetch(`${API_URL}/api/datasets/${id}`, {
+      const res = await fetch(`${API_URL}/api/datasets/${id}/hard`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${user.token}` }
       });
       
       if (res.ok) {
-        alert("Dataset eliminado con éxito.");
+        alert("Dataset y archivos destruidos permanentemente.");
         fetchDatasets();
       } else {
         const err = await res.json();
-        alert(`Error al eliminar: ${err.message}`);
+        alert(`Error al destruir: ${err.message}`);
       }
     } catch (error) {
-      console.error("Error al eliminar:", error);
+      console.error("Error al destruir:", error);
       alert("Error de red.");
     }
   };
@@ -271,16 +319,42 @@ function GestionDatasets() {
                     </CanView>
 
                     <CanView requiredPermission="data_management.delete">
+                      <CanView requiredPermission="data_management.delete">
+                        {status === 'archived' ? (
+                          /* Si está oculto, mostramos el botón para hacerlo visible */
+                          <button 
+                            className="btn-edit" 
+                            style={{ backgroundColor: '#4CAF50', color: 'white' }}
+                            onClick={() => handleMostrar(id, data.nombre)}
+                            title="Hacer visible al público"
+                          >
+                            Hacer Visible
+                          </button>
+                        ) : (
+                          /* Si está visible, mostramos el botón para ocultar */
+                          <button 
+                            className="btn-delete" 
+                            style={{ 
+                              backgroundColor: status === 'deleted' ? '#cccccc' : '#757575', 
+                              cursor: status === 'deleted' ? 'not-allowed' : 'pointer'
+                            }}
+                            onClick={() => handleOcultar(id, data.nombre)}
+                            disabled={status === 'deleted' || status === 'pending_validation'}
+                            title="Ocultar dataset del catálogo público"
+                          >
+                            Ocultar
+                          </button>
+                        )}
+                      </CanView>
+
+                      {/* NUEVO BOTÓN DE DESTRUCCIÓN (Hard Delete) */}
                       <button 
                         className="btn-delete" 
-                        style={{ 
-                          backgroundColor: status === 'deleted' ? '#cccccc' : '#f44336', 
-                          cursor: status === 'deleted' ? 'not-allowed' : 'pointer'
-                        }}
-                        onClick={() => handleEliminar(id, data.nombre)}
-                        disabled={status === 'deleted'}
+                        style={{ backgroundColor: '#8B0000', color: 'white', cursor: 'pointer', marginLeft: '5px' }}
+                        onClick={() => handleDestruir(id, data.nombre)}
+                        title="Borrar completamente de la Base de Datos"
                       >
-                        {status === 'deleted' ? 'Eliminado' : 'Eliminar'}
+                        Destruir
                       </button>
                     </CanView>
 

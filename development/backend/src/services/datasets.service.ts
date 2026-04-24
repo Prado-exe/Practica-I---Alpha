@@ -21,10 +21,12 @@ import {createFullDatasetInDb,
   recordDatasetEvent, 
   fetchDatasetsPaginated,
   fetchDatasetDetailsFromDb, 
-  softDeleteDatasetInDb,
+  archiveDatasetInDb,
   updateDatasetInDb,
 createDatasetRequestInDb,
-resolveDatasetRequestInDb } from "../repositories/datasets.repository";
+resolveDatasetRequestInDb,
+hardDeleteDatasetInDb,
+unarchiveDatasetInDb } from "../repositories/datasets.repository";
 import { z } from "zod";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -67,7 +69,8 @@ const createDatasetSchema = z.object({
   temporal_coverage_start: z.string().optional().nullable(),
   temporal_coverage_end: z.string().optional().nullable(),
 
-  files: z.array(fileSchema).min(1, "Debe subir al menos un archivo.")
+  files: z.array(fileSchema).min(1, "Debe subir al menos un archivo."),
+  tags: z.array(z.number().int()).min(1, "Debes seleccionar al menos 1 etiqueta").max(5, "Máximo 5 etiquetas")
 });
 
 /**
@@ -94,7 +97,7 @@ export async function createDataset(accountId: number, isAdmin: boolean, input: 
   return result;
 }
 
-// 👈 Añade el 6to parámetro
+
 /**
  * Descripción: Construye la información de paginación y recupera el listado de datasets.
  * POR QUÉ: Calcula el `offset` y el total de páginas (`totalPages`) matemáticamente en esta capa para mantener al repositorio agnóstico de las lógicas de interfaz, devolviendo un objeto estructurado directamente consumible por los componentes de tablas del frontend.
@@ -153,69 +156,13 @@ export async function getDatasetById(id: number) {
 }
 
 /**
- * Descripción: Ejecuta el borrado lógico del dataset y la destrucción física de sus archivos en la nube.
- * POR QUÉ: Si la llamada al SDK de AWS (`DeleteObjectCommand`) falla por desincronización o indisponibilidad temporal, el error es capturado (`catch (s3Error)`) pero NO se aborta la ejecución principal. Esto previene que el dataset quede "inborrable" en la base de datos debido a un archivo fantasma en el bucket.
- * @param {number} datasetId ID del dataset a eliminar.
- * @param {number} accountId ID del administrador que realiza la acción.
- * @return {Promise<Object>} Mensaje de éxito de la operación.
- * @throws {AppError} 404 si el dataset no existe o ya fue borrado previamente.
+ * Descripción: Archiva un dataset para ocultarlo de las vistas públicas.
  */
-export async function removeDataset(datasetId: number, accountId: number) {
+export async function archiveDataset(datasetId: number, accountId: number) {
   try {
-    console.log(`\n--- INICIANDO BORRADO DE DATASET ID: ${datasetId} ---`);
-    
-    // 1. Borrado lógico en base de datos
-    const result = await softDeleteDatasetInDb(datasetId, accountId);
-    console.log(`✅ BD Actualizada. Archivos encontrados para borrar físicamente:`, result.filesToDelete?.length || 0);
-
-    if (result.filesToDelete && result.filesToDelete.length > 0) {
-      
-      // 👇 2. EL SECRETO: Cliente interno para Docker apuntando a 'minio' 👇
-      const internalS3Client = new S3Client({
-        region: env.S3_REGION || 'us-east-1',
-        endpoint: 'http://minio:9000', // Cambia 'minio' si tu contenedor se llama distinto
-        credentials: {
-          accessKeyId: env.S3_ACCESS_KEY || 'admin_minio',
-          secretAccessKey: env.S3_SECRET_KEY || 'password123',
-        },
-        forcePathStyle: true,
-      });
-
-      const bucketName = env.S3_BUCKET_NAME || 'observatory-files';
-
-      // 3. Iterar y borrar cada archivo de MinIO
-      for (const file of result.filesToDelete) {
-        if (file.storage_key) {
-          console.log(`⏳ Intentando eliminar de MinIO el archivo con Key: "${file.storage_key}" en el Bucket: "${bucketName}"`);
-          
-          try {
-            const deleteCommand = new DeleteObjectCommand({
-              Bucket: bucketName,
-              Key: file.storage_key
-            });
-            
-            // Usamos internalS3Client en vez de s3Client
-            await internalS3Client.send(deleteCommand);
-            console.log(`✅ ÉXITO: Archivo físico destruido en MinIO -> ${file.storage_key}`);
-          } catch (s3Error: any) {
-            console.error(`❌ FALLO CRÍTICO AL BORRAR EN MINIO:`);
-            console.error(`   - Key: ${file.storage_key}`);
-            console.error(`   - Código de error: ${s3Error.Code || s3Error.name}`);
-            console.error(`   - Mensaje: ${s3Error.message}`);
-          }
-        } else {
-          console.warn(`⚠️ El archivo ID ${file.aws_file_reference_id} no tiene storage_key válido.`);
-        }
-      }
-    } else {
-      console.log(`ℹ️ No se encontraron archivos vinculados a este dataset para borrar en MinIO.`);
-    }
-
-    console.log(`--- FIN DEL PROCESO ---\n`);
-    // Aseguramos que lea el título correctamente dependiendo de la estructura de tu repositorio
+    const result = await archiveDatasetInDb(datasetId, accountId);
     const title = result.dataset?.title || datasetId;
-    return { message: `El dataset '${title}' fue eliminado correctamente.` };
-    
+    return { message: `El dataset '${title}' fue archivado correctamente.` };
   } catch (error: any) {
     if (error.message.includes("no encontrado")) throw new AppError(error.message, 404);
     throw error;
@@ -317,6 +264,63 @@ export async function resolveDatasetRequest(datasetId: number, adminAccountId: n
     const result = await resolveDatasetRequestInDb(datasetId, adminAccountId, validatedData.action, validatedData.review_comment);
     return result;
   } catch (error: any) {
+    throw error;
+  }
+}
+
+/**
+ * Descripción: Orquesta la destrucción física total en Base de Datos y MinIO.
+ */
+export async function destroyDataset(datasetId: number) {
+  try {
+    console.log(`\n--- INICIANDO DESTRUCCIÓN TOTAL DE DATASET ID: ${datasetId} ---`);
+    
+    const result = await hardDeleteDatasetInDb(datasetId);
+    
+    if (result.filesToDelete && result.filesToDelete.length > 0) {
+      const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+      const internalS3Client = new S3Client({
+        region: env.S3_REGION || 'us-east-1',
+        endpoint: 'http://minio:9000', 
+        credentials: {
+          accessKeyId: env.S3_ACCESS_KEY || 'admin_minio',
+          secretAccessKey: env.S3_SECRET_KEY || 'password123',
+        },
+        forcePathStyle: true,
+      });
+
+      const bucketName = env.S3_BUCKET_NAME || 'observatory-files';
+
+      for (const file of result.filesToDelete) {
+        if (file.storage_key) {
+          try {
+            await internalS3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: file.storage_key }));
+            console.log(`✅ Físicamente destruido de MinIO: ${file.storage_key}`);
+          } catch (e: any) {
+            console.error(`❌ Error borrando en MinIO: ${file.storage_key} - ${e.message}`);
+          }
+        }
+      }
+    }
+    
+    console.log(`--- FIN DEL PROCESO DE DESTRUCCIÓN ---\n`);
+    return { message: `El dataset '${result.title}' fue destruido permanentemente de la base de datos y del servidor de archivos.` };
+    
+  } catch (error: any) {
+    if (error.message.includes("no encontrado")) throw new AppError(error.message, 404);
+    throw error;
+  }
+}
+
+/**
+ * Descripción: Cambia el estado de un dataset de 'archived' a 'published'.
+ */
+export async function unarchiveDataset(datasetId: number, accountId: number) {
+  try {
+    const result = await unarchiveDatasetInDb(datasetId, accountId);
+    return { message: `El dataset '${result.dataset.title}' ahora es visible nuevamente.` };
+  } catch (error: any) {
+    if (error.message.includes("no encontrado")) throw new AppError(error.message, 404);
     throw error;
   }
 }

@@ -17,7 +17,7 @@
  * se hacen aquí antes de tocar el servicio para ahorrar carga de CPU y Base de Datos.
  * ============================================================================
  */
-import { createDataset, getDatasets, getDatasetById, removeDataset, editDataset, submitDatasetRequest } from "../services/datasets.service";
+import { createDataset, getDatasets, getDatasetById, editDataset, submitDatasetRequest,archiveDataset, unarchiveDataset } from "../services/datasets.service";
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { readJsonBody } from "../utils/body";
@@ -41,11 +41,20 @@ export async function getDatasetsAction(req: HttpRequest, res: HttpResponse) {
 
     const url = new URL(req.url || "", `http://${req.headers?.host || "localhost"}`);
     const search = url.searchParams.get("search") || "";
-    
-    // Validamos y limpiamos la paginación para evitar que metan letras
     const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
     const limit = Math.max(1, parseInt(url.searchParams.get("limit") || "10", 10));
-    const result = await getDatasets(accountId, isAdmin, search, page, limit, {});
+
+    // Capturamos filtros para el buscador de administración
+    const filters = {
+      categoria: url.searchParams.get("categoria") || "",
+      institucion: url.searchParams.get("institucion") || "",
+      estado: url.searchParams.get("estado") || "",
+      fecha: url.searchParams.get("fecha") || "",
+      ods: url.searchParams.get("ods") || "", // Opcional en admin
+      isPublicCatalog: false // Es vista administrativa
+    };
+
+    const result = await getDatasets(accountId, isAdmin, search, page, limit, filters);
     sendJson(res, 200, { ok: true, ...result });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
@@ -95,23 +104,15 @@ export async function getDatasetByIdAction(req: HttpRequest, res: HttpResponse) 
   }
 }
 
-/**
- * Descripción: Controlador que gestiona la solicitud de borrado (Soft Delete) de un dataset.
- * POR QUÉ: Obliga la extracción del `accountId` desde el token JWT para inyectarlo en la llamada al servicio. Esto garantiza, por diseño, que el borrado en la base de datos deje un rastro de auditoría verídico con el identificador del usuario real que ejecutó la acción.
- * @param {HttpRequest} req Petición HTTP con el parámetro `id`.
- * @param {HttpResponse} res Respuesta HTTP.
- * @return {Promise<void>}
- * @throws {Ninguna}
- */
-export async function deleteDatasetAction(req: HttpRequest, res: HttpResponse) {
+export async function archiveDatasetAction(req: HttpRequest, res: HttpResponse) {
   try {
     const id = Number((req as any).params?.id);
     if (!id || isNaN(id)) return sendJson(res, 400, { ok: false, message: "ID inválido" });
 
     const payload = tryGetAuthPayload(req);
     const accountId = Number(payload?.sub);
-
-    const result = await removeDataset(id, accountId);
+    const result = await archiveDataset(id, accountId);
+    
     sendJson(res, 200, { ok: true, message: result.message });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
@@ -150,17 +151,21 @@ export async function getPublicDatasetsAction(req: HttpRequest, res: HttpRespons
     const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
     const limit = Math.max(1, parseInt(url.searchParams.get("limit") || "10", 10));
 
+    // 👇 CRÍTICO: Intentamos detectar si el usuario está logueado para mostrar datasets 'internal'
+    const payload = tryGetAuthPayload(req);
+    const accountId = payload ? Number(payload.sub) : 0;
+
     const filters = {
       categoria: url.searchParams.get("categoria") || "",
       ods: url.searchParams.get("ods") || "",
       etiqueta: url.searchParams.get("etiqueta") || "",
-      licencia: url.searchParams.get("licencia") || ""
+      licencia: url.searchParams.get("licencia") || "",
+      isPublicCatalog: true // 👈 FORZAR SOLAMENTE VALIDADOS
     };
 
-    const result = await getDatasets(0, false, search, page, limit, filters);
-    
+    // Pasamos accountId para que el repo filtre d.access_level
+    const result = await getDatasets(accountId, false, search, page, limit, filters);
 
-    // Respondemos con el mismo formato que espera tu frontend
     sendJson(res, 200, { ok: true, ...result });
   } catch (error) {
     console.error("❌ Error en getPublicDatasetsAction:", error);
@@ -229,6 +234,39 @@ export async function validateDatasetAction(req: HttpRequest, res: HttpResponse)
     const { resolveDatasetRequest } = require("../services/datasets.service");
     
     const result = await resolveDatasetRequest(id, adminAccountId, body);
+    sendJson(res, 200, { ok: true, message: result.message });
+  } catch (error) {
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
+/**
+ * Controlador que gestiona la solicitud de destrucción total (Hard Delete).
+ */
+export async function destroyDatasetAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const id = Number((req as any).params?.id);
+    if (!id || isNaN(id)) return sendJson(res, 400, { ok: false, message: "ID inválido" });
+
+    // Importamos dinámicamente el nuevo servicio
+    const { destroyDataset } = require("../services/datasets.service");
+    
+    const result = await destroyDataset(id);
+    sendJson(res, 200, { ok: true, message: result.message });
+  } catch (error) {
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
+export async function unarchiveDatasetAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const id = Number((req as any).params?.id);
+    if (!id || isNaN(id)) return sendJson(res, 400, { ok: false, message: "ID inválido" });
+
+    const payload = tryGetAuthPayload(req);
+    const accountId = Number(payload?.sub);
+    const result = await unarchiveDataset(id, accountId);
+    
     sendJson(res, 200, { ok: true, message: result.message });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });

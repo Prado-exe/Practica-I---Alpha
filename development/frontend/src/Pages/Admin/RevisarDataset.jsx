@@ -57,6 +57,8 @@ function RevisarDataset({ datasetId, onCancel }) {
           <p><strong>Categoría:</strong> {dataset.category_name}</p>
           <p><strong>Institución:</strong> {dataset.institution_name || "N/A"}</p>
           <p><strong>Licencia:</strong> {dataset.license_name}</p>
+          <p><strong>Objetivo ODS:</strong> {dataset.objective_code ? `${dataset.objective_code} - ${dataset.objective_name}` : "Ninguno"}</p>
+          <p><strong>Etiquetas:</strong> {dataset.tags && dataset.tags.length > 0 ? dataset.tags.map(t => t.name).join(', ') : "Ninguna"}</p>
           <p><strong>Nivel de Acceso:</strong> {dataset.access_level}</p>
           <p><strong>Fecha de Creación de Datos:</strong> {dataset.creation_date ? dataset.creation_date.split('T')[0] : "N/A"}</p>
         </div>

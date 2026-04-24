@@ -26,11 +26,12 @@ function Datos() {
     const loadFilters = async () => {
       try {
         setFiltersLoading(true);
-        // 🔹 Solo pedimos lo que existe: Categorías, Tags y Licencias
-        const [categoriasData, tagsData, licenciasData] = await Promise.all([
+        // 👇 Agregamos getOds() a la promesa
+        const [categoriasData, tagsData, licenciasData, odsData] = await Promise.all([
           getCategorias(),
           getTags(),
-          getLicencias()
+          getLicencias(),
+          getOds() // 👈 NUEVO
         ]);
 
         const dynamicFilters = [
@@ -49,6 +50,14 @@ function Datos() {
             key: "licencia",
             title: "Licencia",
             options: licenciasData.map(l => ({ label: l.name, value: String(l.license_id) }))
+          },
+          {
+            key: "ods",
+            title: "Objetivo ODS",
+            options: odsData.map(o => ({ 
+              label: `${o.objective_code} - ${o.name || o.objective_name}`, 
+              value: String(o.ods_id || o.ods_objective_id) 
+            }))
           }
         ];
 

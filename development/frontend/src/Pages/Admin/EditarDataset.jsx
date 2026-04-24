@@ -15,15 +15,18 @@ function EditarDataset({ datasetId, onCancel }) {
   const [categories, setCategories] = useState([]);
   const [licenses, setLicenses] = useState([]);
   const [instituciones, setInstituciones] = useState([]);
+  const [odsList, setOdsList] = useState([]); // 👈 NUEVO
+  const [tagsList, setTagsList] = useState([]); // 👈 NUEVO
   const [originalStatus, setOriginalStatus] = useState(""); 
 
-  // ESTADOS DE ARCHIVOS (Lógica de la 2da versión)
+  // ESTADOS DE ARCHIVOS
   const [existingFiles, setExistingFiles] = useState([]); 
   const [deletedFileIds, setDeletedFileIds] = useState([]); 
   const [newFiles, setNewFiles] = useState([]); 
 
   const [formData, setFormData] = useState({
     title: "", summary: "", description: "", category_id: "", license_id: "", institution_id: "", 
+    ods_objective_id: "", tags: [], // 👈 NUEVOS CAMPOS
     access_level: "public", creation_date: "", temporal_coverage_start: "", temporal_coverage_end: "",
     geographic_coverage: "", update_frequency: "", source_url: "", dataset_status: ""
   });
@@ -32,16 +35,20 @@ function EditarDataset({ datasetId, onCancel }) {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [catRes, licRes, instRes, dsRes] = await Promise.all([
+        const [catRes, licRes, instRes, odsRes, tagsRes, dsRes] = await Promise.all([
           fetch(`${API_URL}/api/categories`),
           fetch(`${API_URL}/api/licenses`),
           fetch(`${API_URL}/api/instituciones`, { headers: { "Authorization": `Bearer ${user.token}` } }),
+          fetch(`${API_URL}/api/ods`), // 👈 NUEVO
+          fetch(`${API_URL}/api/tags`), // 👈 NUEVO
           fetch(`${API_URL}/api/datasets/${datasetId}`, { headers: { "Authorization": `Bearer ${user.token}` } })
         ]);
 
         if (catRes.ok) setCategories((await catRes.json()).data || []);
         if (licRes.ok) setLicenses((await licRes.json()).data || []);
         if (instRes.ok) setInstituciones((await instRes.json()).instituciones || []);
+        if (odsRes.ok) setOdsList((await odsRes.json()).data || []);
+        if (tagsRes.ok) setTagsList((await tagsRes.json()).data || []);
 
         if (dsRes.ok) {
           const { data } = await dsRes.json();
@@ -55,6 +62,8 @@ function EditarDataset({ datasetId, onCancel }) {
             category_id: data.category_id || "",
             license_id: data.license_id || "",
             institution_id: data.institution_id || "", 
+            ods_objective_id: data.ods_objective_id || "", // 👈 NUEVO
+            tags: data.tags ? data.tags.map(t => t.tag_id || t) : [], // 👈 NUEVO (Soporta arreglo de IDs o de objetos)
             access_level: data.access_level || "public",
             creation_date: data.creation_date ? data.creation_date.split('T')[0] : "", 
             temporal_coverage_start: data.temporal_coverage_start ? data.temporal_coverage_start.split('T')[0] : "",
@@ -79,6 +88,27 @@ function EditarDataset({ datasetId, onCancel }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleAddTag = (e) => {
+    const tagId = Number(e.target.value);
+    if (!tagId) return;
+    
+    setFormData(prev => {
+      if (prev.tags.length >= 5) {
+        alert("Máximo 5 etiquetas permitidas.");
+        return prev;
+      }
+      if (prev.tags.includes(tagId)) return prev;
+      return { ...prev, tags: [...prev.tags, tagId] };
+    });
+  };
+
+  const handleRemoveTag = (tagIdToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(id => id !== tagIdToRemove)
+    }));
+  };
+
   // MÉTODOS DE ARCHIVOS
   const handleNewFileChange = (e) => setNewFiles(Array.from(e.target.files));
   const removeNewFile = (indexToRemove) => setNewFiles(files => files.filter((_, index) => index !== indexToRemove));
@@ -90,14 +120,12 @@ function EditarDataset({ datasetId, onCancel }) {
   const handleSubmit = async (e, forcedStatus = null) => {
     if (e) e.preventDefault();
 
-    if (existingFiles.length === 0 && newFiles.length === 0) {
-      return alert("El dataset debe tener al menos un archivo válido.");
-    }
+    if (existingFiles.length === 0 && newFiles.length === 0) return alert("El dataset debe tener al menos un archivo válido.");
+    if (formData.tags.length === 0) return alert("Debes seleccionar al menos 1 etiqueta."); // 👈 NUEVO
 
     setIsSubmitting(true);
 
     try {
-      // 1. Subida de nuevos archivos
       const uploadedFilesData = [];
       for (const file of newFiles) {
         const presignedRes = await fetch(`${API_URL}/api/upload/presigned-url`, {
@@ -116,12 +144,13 @@ function EditarDataset({ datasetId, onCancel }) {
         });
       }
 
-      // 2. Payload Unificado
       const payload = {
         ...formData,
         category_id: Number(formData.category_id),
         license_id: Number(formData.license_id),
         institution_id: formData.institution_id ? Number(formData.institution_id) : null,
+        ods_objective_id: formData.ods_objective_id ? Number(formData.ods_objective_id) : null, // 👈 NUEVO
+        tags: formData.tags, // 👈 NUEVO
         dataset_status: forcedStatus || formData.dataset_status,
         new_files: uploadedFilesData,
         deleted_file_ids: deletedFileIds 
@@ -163,7 +192,6 @@ function EditarDataset({ datasetId, onCancel }) {
 
       <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : (e) => handleSubmit(e)}>
         
-        {/* PASO 1: METADATOS */}
         <div className={step === 1 ? "d-block" : "d-none"}>
           <div className="form-group">
             <label>Título del Dataset *</label>
@@ -195,13 +223,76 @@ function EditarDataset({ datasetId, onCancel }) {
                 {instituciones.map(inst => <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name || inst.name}</option>)}
               </select>
             </div>
+            {/* 👇 NUEVO: Selector de ODS */}
+            <div className="form-col">
+              <label>Objetivo ODS (Opcional)</label>
+              <select name="ods_objective_id" value={formData.ods_objective_id} onChange={handleChange} className="form-control">
+                <option value="">Ninguno</option>
+                {odsList.map(o => <option key={o.ods_objective_id || o.ods_id} value={o.ods_objective_id || o.ods_id}>{o.objective_code} - {o.objective_name || o.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row" style={{ marginTop: "15px" }}>
             <div className="form-col">
               <label>Fecha Creación *</label>
               <input type="date" name="creation_date" required value={formData.creation_date} onChange={handleChange} className="form-control" />
             </div>
           </div>
 
-          <div className="form-group">
+          {/* 👇 NUEVO: ETIQUETAS (Selector + Chips) */}
+          <div className="form-group" style={{ marginTop: '15px' }}>
+            <label>Etiquetas (Seleccionadas: {formData.tags.length}/5) *</label>
+            
+            {/* 1. Selector Desplegable */}
+            <select 
+              className="form-control" 
+              value="" 
+              onChange={handleAddTag}
+              disabled={formData.tags.length >= 5}
+            >
+              <option value="">
+                {formData.tags.length >= 5 ? "Límite de 5 alcanzado" : "-- Selecciona una etiqueta para añadirla --"}
+              </option>
+              {tagsList
+                .filter(tag => !formData.tags.includes(tag.tag_id)) // Oculta las que ya están seleccionadas
+                .map(tag => (
+                  <option key={tag.tag_id} value={tag.tag_id}>{tag.name}</option>
+              ))}
+            </select>
+
+            {/* 2. Chips Visuales (Píldoras) */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+              {formData.tags.map(tagId => {
+                // 👇 CAMBIO CLAVE AQUÍ: Forzamos todo a String para que no haya falsos negativos
+                const tagObj = tagsList.find(t => String(t.tag_id) === String(tagId));
+                
+                return (
+                  <div key={tagId} style={{
+                    display: 'flex', alignItems: 'center', background: '#0056b3', color: 'white',
+                    padding: '5px 12px', borderRadius: '15px', fontSize: '13px'
+                  }}>
+                    {/* 👇 Si lo encuentra, muestra el nombre, si no, se protege mostrando el ID temporalmente */}
+                    {tagObj ? tagObj.name : `Etiqueta #${tagId}`}
+                    <button 
+                      type="button" 
+                      onClick={() => handleRemoveTag(tagId)} 
+                      style={{ 
+                        background: 'transparent', border: 'none', color: 'white', 
+                        marginLeft: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' 
+                      }}
+                      title="Quitar etiqueta"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            {formData.tags.length === 0 && <small style={{color: '#d32f2f', display: 'block', marginTop: '5px'}}>* Selecciona al menos 1 etiqueta para continuar.</small>}
+          </div>
+
+          <div className="form-group" style={{ marginTop: "15px" }}>
             <label>Resumen Corto *</label>
             <textarea name="summary" required maxLength="500" value={formData.summary} onChange={handleChange} className="form-control textarea-short" />
           </div>
@@ -216,10 +307,9 @@ function EditarDataset({ datasetId, onCancel }) {
           </div>
         </div>
 
-        {/* PASO 2: ARCHIVOS */}
+        {/* PASO 2: ARCHIVOS (Se mantiene intacto) */}
         <div className={step === 2 ? "d-block" : "d-none"}>
           
-          {/* Archivos Existentes */}
           <div className="file-list-container">
             <h3>Archivos Actuales:</h3>
             <ul className="file-list">
@@ -232,7 +322,6 @@ function EditarDataset({ datasetId, onCancel }) {
             </ul>
           </div>
 
-          {/* Subir Nuevos */}
           <div className="file-drop-area">
             <input type="file" multiple onChange={handleNewFileChange} id="file-upload" className="d-none" />
             <label htmlFor="file-upload" className="file-upload-label">📁 Añadir nuevos archivos</label>

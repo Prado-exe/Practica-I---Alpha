@@ -1,20 +1,28 @@
 // frontend/src/Services/DatasetService.js
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-// frontend/src/Services/DatasetService.js
 export async function getDatasets({ search = "", filters = {}, page = 1, limit = 7 }) {
   try {
-    const queryParams = new URLSearchParams({
-      search: search || "",
-      page: String(page),
-      limit: String(limit)
-    });
+    const queryParams = new URLSearchParams();
 
+    // Agregamos el buscador de texto
+    if (search) queryParams.append("search", search);
+    
+    // Paginación
+    queryParams.append("page", String(page));
+    queryParams.append("limit", String(limit));
+
+    // Procesamos los filtros dinámicos
     Object.keys(filters).forEach(key => {
       const values = filters[key];
+      
+      // Si el filtro es un arreglo (ej: Múltiples categorías)
       if (Array.isArray(values) && values.length > 0) {
-        // Ahora enviamos IDs: &categoria=1,4,12
         queryParams.append(key, values.join(","));
+      } 
+      // Si el filtro es un texto plano directo
+      else if (values && typeof values === 'string' && values.trim() !== '') {
+        queryParams.append(key, values);
       }
     });
 

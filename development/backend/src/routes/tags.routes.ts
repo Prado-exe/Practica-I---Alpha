@@ -18,6 +18,7 @@ import { getTagsForDropdown } from "../services/tags.service";
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
 import { getErrorStatus, getErrorMessage } from "./auth.routes";
+import { readJsonBody } from "../utils/body";
 
 /**
  * Descripción: Controlador que procesa peticiones HTTP GET para listar todas las etiquetas registradas en el sistema.
@@ -68,5 +69,36 @@ export async function getAllTagsAction(req: HttpRequest, res: HttpResponse) {
     sendJson(res, 200, { ok: true, data });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
+export async function createTagAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const body = await readJsonBody<any>(req);
+    const { insertTagInDb } = require("../repositories/tags.repository");
+    const tag = await insertTagInDb(body.name);
+    sendJson(res, 201, { ok: true, data: tag });
+  } catch (error) {
+    sendJson(res, 500, { ok: false, message: "Error al crear etiqueta" });
+  }
+}
+
+export async function deleteTagAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const id = Number((req as any).params?.id);
+    const url = new URL(req.url || "", `http://${req.headers?.host}`);
+    const replacementId = url.searchParams.get("replacementId");
+
+    const { deleteTagInDb, replaceAndDeleteTagInDb } = require("../repositories/tags.repository");
+
+    if (replacementId) {
+      await replaceAndDeleteTagInDb(id, Number(replacementId));
+    } else {
+      await deleteTagInDb(id);
+    }
+    
+    sendJson(res, 200, { ok: true, message: "Operación exitosa" });
+  } catch (error) {
+    sendJson(res, 500, { ok: false, message: "Error al eliminar etiqueta" });
   }
 }

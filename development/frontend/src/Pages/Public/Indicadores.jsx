@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   PieChart, Pie, Cell, Tooltip, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend,
@@ -7,13 +7,16 @@ import {
 import {
   Database, CheckCircle, Hash, Globe, TrendingUp, TrendingDown,
   Minus, FileText, Layers, ChevronDown, AlertCircle, Loader2,
-  BarChart2, Table2, RefreshCcw,
+  BarChart2, Table2, RefreshCcw, FileBox
 } from "lucide-react";
 import Breadcrumb from "../../Components/Common/Breadcrumb";
-import { DATASETS } from "../../data/datasetManifest";
+// ❌ Borramos import { DATASETS }
 import { useDataset } from "../../hooks/useDataset";
 import { TYPE_LABELS } from "../../utils/columnMapper";
+import { useAuth } from "../../Context/AuthContext"; // ✅ Agregamos Auth
 import "../../Styles/Pages_styles/Public/Indicadores.css";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"; // ✅ Agregamos API
 
 /* ─── palette for charts ─── */
 const CHART_COLORS = ["#0056b3","#1976d2","#1b7a4a","#388e3c","#6a1b9a","#c62828","#ef6c00","#00838f"];
@@ -184,20 +187,13 @@ function MetadataPanel({ metadata }) {
   );
 }
 
-function EmptyState({ onSelect }) {
+// ✅ Actualizamos el EmptyState para quitar la dependencia del archivo local
+function EmptyState({ selectedDataset }) {
   return (
     <div className="ind-empty">
       <BarChart2 size={56} strokeWidth={1} />
-      <h3>Selecciona un dataset para comenzar</h3>
-      <p>Elige uno de los conjuntos de datos disponibles en el panel lateral para visualizar sus indicadores y gráficos de forma automática.</p>
-      <div className="empty-dataset-grid">
-        {DATASETS.map(ds => (
-          <button key={ds.id} className="empty-ds-btn" onClick={() => onSelect(ds.id)} style={{ "--ds-color": ds.color }}>
-            <span className="ds-cat">{ds.category}</span>
-            <span className="ds-name">{ds.name}</span>
-          </button>
-        ))}
-      </div>
+      <h3>{selectedDataset ? "Ahora selecciona un archivo" : "Selecciona un dataset para comenzar"}</h3>
+      <p>Elige uno de los conjuntos de datos disponibles en el panel lateral y luego el archivo que deseas analizar para visualizar sus indicadores y gráficos de forma automática.</p>
     </div>
   );
 }
@@ -206,7 +202,7 @@ function LoadingState() {
   return (
     <div className="ind-loading">
       <Loader2 size={40} className="spin" />
-      <p>Cargando y analizando el dataset…</p>
+      <p>Cargando y analizando el archivo…</p>
     </div>
   );
 }
@@ -256,21 +252,61 @@ function DataTable({ data, columns }) {
 /* ─── Main component ─── */
 
 function Indicadores() {
-  const [selectedId, setSelectedId]     = useState(null);
-  const [lastManifest, setLastManifest] = useState(null);
-  const { data, columns, mapping, metadata, loading, error, loadDataset } = useDataset();
+  const { user } = useAuth(); // Para manejar público vs privado
+  const [catalog, setCatalog] = useState([]);
+  const [selectedDataset, setSelectedDataset] = useState(null);
+  const [selectedFileId, setSelectedFileId] = useState("");
 
-  const handleSelect = useCallback((id) => {
-    const ds = DATASETS.find(d => d.id === id);
-    if (!ds) return;
-    setSelectedId(id);
-    setLastManifest(ds);
-    loadDataset(ds);
-  }, [loadDataset]);
+  const { data, columns, mapping, metadata, loading, error, loadFileContent } = useDataset();
+
+  // ✅ Cargar catálogo dinámico al entrar a la página
+  useEffect(() => {
+    const fetchCatalog = async () => {
+      try {
+        const headers = user?.token ? { "Authorization": `Bearer ${user.token}` } : {};
+        const endpoint = user?.token ? '/api/datasets?limit=100' : '/api/public/datasets?limit=100';
+        
+        const res = await fetch(`${API_URL}${endpoint}`, { headers });
+        if (res.ok) {
+          const json = await res.json();
+          setCatalog(json.data || []);
+        }
+      } catch (error) {
+        console.error("Error al cargar el catálogo:", error);
+      }
+    };
+    fetchCatalog();
+  }, [user]);
+
+  // ✅ Obtener detalles del dataset y sus archivos firmados
+  const handleDatasetChange = async (datasetId) => {
+    if (!datasetId) return;
+    try {
+      const headers = user?.token ? { "Authorization": `Bearer ${user.token}` } : {};
+      const endpoint = user?.token ? `/api/datasets/${datasetId}` : `/api/public/datasets/${datasetId}`;
+      
+      const res = await fetch(`${API_URL}${endpoint}`, { headers });
+      const { data: dbDataset } = await res.json();
+      
+      setSelectedDataset(dbDataset);
+      setSelectedFileId(""); // Reseteamos el archivo al cambiar de dataset
+    } catch (err) {
+      console.error("Error al obtener detalle del dataset:", err);
+    }
+  };
+
+  // ✅ Mandar a procesar el archivo seleccionado
+  const handleFileChange = useCallback((fileId) => {
+    const file = selectedDataset.files.find(f => String(f.aws_file_reference_id) === String(fileId));
+    if (file) {
+      setSelectedFileId(fileId);
+      loadFileContent(file, selectedDataset);
+    }
+  }, [selectedDataset, loadFileContent]);
 
   const handleRetry = useCallback(() => {
-    if (lastManifest) loadDataset(lastManifest);
-  }, [lastManifest, loadDataset]);
+    if (selectedFileId) handleFileChange(selectedFileId);
+  }, [selectedFileId, handleFileChange]);
 
   const kpis    = useMemo(() => computeKpis(data, mapping), [data, mapping]);
   const pieData = useMemo(() => groupBySum(data, mapping?.categoryCol, mapping?.primaryNumericCol, 8), [data, mapping]);
@@ -309,27 +345,45 @@ function Indicadores() {
 
           {/* Dataset selector */}
           <div className="sidebar-section">
-            <p className="panel-title"><Database size={13} /> Seleccionar dataset</p>
+            <p className="panel-title"><Database size={13} /> 1. Seleccionar dataset</p>
             <div className="select-wrap">
               <select
                 className="dataset-select"
-                value={selectedId ?? ""}
-                onChange={e => handleSelect(e.target.value)}
+                value={selectedDataset?.dataset_id ?? ""}
+                onChange={e => handleDatasetChange(e.target.value)}
                 aria-label="Seleccionar dataset"
               >
                 <option value="" disabled>-- Elige un dataset --</option>
-                {DATASETS.map(ds => (
-                  <option key={ds.id} value={ds.id}>{ds.name}</option>
+                {catalog.map(ds => (
+                  <option key={ds.dataset_id} value={ds.dataset_id}>{ds.nombre}</option>
                 ))}
               </select>
               <ChevronDown size={16} className="select-chevron" />
             </div>
-            {selectedId && (
-              <p className="dataset-desc">
-                {DATASETS.find(d => d.id === selectedId)?.description}
-              </p>
-            )}
           </div>
+
+          {/* File selector */}
+          {selectedDataset && (
+            <div className="sidebar-section">
+              <p className="panel-title"><FileBox size={13} /> 2. Seleccionar archivo</p>
+              <div className="select-wrap">
+                <select 
+                  className="dataset-select" 
+                  value={selectedFileId} 
+                  onChange={e => handleFileChange(e.target.value)}
+                  aria-label="Seleccionar archivo"
+                >
+                  <option value="" disabled>-- Elige un archivo --</option>
+                  {selectedDataset.files?.map(f => (
+                    <option key={f.aws_file_reference_id} value={f.aws_file_reference_id}>
+                      {f.display_name} {f.file_format ? `(${f.file_format.toUpperCase()})` : ""}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={16} className="select-chevron" />
+              </div>
+            </div>
+          )}
 
           {/* Metadata */}
           {metadata && <MetadataPanel metadata={metadata} />}
@@ -348,10 +402,10 @@ function Indicadores() {
 
           {!loading && error && <ErrorState error={error} onRetry={handleRetry} />}
 
-          {!loading && !error && !selectedId && <EmptyState onSelect={handleSelect} />}
+          {!loading && !error && !selectedFileId && <EmptyState selectedDataset={selectedDataset} />}
 
-          {!loading && !error && selectedId && !data.length && !loading && (
-            <div className="ind-loading"><p>Sin datos para mostrar.</p></div>
+          {!loading && !error && selectedFileId && !data.length && !loading && (
+            <div className="ind-loading"><p>Sin datos numéricos o geográficos para graficar en este archivo.</p></div>
           )}
 
           {hasData && (
