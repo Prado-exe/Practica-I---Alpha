@@ -9,29 +9,14 @@ import {
   FileText, Layers, ChevronDown, AlertCircle, Loader2,
   BarChart2, Table2, RefreshCcw,
 } from "lucide-react";
-
+import { useLocation } from "react-router-dom"; // Añade esta importación arriba
 import Breadcrumb from "../../Components/Common/Breadcrumb";
 import { useDataset } from "../../hooks/useDataset";
 import { TYPE_LABELS } from "../../utils/columnMapper";
 import { getDatasets } from "../../Services/DatasetService"; 
 import "../../Styles/Pages_styles/Public/Indicadores.css";
 
-// 👇 Añadimos la URL del backend para descargar los CSV correctamente
-// 🚨 1. CONFIGURACIÓN DE MINIO
-    const MINIO_ENDPOINT = "http://localhost:9000";
-    const MINIO_BUCKET = "observatory-files";
 
-    // 👇 FORZAMOS EL NOMBRE DEL ARCHIVO DE TU IMAGEN
-    let rawUrl = "dataset_1_1740600868514.csv"; 
-    
-    let finalUrl = rawUrl;
-    
-    if (rawUrl && !rawUrl.startsWith("http")) {
-      const cleanPath = rawUrl.replace(/^\//, ''); 
-      finalUrl = `${MINIO_ENDPOINT}/${MINIO_BUCKET}/${cleanPath}`;
-    }
-
-    console.log("🔗 Descargando CSV desde MinIO:", finalUrl);
 
 /* ─── palette for charts ─── */
 const CHART_COLORS = ["#0056b3","#1976d2","#1b7a4a","#388e3c","#6a1b9a","#c62828","#ef6c00","#00838f"];
@@ -267,7 +252,8 @@ function DataTable({ data, columns }) {
 /* ─── Main component ─── */
 
 function Indicadores() {
-  const [selectedId, setSelectedId]     = useState(null);
+  const location = useLocation();
+  const [selectedId, setSelectedId] = useState(location.state?.selectedDatasetId || null);
   const [lastManifest, setLastManifest] = useState(null);
   const [availableDatasets, setAvailableDatasets] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
@@ -293,48 +279,67 @@ function Indicadores() {
   const handleSelect = useCallback(async (id) => {
   if (!id) return;
   setSelectedId(id);
-  
+
   try {
-    // 1. Buscamos el detalle completo del dataset (para obtener el array 'files')
-    // Importante: Asegúrate de importar getPublicDatasetById desde tu DatasetService
+    // 1. Buscamos el detalle completo del dataset por ID
+    // Esto es necesario porque el listado general no trae el array 'files'
     const { getPublicDatasetById } = await import("../../Services/DatasetService");
-    const fullDataset = await getPublicDatasetById(id);
+    const fullDs = await getPublicDatasetById(id);
 
-    console.log("👀 DETALLE COMPLETO RECUPERADO:", fullDataset);
+    console.log(`👀 Procesando Dataset: ${fullDs.nombre || fullDs.title}`);
+    console.log("📦 Detalle completo recuperado:", fullDs);
 
-    // 2. Extraer el archivo principal
-    // Buscamos en el array 'files' que ahora SÍ debería existir
-    const primaryFile = fullDataset.files?.find(f => f.is_primary) || fullDataset.files?.[0];
+    // 🚨 CONFIGURACIÓN DE MINIO
+    const MINIO_ENDPOINT = "http://localhost:9000";
+    const MINIO_BUCKET = "observatory-files";
+
+    /**
+     * 🔍 DETECCIÓN DINÁMICA:
+     * El objeto devuelto por el backend tiene un array 'files'.
+     * Buscamos el archivo marcado como principal (is_primary) o el primero disponible.
+     */
+    const primaryFile = fullDs.files?.find(f => f.is_primary) || fullDs.files?.[0];
     
-    // 3. Obtener y reparar la URL
-    let finalUrl = primaryFile?.file_url || "";
+    if (!primaryFile) {
+      throw new Error("Este dataset no tiene archivos cargados.");
+    }
 
-    // Reparación de host (Docker internal 'storage' -> 'localhost')
+    // Extraemos la URL (el backend ya debería haber reemplazado 'storage' por 'localhost')
+    let finalUrl = primaryFile.file_url || "";
+
+    // Si por alguna razón la URL viene con el nombre interno de la red de Docker:
     if (finalUrl.includes('storage:9000')) {
       finalUrl = finalUrl.replace('storage:9000', 'localhost:9000');
     }
 
-    console.log("🔗 URL FINAL PARA PAPAPARSE:", finalUrl);
-
-    if (!finalUrl) {
-      throw new Error("El dataset no tiene archivos válidos para graficar.");
+    // PLAN B: Si no hay URL pero hay una 'storage_key', la armamos manualmente
+    if (!finalUrl && primaryFile.storage_key) {
+      finalUrl = `${MINIO_ENDPOINT}/${MINIO_BUCKET}/${primaryFile.storage_key.replace(/^\//, '')}`;
     }
 
-    // 4. Formatear y cargar al hook
+    console.log("🔗 URL Generada Dinámicamente:", finalUrl);
+
+    if (!finalUrl) {
+      throw new Error("No se pudo determinar una URL de descarga válida.");
+    }
+
+    // Preparamos el objeto para el hook useDataset
     const formattedManifest = {
-      ...fullDataset,
+      ...fullDs,
       url: finalUrl,
-      name: fullDataset.title || fullDataset.nombre,
-      category: fullDataset.category?.name || fullDataset.categoria,
-      format: primaryFile?.file_format || "CSV",
-      file: primaryFile?.display_name || "datos.csv"
+      name: fullDs.nombre || fullDs.title,
+      category: fullDs.categoria || (fullDs.category?.name),
+      description: fullDs.descripcion || fullDs.summary,
+      format: primaryFile.file_format || "CSV",
+      file: primaryFile.display_name || "archivo.csv"
     };
 
+    // 🚀 Cargamos los datos reales del CSV
     loadDataset(formattedManifest);
 
   } catch (err) {
-    console.error("❌ Error al seleccionar dataset:", err);
-    // Forzamos un error en el hook para que se muestre en la interfaz
+    console.error("❌ Error al procesar el dataset:", err.message);
+    // Notificamos al hook para que muestre el error en la interfaz
     loadDataset({ url: "", error: err.message });
   }
 }, [loadDataset]);

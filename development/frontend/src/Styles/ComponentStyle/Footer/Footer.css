@@ -137,3 +137,46 @@
   }
 
 }
+
+/* ... (tus estilos anteriores se mantienen, añade o modifica estos) ... */
+
+.footer-section a {
+  color: #E3F2FD;
+  text-decoration: none;
+  font-size: 0.95rem;
+  display: inline-block; /* Para mejor área de click */
+  padding: 2px 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.footer-section a:hover {
+  color: #ffffff;
+  transform: translateX(5px); /* Efecto sutil de desplazamiento */
+}
+
+/* Línea divisoria inferior */
+.footer-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 2rem 0 1rem 0;
+}
+
+/* Estilo para los logos en el footer para que no se vean pegados */
+.footer-logos a {
+    display: flex;
+    align-items: center;
+    transition: opacity 0.3s ease;
+}
+
+.footer-logos a:hover {
+    opacity: 0.8;
+}
+
+/* Ajuste de los títulos para que coincidan con el diseño */
+.footer-section h4 {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  opacity: 0.9;
+}

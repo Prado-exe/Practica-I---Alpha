@@ -1,25 +1,6 @@
-/* Fondo */
-.login-bg {
-  min-height: 100vh;
-  background-image: url("../assets/login-bg.jpg");
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  padding: 1rem;
-}
+/* ELIMINADAS LAS CLASES .login-bg Y .login-bg::before */
 
-.login-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.4);
-}
-
-/* Contenedor */
+/* Contenedor principal de la tarjeta */
 .login-container {
   position: relative;
   z-index: 1;
@@ -61,7 +42,7 @@
   border-color: #1565c0;
 }
 
-/* Botón */
+/* Botón principal */
 .login-btn {
   background-color: #1565c0;
   color: white;
@@ -77,31 +58,58 @@
   background-color: #0d47a1;
 }
 
-/* Links */
+/* --- SECCIÓN DE ENLACES ACTUALIZADA --- */
 .login-links {
-  display: flex;
-  justify-content: center;
-  font-size: 0.85rem;
+  display: flex;         
+  justify-content: center; 
+  align-items: center;     
+  width: 100%;            
+  margin-top: 1rem;        
 }
 
 .login-links a {
+  text-align: center;     
+  text-decoration: none;  
   color: #1565c0;
-  text-decoration: none;
+  font-size: 0.85rem;
 }
 
 .login-links a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+/* Reglas generales para quitar la línea azul en todos los enlaces de la tarjeta */
+.login-container a {
+  color: #1565c0;
+  text-decoration: none; /* Quita el subrayado */
+}
+
+.login-container a:hover {
+  text-decoration: none; /* Asegura que no salga línea al hacer hover */
+  opacity: 0.8; /* Efecto sutil al pasar el mouse */
+}
+
+/* Estilos específicos para el botón de Volver al Inicio */
+.back-to-home {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eeeeee;
+}
+
+.back-to-home a {
+  color: #666666;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-
   .login-container{
-    padding:1.5rem;
+    padding: 1.5rem;
   }
-
   .login-logo{
-    width:100px;
+    width: 100px;
   }
-
 }
