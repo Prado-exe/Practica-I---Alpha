@@ -9,7 +9,7 @@ function RecuperarContrasena() {
   const [sent, setSent] = useState(false);
 
   // Declaramos la variable para no tener "localhost" quemado
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
   const handleSubmit = async (e) => {
     e.preventDefault();

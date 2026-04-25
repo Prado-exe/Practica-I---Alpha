@@ -289,14 +289,10 @@ function Indicadores() {
     console.log(`👀 Procesando Dataset: ${fullDs.nombre || fullDs.title}`);
     console.log("📦 Detalle completo recuperado:", fullDs);
 
-    // 🚨 CONFIGURACIÓN DE MINIO
-    const MINIO_ENDPOINT = "http://localhost:9000";
-    const MINIO_BUCKET = "observatory-files";
-
     /**
      * 🔍 DETECCIÓN DINÁMICA:
      * El objeto devuelto por el backend tiene un array 'files'.
-     * Buscamos el archivo marcado como principal (is_primary) o el primero disponible.
+     * Buscamos el archivo principal.
      */
     const primaryFile = fullDs.files?.find(f => f.is_primary) || fullDs.files?.[0];
     
@@ -304,20 +300,15 @@ function Indicadores() {
       throw new Error("Este dataset no tiene archivos cargados.");
     }
 
-    // Extraemos la URL (el backend ya debería haber reemplazado 'storage' por 'localhost')
+    // Usamos directamente la URL que nos entrega el backend
     let finalUrl = primaryFile.file_url || "";
 
-    // Si por alguna razón la URL viene con el nombre interno de la red de Docker:
-    if (finalUrl.includes('storage:9000')) {
-      finalUrl = finalUrl.replace('storage:9000', 'localhost:9000');
-    }
-
-    // PLAN B: Si no hay URL pero hay una 'storage_key', la armamos manualmente
+    // PLAN B: Si no hay URL pero hay una 'storage_key', armamos la URL pública de AWS S3
     if (!finalUrl && primaryFile.storage_key) {
-      finalUrl = `${MINIO_ENDPOINT}/${MINIO_BUCKET}/${primaryFile.storage_key.replace(/^\//, '')}`;
+      finalUrl = `https://bucketapha.s3.us-east-2.amazonaws.com/${primaryFile.storage_key.replace(/^\//, '')}`;
     }
 
-    console.log("🔗 URL Generada Dinámicamente:", finalUrl);
+    console.log("🔗 URL Generada para Descarga:", finalUrl);
 
     if (!finalUrl) {
       throw new Error("No se pudo determinar una URL de descarga válida.");
@@ -410,8 +401,8 @@ function Indicadores() {
             <div className="select-wrap">
               <select
                 className="dataset-select"
-                value={selectedDataset?.dataset_id ?? ""}
-                onChange={e => handleDatasetChange(e.target.value)}
+                value={selectedId || ""}
+                onChange={e => handleSelect(e.target.value)}
                 aria-label="Seleccionar dataset"
                 disabled={loadingList}
               >

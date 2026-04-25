@@ -23,7 +23,7 @@ import { env } from "./env";
  * crítica de arquitectura. Mientras que el SDK de AWS intenta por defecto usar 
  * el estilo de "Virtual Hosting" (ej: bucket.s3.amazon.com), MinIO y la 
  * mayoría de las implementaciones autohospedadas requieren el estilo de "Ruta" 
- * (ej: localhost:9000/bucket) para el correcto enrutamiento de las peticiones. 
+ *  para el correcto enrutamiento de las peticiones. 
  * El uso del `endpoint` personalizado permite que el tráfico se redirija 
  * mágicamente a la infraestructura local durante el desarrollo, manteniendo 
  * el mismo comportamiento que en producción.

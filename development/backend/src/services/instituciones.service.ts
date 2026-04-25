@@ -27,7 +27,7 @@ import { env } from "../config/env";
 
 /**
  * Descripción: Recupera todas las instituciones del sistema e inyecta URLs prefirmadas temporales para sus logos.
- * POR QUÉ: Se procesan las URLs en paralelo (`Promise.all`) para no penalizar el tiempo de respuesta. El reemplazo explícito de `storage:9000` por `localhost:9000` es un workaround necesario para puentear la red interna de Docker, permitiendo que el navegador del cliente (que está fuera de la red de Docker) pueda resolver y renderizar las imágenes de MinIO.
+ * POR QUÉ: Se procesan las URLs en paralelo (`Promise.all`) para no penalizar el tiempo de respuesta.  es un workaround necesario para puentear la red interna de Docker, permitiendo que el navegador del cliente (que está fuera de la red de Docker) pueda resolver y renderizar las imágenes de MinIO.
  * @param {void} No requiere parámetros.
  * @return {Promise<Array>} Lista de instituciones con la propiedad `logo_url` resuelta.
  * @throws {Ninguna} Los errores de firma de S3 se capturan silenciosamente retornando la institución sin URL para no romper la lista completa.
@@ -43,7 +43,7 @@ export async function getInstitutions() {
           const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
           
           // 👇 1. APLICAMOS EL REEMPLAZO AQUÍ 👇
-          const finalUrl = presignedUrl.replace('storage:9000', 'localhost:9000');
+          const finalUrl = presignedUrl;
           
           return { ...inst, logo_url: finalUrl }; // 👈 Usamos finalUrl
         } catch (error) {
@@ -80,7 +80,7 @@ export async function getPublicInstitutions(search: string = "", page: number = 
           const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
           
           // 👇 2. Y TAMBIÉN APLICAMOS EL REEMPLAZO AQUÍ 👇
-          const finalUrl = presignedUrl.replace('storage:9000', 'localhost:9000');
+          const finalUrl = presignedUrl;
           
           return { ...inst, logo_url: finalUrl }; // 👈 Usamos finalUrl
         } catch (error) {

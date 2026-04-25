@@ -5,7 +5,7 @@ function MantenedorTags() {
   const { user } = useAuth();
   const [tags, setTags] = useState([]);
   const [newTagName, setNewTagName] = useState("");
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
   const fetchTags = async () => {
     const res = await fetch(`${API_URL}/api/tags`);

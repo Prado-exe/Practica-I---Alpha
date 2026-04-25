@@ -6,7 +6,7 @@ import CrearInstitucion from "./CrearInstitucion";
 import EditarInstitucion from "./EditarInstitucion"; 
 import "../../Styles/Pages_styles/Admin/GestionInstituciones.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
 function GestionInstituciones() {
   const { user } = useAuth();

@@ -123,7 +123,7 @@ export async function getDatasets(accountId: number, isAdmin: boolean, search: s
 
 /**
  * Descripción: Obtiene el detalle completo del dataset e hidrata los archivos con URLs temporales de acceso seguro.
- * POR QUÉ: Implementa una reescritura de URL (`.replace('storage:9000', 'localhost:9000')`) como un "workaround" para entornos Docker locales. El backend se comunica con MinIO a través de la red interna de Docker (`storage`), pero el cliente web necesita acceder mediante `localhost`. Las URLs generadas tienen un TTL de 3600 segundos (1 hora) por políticas de seguridad.
+ * POR QUÉ: Implementa una reescritura de URL como un "workaround" para entornos Docker locales. El backend se comunica con MinIO a través de la red interna de Docker (`storage`), pero el cliente web necesita acceder mediante `localhost`. Las URLs generadas tienen un TTL de 3600 segundos (1 hora) por políticas de seguridad.
  * @param {number} id Identificador numérico del dataset.
  * @return {Promise<Object>} Dataset completo con las URLs de sus archivos firmadas criptográficamente.
  * @throws {AppError} 404 si el ID no corresponde a un dataset existente.
@@ -139,7 +139,7 @@ export async function getDatasetById(id: number) {
           try {
             const command = new GetObjectCommand({ Bucket: env.S3_BUCKET_NAME, Key: file.storage_key });
             const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-            const finalUrl = presignedUrl.replace('storage:9000', 'localhost:9000');
+            const finalUrl = presignedUrl;
             
             return { ...file, file_url: finalUrl };
           } catch (error) {
@@ -181,34 +181,21 @@ export async function archiveDataset(datasetId: number, accountId: number) {
 export async function editDataset(datasetId: number, accountId: number, input: any) {
   try {
     const result = await updateDatasetInDb(datasetId, accountId, input);
+    
     if (result.s3KeysToDelete && result.s3KeysToDelete.length > 0) {
-      
-      const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-      
-      // Cliente exclusivo para la red interna de Docker
-      const internalS3Client = new S3Client({
-        region: env.S3_REGION || 'us-east-1',
-        // 👇 CAMBIA "minio" por el nombre de tu contenedor si es distinto (ej: minio-dev)
-        endpoint: 'http://minio:9000', 
-        credentials: {
-          accessKeyId: env.S3_ACCESS_KEY || 'admin_minio',    // 👈 Tus credenciales
-          secretAccessKey: env.S3_SECRET_KEY || 'password123',// 👈 Tus credenciales
-        },
-        forcePathStyle: true,
-      });
-
-      const bucketName = env.S3_BUCKET_NAME || 'observatory-files'; 
-      console.log(`\n🗑️ [MINIO] Intentando borrar ${result.s3KeysToDelete.length} archivos del bucket: "${bucketName}"...`);
+      const bucketName = env.S3_BUCKET_NAME; 
+      console.log(`\n🗑️ [S3] Intentando borrar ${result.s3KeysToDelete.length} archivos del bucket: "${bucketName}"...`);
 
       for (const key of result.s3KeysToDelete) {
          try {
+           // 💡 Usamos s3Client (el cliente real de AWS)
            const deleteCommand = new DeleteObjectCommand({ 
              Bucket: bucketName, 
              Key: key 
            });
            
-           await internalS3Client.send(deleteCommand);
-           console.log(`   ✅ ÉXITO: Archivo destruido físicamente de MinIO -> ${key}`);
+           await s3Client.send(deleteCommand);
+           console.log(`   ✅ ÉXITO: Archivo destruido físicamente de Amazon S3 -> ${key}`);
          } catch(e: any) { 
            console.error(`   ❌ FALLO AL BORRAR -> ${key}`);
            console.error(`      Motivo: ${e.message || e.Code}`);
@@ -219,7 +206,6 @@ export async function editDataset(datasetId: number, accountId: number, input: a
       console.log("ℹ️ No se detectaron archivos eliminados en esta edición.");
     }
     
-    // Retornamos solo el dataset actualizado hacia el controlador
     return result.updatedDataset;
 
   } catch (error: any) {
@@ -278,33 +264,27 @@ export async function destroyDataset(datasetId: number) {
     const result = await hardDeleteDatasetInDb(datasetId);
     
     if (result.filesToDelete && result.filesToDelete.length > 0) {
-      const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-      const internalS3Client = new S3Client({
-        region: env.S3_REGION || 'us-east-1',
-        endpoint: 'http://minio:9000', 
-        credentials: {
-          accessKeyId: env.S3_ACCESS_KEY || 'admin_minio',
-          secretAccessKey: env.S3_SECRET_KEY || 'password123',
-        },
-        forcePathStyle: true,
-      });
-
-      const bucketName = env.S3_BUCKET_NAME || 'observatory-files';
+      // 💡 Eliminamos el "internalS3Client" y usamos el s3Client global importado arriba
+      const bucketName = env.S3_BUCKET_NAME;
 
       for (const file of result.filesToDelete) {
         if (file.storage_key) {
           try {
-            await internalS3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: file.storage_key }));
-            console.log(`✅ Físicamente destruido de MinIO: ${file.storage_key}`);
+            // Usamos s3Client y DeleteObjectCommand directamente
+            await s3Client.send(new DeleteObjectCommand({ 
+              Bucket: bucketName, 
+              Key: file.storage_key 
+            }));
+            console.log(`✅ Físicamente destruido de Amazon S3: ${file.storage_key}`);
           } catch (e: any) {
-            console.error(`❌ Error borrando en MinIO: ${file.storage_key} - ${e.message}`);
+            console.error(`❌ Error borrando en Amazon S3: ${file.storage_key} - ${e.message}`);
           }
         }
       }
     }
     
     console.log(`--- FIN DEL PROCESO DE DESTRUCCIÓN ---\n`);
-    return { message: `El dataset '${result.title}' fue destruido permanentemente de la base de datos y del servidor de archivos.` };
+    return { message: `El dataset '${result.title}' fue destruido permanentemente de la base de datos y de Amazon S3.` };
     
   } catch (error: any) {
     if (error.message.includes("no encontrado")) throw new AppError(error.message, 404);

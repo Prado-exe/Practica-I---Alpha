@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import "../../styles/pages_styles/Admin/GestionDatasets.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
 function ValidarDataset({ datasetId, onCancel }) {
   const { user } = useAuth();

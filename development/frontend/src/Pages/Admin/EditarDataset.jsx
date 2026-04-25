@@ -3,7 +3,7 @@ import "../../Styles/Pages_styles/Admin/CrearDataset.css";
 import "../../Styles/Pages_styles/Admin/GestionDatasets.css"; 
 import { useAuth } from "../../Context/AuthContext"; 
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
 function EditarDataset({ datasetId, onCancel }) {
   const [step, setStep] = useState(1);

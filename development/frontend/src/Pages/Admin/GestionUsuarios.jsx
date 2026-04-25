@@ -5,7 +5,7 @@ import CanView from "../../Components/Common/CanView";
 import { useAuth } from "../../Context/AuthContext"; 
 import "../../Styles/Pages_styles/Admin/GestionUsuarios.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
 function GestionUsuarios() { 
   const { user } = useAuth();

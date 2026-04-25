@@ -12,7 +12,7 @@ function Captcha({ onVerify }) {
 
     try {
 
-      const response = await fetch("http://localhost:3000/api/captcha", {
+      const response = await fetch("http://3.139.202.192:3000/api/captcha", {
         method: "POST"
       });
 

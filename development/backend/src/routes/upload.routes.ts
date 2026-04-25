@@ -114,7 +114,9 @@ export async function generateUploadUrlAction(req: HttpRequest, res: HttpRespons
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
 
     
-    const fileUrl = `${env.S3_ENDPOINT}/${env.S3_BUCKET_NAME}/${uniqueKey}`;
+    const fileUrl = env.S3_ENDPOINT 
+  ? `${env.S3_ENDPOINT}/${env.S3_BUCKET_NAME}/${uniqueKey}`
+  : `https://${env.S3_BUCKET_NAME}.s3.${env.S3_REGION}.amazonaws.com/${uniqueKey}`;
 
    
     sendJson(res, 200, {

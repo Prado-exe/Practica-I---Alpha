@@ -119,7 +119,7 @@ export const env = {
   ACCESS_TOKEN_EXPIRES_IN_MS: ms(accessTokenTime as ms.StringValue) ?? 900000,
   REFRESH_TOKEN_EXPIRES_IN_MS: ms(refreshTokenTime as ms.StringValue) ?? 604800000,
 
-  S3_ENDPOINT: getEnv("S3_ENDPOINT", "http://localhost:9000"),
+  S3_ENDPOINT: process.env.S3_ENDPOINT || undefined,
   S3_REGION: getEnv("S3_REGION", "us-east-1"),
   S3_ACCESS_KEY: getEnv("S3_ACCESS_KEY"),
   S3_SECRET_KEY: getEnv("S3_SECRET_KEY"),

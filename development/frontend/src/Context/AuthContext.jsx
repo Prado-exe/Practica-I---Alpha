@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from "react";
 
 const AuthContext = createContext();
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
 export function AuthProvider({ children }) {
   // 1. Inicializamos el estado leyendo el localStorage directamente

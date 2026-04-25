@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import "../styles/pages_styles/register.css"; // Asegúrate de que la ruta sea correcta
 import logo from "../assets/content.png";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
 function Register() {
   const [name, setName] = useState("");

@@ -3,7 +3,7 @@ import { useState } from "react";
 import "../styles/pages_styles/VerificacionSeguridad.css";
 import logo from "../assets/content.png";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://3.139.202.192:3000";
 
 function Verificacion_de_seguridad() {
   const location = useLocation();
