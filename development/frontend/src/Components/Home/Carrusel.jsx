@@ -1,40 +1,70 @@
 import { useRef, useState, useContext, useEffect } from "react";
 import { AccessibilityContext } from "../../Context/AccessibilityContext";
 import { homeSlides } from "../../Data/HomeSlides";
-
 import "../../Styles/ComponentStyle/Home/Carrusel.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+function toStaticSlide(s, i) {
+  return {
+    news_post_id: s.id ?? i,
+    title: s.title,
+    summary: s.subtitle ?? null,
+    content: s.description ?? null,
+    image_url: s.img ?? null,
+    published_at: s.date ?? null,
+  };
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" });
+  } catch {
+    return dateStr;
+  }
+}
+
 function Carrusel() {
-
   const carouselRef = useRef(null);
-
-  const { fontSize, highContrast, reducedMotion } =
-    useContext(AccessibilityContext);
-
+  const { fontSize, highContrast, reducedMotion } = useContext(AccessibilityContext);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [slides, setSlides] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/public/carousel`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ok && data.data?.length > 0) {
+          setSlides(data.data);
+        } else {
+          setSlides(homeSlides.map(toStaticSlide));
+        }
+      })
+      .catch(() => setSlides(homeSlides.map(toStaticSlide)))
+      .finally(() => setLoading(false));
+  }, []);
 
   const scrollToIndex = (index) => {
-
-    const width = carouselRef.current.offsetWidth;
-
+    if (!carouselRef.current) return;
     carouselRef.current.scrollTo({
-      left: width * index,
+      left: carouselRef.current.offsetWidth * index,
       behavior: reducedMotion ? "auto" : "smooth",
     });
-
     setActiveIndex(index);
   };
 
   const scrollLeft = () => {
-    const newIndex =
-      activeIndex === 0 ? homeSlides.length - 1 : activeIndex - 1;
-    scrollToIndex(newIndex);
+    if (slides.length === 0) return;
+    scrollToIndex(activeIndex === 0 ? slides.length - 1 : activeIndex - 1);
   };
 
   const scrollRight = () => {
-    const newIndex =
-      activeIndex === homeSlides.length - 1 ? 0 : activeIndex + 1;
-    scrollToIndex(newIndex);
+    if (slides.length === 0) return;
+    scrollToIndex(activeIndex === slides.length - 1 ? 0 : activeIndex + 1);
   };
 
   const handleKeyDown = (e) => {
@@ -43,33 +73,36 @@ function Carrusel() {
   };
 
   const handleScroll = () => {
-    const scrollPosition = carouselRef.current.scrollLeft;
-    const width = carouselRef.current.offsetWidth;
-
-    const index = Math.round(scrollPosition / width);
-
+    if (!carouselRef.current) return;
+    const index = Math.round(
+      carouselRef.current.scrollLeft / carouselRef.current.offsetWidth
+    );
     setActiveIndex(index);
   };
 
-  /* autoplay accesible */
   useEffect(() => {
-
-    if (reducedMotion) return;
-
-    const interval = setInterval(() => {
-      scrollRight();
-    }, 8000);
-
+    if (reducedMotion || slides.length <= 1) return;
+    const interval = setInterval(scrollRight, 8000);
     return () => clearInterval(interval);
+  }, [activeIndex, reducedMotion, slides.length]);
 
-  }, [activeIndex, reducedMotion]);
+  if (loading) {
+    return (
+      <div
+        className="carousel-wrapper carousel-skeleton"
+        style={{ "--font-scale": fontSize }}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  if (slides.length === 0) return null;
 
   return (
     <div
       className={`carousel-wrapper ${highContrast ? "hc" : ""}`}
       style={{ "--font-scale": fontSize }}
     >
-      {/* Flecha izquierda */}
       <button
         className="carousel-arrow left"
         onClick={scrollLeft}
@@ -88,53 +121,50 @@ function Carrusel() {
         onKeyDown={handleKeyDown}
         onScroll={handleScroll}
       >
-        {homeSlides.map((slide, index) => (
+        {slides.map((slide, index) => (
           <article
-            key={slide.id}
+            key={slide.news_post_id ?? index}
             className="carousel-item"
             role="group"
             aria-roledescription="slide"
-            aria-label={`${index + 1} de ${homeSlides.length}`}
+            aria-label={`${index + 1} de ${slides.length}`}
+            style={
+              slide.image_url
+                ? { backgroundImage: `url(${slide.image_url})` }
+                : undefined
+            }
           >
-            <img src={slide.img} alt={slide.alt} loading="lazy" />
-
-            <div className="carousel-content">
-              <div className="carousel-body">
-
-                <h2 className="carousel-title">{slide.title}</h2>
-
-                {slide.subtitle && (
-                  <h3 className="carousel-subtitle">{slide.subtitle}</h3>
-                )}
-
-                <p className="carousel-description">
-                  {slide.description}
-                </p>
-
-              </div>
-
-              <div className="carousel-footer">
-
-                <span className="carousel-date">
-                  📅 {slide.date}
-                </span>
-
-                {slide.link && (
-                  <a
-                    href={slide.link}
-                    className="carousel-btn"
-                  >
-                    Ver más
-                  </a>
-                )}
-
+            <div className="carousel-overlay">
+              <div className="carousel-content">
+                <div className="carousel-body">
+                  <span className="carousel-badge">Destacado</span>
+                  <h2 className="carousel-title">{slide.title}</h2>
+                  {slide.summary && (
+                    <p className="carousel-subtitle">{slide.summary}</p>
+                  )}
+                  {slide.content && (
+                    <p className="carousel-description">{slide.content}</p>
+                  )}
+                </div>
+                <div className="carousel-footer">
+                  <span className="carousel-date">
+                    📅 {formatDate(slide.published_at)}
+                  </span>
+                  {(slide.link_url || slide.slug) && (
+                    <a
+                      href={slide.link_url || `/noticias/${slide.slug}`}
+                      className="carousel-btn"
+                    >
+                      Ver más
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </article>
         ))}
       </section>
 
-      {/* Flecha derecha */}
       <button
         className="carousel-arrow right"
         onClick={scrollRight}
@@ -143,9 +173,8 @@ function Carrusel() {
         ›
       </button>
 
-      {/* dots */}
       <div className="carousel-dots">
-        {homeSlides.map((_, index) => (
+        {slides.map((_, index) => (
           <button
             key={index}
             className={`dot ${index === activeIndex ? "active" : ""}`}
@@ -154,7 +183,6 @@ function Carrusel() {
           />
         ))}
       </div>
-
     </div>
   );
 }

@@ -28,14 +28,53 @@ const getCategoryIcon = (categoryName) => {
   return Layers;
 };
 
-// SIMULADOR DE TENDENCIAS PARA LAS TABLAS 
-const generateDummyTrend = () => [
-  { year: '2020', value: Math.floor(Math.random() * 20) + 5 },
-  { year: '2021', value: Math.floor(Math.random() * 30) + 10 },
-  { year: '2022', value: Math.floor(Math.random() * 40) + 15 },
-  { year: '2023', value: Math.floor(Math.random() * 50) + 20 },
-  { year: '2024', value: Math.floor(Math.random() * 60) + 25 },
-];
+// Construye tendencia acumulada por día rellenando días sin datos con el último valor
+// Construye tendencia acumulada por día usando la fecha real (YYYY-MM-DD) como eje X
+function buildCategoryTrend(datasetsForCategory) {
+  if (!datasetsForCategory.length) {
+    // Fallback: dos puntos ficticios para que la línea sea visible
+    const today = new Date().toISOString().slice(0, 10);
+    return [{ date: today, value: 0 }];
+  }
+
+  // Contar cuántos datasets se publicaron cada día
+  const dayCount = {};
+  datasetsForCategory.forEach(ds => {
+    const d = new Date(ds.created_at || ds.updated_at || "");
+    if (isNaN(d)) return;
+    const key = d.toISOString().slice(0, 10); // "YYYY-MM-DD"
+    dayCount[key] = (dayCount[key] || 0) + 1;
+  });
+
+  const keys = Object.keys(dayCount).sort();
+  if (!keys.length) {
+    const today = new Date().toISOString().slice(0, 10);
+    return [{ date: today, value: 0 }];
+  }
+
+  // Si solo hay un día con datos, agregamos un punto inicial en 0 el día anterior
+  if (keys.length === 1) {
+    const prev = new Date(keys[0]);
+    prev.setDate(prev.getDate() - 1);
+    const prevKey = prev.toISOString().slice(0, 10);
+    return [
+      { date: prevKey, value: 0 },
+      { date: keys[0], value: dayCount[keys[0]] },
+    ];
+  }
+
+  // Rellenar TODOS los días entre el primero y el último con acumulado
+  const start = new Date(keys[0]);
+  const end   = new Date(keys[keys.length - 1]);
+  const result = [];
+  let cumulative = 0;
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const key = d.toISOString().slice(0, 10);
+    cumulative += dayCount[key] || 0;
+    result.push({ date: key, value: cumulative });
+  }
+  return result;
+}
 
 function CircularProgress({ percentage, color, size = 46 }) {
   const strokeWidth = 4;
@@ -69,14 +108,11 @@ function IndicadoresDefault() {
   const navigate = useNavigate();
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // ==========================================
-  // NUEVO: Estado de la vista principal (Botones Arriba)
-  // ==========================================
-  const [mainView, setMainView] = useState("estado"); // 'estado' o 'evolucion'
-
+  const [mainView, setMainView] = useState("estado");
   const [activeTab, setActiveTab] = useState("tematico");
-  const [timeFilter, setTimeFilter] = useState("general"); 
+  const [timeFilter, setTimeFilter] = useState("general");
+  // Sin filtro de fecha: todos los datasets se muestran siempre
+  const filteredDatasets = datasets;
 
   useEffect(() => {
     async function fetchDatasets() {
@@ -94,13 +130,13 @@ function IndicadoresDefault() {
 
   // Lógica de Series de Tiempo
   const timeSeriesStats = useMemo(() => {
-    if (!datasets.length) return { data: [], keys: [] };
+    if (!filteredDatasets.length) return { data: [], keys: [] };
 
     const timeMap = {};
     const allCategories = new Set();
     const allOrigins = new Set();
 
-    datasets.forEach(ds => {
+    filteredDatasets.forEach(ds => {
       const dateStr = ds.created_at || ds.updated_at || "2023-01-01T00:00:00Z";
       const date = new Date(dateStr);
       const timeKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -150,42 +186,49 @@ function IndicadoresDefault() {
       return newItem;
     });
 
-    return { 
-      data, 
+    return {
+      data,
       categoryKeys: Array.from(allCategories),
       originKeys: Array.from(allOrigins)
     };
-  }, [datasets]);
+  }, [filteredDatasets]);
 
   // Lógica Tabular
   const thematicStats = useMemo(() => {
-    if (!datasets.length) return { total: 0, data: [] };
-    const total = datasets.length;
+    if (!filteredDatasets.length) return { total: 0, data: [] };
+    const total = filteredDatasets.length;
     const categoryCount = {};
-    
-    datasets.forEach(ds => {
+
+    filteredDatasets.forEach(ds => {
       const cat = ds.categoria || ds.category?.name || "Sin Categoría";
       categoryCount[cat] = (categoryCount[cat] || 0) + 1;
     });
 
+    const categoryDatasets = {};
+    filteredDatasets.forEach(ds => {
+      const cat = ds.categoria || ds.category?.name || "Sin Categoría";
+      if (!categoryDatasets[cat]) categoryDatasets[cat] = [];
+      categoryDatasets[cat].push(ds);
+    });
+
     const data = Object.entries(categoryCount)
-      .map(([name, count], index) => ({ 
-        name, count, 
+      .map(([name, count], index) => ({
+        name, count,
         percentage: (count / total) * 100,
         color: GLOBAL_COLORS[index % GLOBAL_COLORS.length],
-        trend: generateDummyTrend() 
+        trend: buildCategoryTrend(categoryDatasets[name] || []),
       }))
       .sort((a, b) => b.count - a.count);
 
     return { total, data };
-  }, [datasets]);
+  }, [filteredDatasets]);
 
   const originStats = useMemo(() => {
-    if (!datasets.length) return { total: 0, data: [] };
-    const total = datasets.length;
+    if (!filteredDatasets.length) return { total: 0, data: [] };
+    const total = filteredDatasets.length;
     const instMap = {};
 
-    datasets.forEach(ds => {
+    filteredDatasets.forEach(ds => {
       const instName = ds.institucion?.nombre || ds.institucion || "Institución Desconocida";
       const catName = ds.categoria || ds.category?.name || "Sin Categoría";
       const dateStr = ds.updated_at || ds.created_at;
@@ -222,7 +265,7 @@ function IndicadoresDefault() {
     }).sort((a, b) => b.count - a.count);
 
     return { total, data };
-  }, [datasets]);
+  }, [filteredDatasets]);
 
   const handleDatasetClick = (datasetId) => {
     navigate(`/indicadores/analisis`, { state: { selectedDatasetId: datasetId } });
@@ -279,6 +322,7 @@ function IndicadoresDefault() {
       </section>
 
       <hr className="ind-separator" />
+
 
       {loading ? (
         <div className="ind-loading">
@@ -411,11 +455,11 @@ function IndicadoresDefault() {
                           </td>
                           <td className="col-tendencia">
                             <div className="sparkline-wrapper">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={cat.trend}>
-                                  <Line type="monotone" dataKey="value" stroke={cat.color} strokeWidth={2.5} dot={false} isAnimationActive={true}/>
-                                </LineChart>
-                              </ResponsiveContainer>
+                              <LineChart width={130} height={42} data={cat.trend} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+                                <XAxis dataKey="date" hide type="category" />
+                                <YAxis hide domain={[0, 'dataMax']} />
+                                <Line type="monotone" dataKey="value" stroke={cat.color} strokeWidth={2.5} dot={{ r: 3, fill: cat.color }} isAnimationActive={false} />
+                              </LineChart>
                             </div>
                           </td>
                         </tr>
@@ -467,7 +511,7 @@ function IndicadoresDefault() {
             </div>
             
             <div className="dataset-grid-links">
-              {datasets.map(ds => (
+              {filteredDatasets.map(ds => (
                 <button 
                   key={ds.dataset_id} 
                   className="ds-link-card" 
