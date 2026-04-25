@@ -43,6 +43,10 @@ const VerificacionSeguridad = lazy(() => import("../Pages/Verificacionseguridad"
 const RecuperarContrasena = lazy(() => import("../Pages/RecuperarContrasena"));
 const ResetPassword = lazy(() => import("../Pages/ResetPassword"));
 
+
+const NoticiasAdmin = lazy(() => import("../Pages/Admin/NoticiasAdmin"));
+
+
 // not found route
 const Error404 = lazy(() => import("../Pages/Public/Error404"));
 
@@ -110,6 +114,15 @@ function AppRoutes() {
             <GestionRoles />
           </ProtectedRoute>
         } />
+
+        <Route 
+          path="/administracion/noticias" 
+          element={
+            <ProtectedRoute requiredPermission="catalog.write">
+              <NoticiasAdmin />
+            </ProtectedRoute>
+          } 
+        />
 
         <Route path="etiquetas" element={
           <ProtectedRoute requiredPermission="admin_general.manage">
