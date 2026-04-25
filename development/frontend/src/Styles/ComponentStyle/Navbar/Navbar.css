@@ -304,3 +304,50 @@ button:focus-visible{
 .logout-btn{
   cursor:pointer;
 }
+
+/* Contenedor del perfil de usuario */
+.user-profile-container {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+/* El círculo con la inicial */
+.user-avatar-circle {
+  width: 35px;
+  height: 35px;
+  background-color: #d32f2f; /* Rojo de la imagen */
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Ajuste para que el UserDropdown no choque con el círculo */
+.navbar-auth .user-profile-container .dropdown-user-btn {
+  padding-left: 0;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+
+/* Quitar borde izquierdo de navbar-auth si hay usuario para que respire mejor */
+.navbar-auth:has(.user-profile-wrapper) {
+  border-left: none;
+}
+
+
+/* Ajuste para que el UserDropdown no rompa el diseño */
+.user-profile-wrapper .dropdown-btn {
+  padding: 0;
+  color: var(--text-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  background: none;
+}

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../Context/AuthContext";
+import { Tag, Plus, Trash2, Database } from "lucide-react";
+import "../../Styles/Pages_styles/Admin/MantenedorTags.css"; // Ajusta la ruta si es necesario
 
 function MantenedorTags() {
   const { user } = useAuth();
@@ -58,42 +60,77 @@ function MantenedorTags() {
   };
 
   return (
-    <div className="gestion-datasets">
-      <h1>Mantenedor de Etiquetas</h1>
-      
-      <form onSubmit={async (e) => {
-        e.preventDefault();
-        const res = await fetch(`${API_URL}/api/tags`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
-          body: JSON.stringify({ name: newTagName })
-        });
-        if (res.ok) { setNewTagName(""); fetchTags(); }
-      }}>
-        <input value={newTagName} onChange={e => setNewTagName(e.target.value)} placeholder="Nueva etiqueta..." required />
-        <button type="submit" className="btn-create">Crear</button>
-      </form>
+    <div className="mtags-container">
+      {/* Cabecera y Formulario */}
+      <div className="mtags-header">
+        <div className="mtags-title-group">
+          <Tag className="mtags-icon-title" size={24} />
+          <h1 className="mtags-title">Mantenedor de Etiquetas</h1>
+        </div>
+        
+        <form className="mtags-form" onSubmit={async (e) => {
+          e.preventDefault();
+          const res = await fetch(`${API_URL}/api/tags`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
+            body: JSON.stringify({ name: newTagName })
+          });
+          if (res.ok) { setNewTagName(""); fetchTags(); }
+        }}>
+          <input 
+            className="mtags-input"
+            value={newTagName} 
+            onChange={e => setNewTagName(e.target.value)} 
+            placeholder="Nombre de nueva etiqueta..." 
+            required 
+          />
+          <button type="submit" className="mtags-btn-add">
+            <Plus size={18} /> Crear
+          </button>
+        </form>
+      </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Datasets Asociados</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tags.map(tag => (
-            <tr key={tag.tag_id}>
-              <td>{tag.name}</td>
-              <td style={{textAlign: 'center'}}>{tag.dataset_count}</td>
-              <td>
-                <button className="btn-delete" onClick={() => handleEliminar(tag)}>Eliminar</button>
-              </td>
+      {/* Tabla de Datos */}
+      <div className="mtags-table-wrapper">
+        <table className="mtags-table">
+          <thead>
+            <tr>
+              <th>Nombre de Etiqueta</th>
+              <th>Datasets Asociados</th>
+              <th>Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {tags.map(tag => (
+              <tr key={tag.tag_id}>
+                <td>
+                  <div className="mtags-name-cell">
+                    <Tag size={16} className="mtags-text-icon" />
+                    {tag.name}
+                  </div>
+                </td>
+                <td>
+                  <span className="mtags-badge">
+                    <Database size={14} /> {tag.dataset_count}
+                  </span>
+                </td>
+                <td>
+                  <button className="mtags-btn-delete" onClick={() => handleEliminar(tag)}>
+                    <Trash2 size={16} /> Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {tags.length === 0 && (
+              <tr>
+                <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                  No hay etiquetas registradas actualmente.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

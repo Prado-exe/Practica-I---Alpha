@@ -20,7 +20,7 @@ import { sendJson} from "../utils/json";
 import { readJsonBody } from "../utils/body";
 import { getErrorStatus, getErrorMessage } from "./auth.routes"; 
 import { getInstitutions, addInstitution, editInstitution, removeInstitution, getPublicInstitutions } from "../services/instituciones.service";
-
+import { getInstitutionById, getDatasetsByInstitution } from "../services/instituciones.service";
 
 import { tryGetAuthPayload } from "../utils/auth"; 
 
@@ -142,5 +142,36 @@ export async function getPublicInstitucionesAction(req: HttpRequest, res: HttpRe
   } catch (error) {
     console.error("❌ Error en getAllCategoriesAction:", error); // AGREGAR ESTO
   sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
+
+export async function getPublicInstitucionByIdAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const id = Number((req as any).params?.id);
+    if (!id || isNaN(id)) return sendJson(res, 400, { ok: false, message: "ID inválido" });
+
+    const institucion = await getInstitutionById(id);
+    if (!institucion) return sendJson(res, 404, { ok: false, message: "Institución no encontrada" });
+
+    sendJson(res, 200, { ok: true, institucion });
+  } catch (error) {
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
+export async function getPublicInstitucionDatasetsAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const id = Number((req as any).params?.id);
+    if (!id || isNaN(id)) return sendJson(res, 400, { ok: false, message: "ID inválido" });
+
+    const url = new URL(req.url || "", `http://${req.headers?.host || "localhost"}`);
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "9", 10);
+
+    const result = await getDatasetsByInstitution(id, page, limit);
+    sendJson(res, 200, { ok: true, ...result });
+  } catch (error) {
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }
 }

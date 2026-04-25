@@ -49,7 +49,9 @@ import {
   createInstitucionAction, 
   updateInstitucionAction, 
   deleteInstitucionAction,
-  getPublicInstitucionesAction 
+  getPublicInstitucionesAction,
+  getPublicInstitucionByIdAction,         // <--- AÑADIR ESTA
+  getPublicInstitucionDatasetsAction 
 } from "./instituciones.routes";
 
 import { getAllCategoriesAction } from "./categories.routes";
@@ -163,6 +165,8 @@ authRouter.add("POST", "/api/instituciones", [requirePermission("admin_general.m
 authRouter.add("PUT", "/api/instituciones/:id", [requirePermission("admin_general.manage")], updateInstitucionAction);
 authRouter.add("DELETE", "/api/instituciones/:id", [requirePermission("admin_general.manage")], deleteInstitucionAction);
 authRouter.add("GET", "/api/public/instituciones", [], getPublicInstitucionesAction);
+authRouter.add("GET", "/api/public/instituciones/:id", [], getPublicInstitucionByIdAction);            // <--- AÑADIR ESTA
+authRouter.add("GET", "/api/public/instituciones/:id/datasets", [], getPublicInstitucionDatasetsAction); // <--- AÑADIR ESTA
 
 //---categorias---
 authRouter.add("GET", "/api/categories", [], getAllCategoriesAction); 

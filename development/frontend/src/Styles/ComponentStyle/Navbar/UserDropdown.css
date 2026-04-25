@@ -47,3 +47,23 @@
   color: red;
   font-weight: bold;
 }
+
+.user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.user-btn {
+  background: none;
+  border: none;
+  padding: 0;
+}

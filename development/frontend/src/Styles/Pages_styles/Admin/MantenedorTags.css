@@ -1,0 +1,177 @@
+/* =========================================
+   Mantenedor de Tags (Prefijo: mtags-)
+   ========================================= */
+
+.mtags-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  margin: 1.5rem auto;
+  width: 100%;
+  max-width: 1100px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* --- HEADER Y FORMULARIO --- */
+.mtags-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.mtags-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #111827;
+}
+
+.mtags-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.mtags-icon-title {
+  color: #3b82f6; /* Azul primario */
+}
+
+.mtags-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mtags-input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 260px;
+}
+
+.mtags-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.mtags-btn-add {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #2563eb;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mtags-btn-add:hover {
+  background-color: #1d4ed8;
+}
+
+/* --- TABLA --- */
+.mtags-table-wrapper {
+  overflow-x: auto;
+}
+
+.mtags-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.mtags-table th {
+  background-color: #f9fafb;
+  padding: 0.875rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mtags-table td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.mtags-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.mtags-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.mtags-text-icon {
+  color: #9ca3af;
+}
+
+/* --- BADGES Y BOTONES DE ACCIÓN --- */
+.mtags-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #e5e7eb;
+}
+
+.mtags-btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: transparent;
+  color: #ef4444;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mtags-btn-delete:hover {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+}
+
+/* --- RESPONSIVO --- */
+@media (max-width: 640px) {
+  .mtags-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .mtags-form {
+    width: 100%;
+  }
+
+  .mtags-input {
+    flex-grow: 1;
+  }
+}

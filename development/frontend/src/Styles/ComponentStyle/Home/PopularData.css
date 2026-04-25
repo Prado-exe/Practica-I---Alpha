@@ -1,14 +1,17 @@
-/* Marco exterior */
+/* ==========================================================================
+   CONTENEDOR PRINCIPAL (Estructura exterior conservada)
+   ========================================================================== */
+
 .expositor-wrapper {
   background: #f5f7fa;
   padding: 4rem;  
   margin: 2rem 8rem;
   border-radius: 16px;
   box-shadow:
-  0 2px 6px rgba(0,0,0,0.04),
-  0 8px 18px rgba(0, 0, 0, 0.548);
+    0 2px 6px rgba(0,0,0,0.04),
+    0 8px 18px rgba(0, 0, 0, 0.2); /* Sombra suavizada */
 }
-/* Contenedor */
+
 .expositor-popdata {
   max-width: 1400px;
   margin: 0 auto;
@@ -23,21 +26,22 @@
   font-size: 2.5rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
+  color: #1e293b;
 }
 
 .expositor-header p {
   font-size: 1.2rem;
-  color: #666;
+  color: #64748b;
 }
 
 .expositor-separator {
   height: 1px;
-  background-color: black;
+  background-color: #cbd5e1;
   border: none;
   margin: 0.5rem 0 2rem 0;
 }
 
-/* Grid */
+/* Grid de Datasets */
 .expositor-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -45,137 +49,161 @@
   align-items: stretch;
 }
 
-/* Cards */
+/* ==========================================================================
+   NUEVO DISEÑO DE CARDS (Enfoque en Institución y Limpieza Visual)
+   ========================================================================== */
+
 .expositor-card {
-  background: white;
-  border-radius: 14px;
-  overflow: hidden;
+  background: #ffffff;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow:
-  0 2px 6px rgba(0,0,0,0.05),
-  0 6px 14px rgba(0,0,0,0.06);
-  transition:
-  transform 0.25s ease,
-  box-shadow 0.25s ease;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .expositor-card:hover {
-  transform: translateY(-8px);
-  box-shadow:
-  0 10px 25px rgba(0,0,0,0.12),
-  0 18px 40px rgba(0,0,0,0.08);
+  transform: translateY(-5px);
+  border-color: #3b82f6; /* Color azul al destacar */
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Imagen */
-.card-image-container {
+/* Sección Superior: Logo Institución + Badge Categoría */
+.card-top-section {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 160px;
-  padding-top: 1.5rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.2rem;
 }
 
-.card-image {
-  max-width: 140px;
-  max-height: 100px;
+.institution-logo-box {
+  width: 60px;
+  height: 60px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  flex-shrink: 0;
+}
+
+.inst-logo {
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
 }
 
-/* Contenido */
+.card-category {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #1e40af;
+  background-color: #dbeafe;
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Cuerpo de la Card: Título y Descripción */
 .card-content {
-  padding: 1.2rem;
   display: flex;
   flex-direction: column;
+  gap: 0.8rem;
   flex-grow: 1;
-  gap: 0.6rem;
 }
 
 .card-content h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.2;
-  margin: 0;
-}
-.card-content p {
-  font-size: 0.95rem;
-  color: #555;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
   line-height: 1.4;
   margin: 0;
+  /* Truncado a 2 líneas */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-content p {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+  /* Truncado a 3 líneas */
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Categoría */
-.card-category {
-  display: inline-block;
-
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-
-  color: #1565c0;
-  background-color: #e3f2fd;
-
-  padding: 4px 8px;
-  border-radius: 6px;
-  width: fit-content;
+/* Pie de la Card: Botón de acción */
+.card-footer {
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #f1f5f9;
 }
 
-/* Botón */
 .card-button {
-  margin-top: auto;
-  align-self: flex-start;
-  padding: 0.55rem 1.3rem;
-  font-size: 0.85rem;
+  display: block;
+  width: 100%;
+  padding: 0.7rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
   border-radius: 8px;
-  border: none;
-  background-color: #1565c0;
-  color: white;
-  cursor: pointer;
-  transition:
-  background-color 0.2s ease,
-  transform 0.15s ease;
+  background-color: #ffffff;
+  color: #2563eb;
+  border: 2px solid #dbeafe;
+  transition: all 0.2s ease;
 }
 
 .card-button:hover {
-
-  background-color: #0d47a1;
-
-  transform: translateY(-1px);
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  transform: scale(1.02);
 }
 
-.card-button:hover {
-  background-color: #0d47a1;
-}
+/* ==========================================================================
+   RESPONSIVE (Adaptabilidad)
+   ========================================================================== */
 
-.card-button:focus-visible {
-
-  outline: 3px solid #ffbf47;
-  outline-offset: 2px;
-
-}
-/* Responsive */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .expositor-wrapper {
-    margin: 2rem 3rem;
+    margin: 2rem 4rem;
   }
+}
+
+@media (max-width: 1024px) {
   .expositor-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .expositor-wrapper {
     margin: 1rem;
     padding: 2rem;
   }
+  .expositor-header h2 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 640px) {
   .expositor-grid {
     grid-template-columns: 1fr;
   }
-
 }

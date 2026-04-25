@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import "../../styles/ComponentStyle/Navbar/UserDropdown.css";
 
-function UserDropdown({ user, logout }) {
+function UserDropdown({ user, logout, children }) {
   if (!user) return null;
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef();
@@ -30,8 +30,7 @@ function UserDropdown({ user, logout }) {
   return (
     <div className="user-dropdown" ref={dropdownRef}>
       <button className="user-btn" onClick={() => setOpen(!open)}>
-        <FaUser />
-        <span>{user.name}</span>
+        {children}
       </button>
 
       {open && (

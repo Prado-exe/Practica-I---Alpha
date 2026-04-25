@@ -30,13 +30,13 @@ function AccessibilityTools() {
         A-
       </button>
 
-      <button
+      {/*<button
         onClick={toggleContrast}
         aria-label="Activar o desactivar alto contraste"
         aria-pressed={highContrast}
       >
         ⬛
-      </button>
+      </button>*/}
 
     </div>
   );

@@ -1,7 +1,6 @@
-import { FaUser, FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes } from "react-icons/fa";
 import { FaPenToSquare } from "react-icons/fa6";
-import { Link } from "react-router-dom";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import AccessibilityTools from "../AccessibilityTools";
@@ -11,7 +10,7 @@ import UserDropdown from "../Navbar/UserDropdown";
 import { useAuth } from "../../Context/AuthContext";
 import logo from "../../assets/Ico_obs_datos2.png";
 
-import "../../styles/ComponentStyle/Navbar/Navbar.css"
+import "../../styles/ComponentStyle/Navbar/Navbar.css";
 
 const navLinks = [
   { label: "Inicio", path: "/" },
@@ -19,7 +18,7 @@ const navLinks = [
   { label: "Instituciones", path: "/instituciones" },
   { label: "Indicadores", path: "/indicadores" },
   { label: "Publicaciones", path: "/publicaciones" },
-  { label: "Noticias", path: "/noticias" }, 
+  { label: "Noticias", path: "/noticias" },
   { label: "Contacto", path: "/formulario" },
 ];
 
@@ -41,7 +40,12 @@ function Navbar() {
 
   const effectiveUser = user;
 
-  /* SCROLL OPTIMIZADO */
+  // Inicial del usuario
+  const userInitial = effectiveUser?.full_name
+    ? effectiveUser.full_name.charAt(0).toUpperCase()
+    : "U";
+
+  /* SCROLL */
   useEffect(() => {
     let lastScrollY = window.scrollY;
     let ticking = false;
@@ -67,80 +71,81 @@ function Navbar() {
   }, []);
 
   return (
-    <>
-     <header
-        className={`navbar 
-          ${scrolled ? "navbar-scrolled" : "navbar-top-transparent"} 
-          ${hidden ? "navbar-hidden" : ""}
-          `}
-      >
-        {/* TOP */}
-        <div className="navbar-top">
-          <button
-            className="hamburger-btn"
-            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
-            aria-expanded={menuOpen}
-            aria-controls="main-menu"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? <FaTimes /> : <FaBars />}
-          </button>
+    <header
+      className={`navbar ${scrolled ? "navbar-scrolled" : ""} ${
+        hidden ? "navbar-hidden" : ""
+      }`}
+    >
+      {/* TOP */}
+      <div className="navbar-top">
+        <button
+          className="hamburger-btn"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <FaTimes /> : <FaBars />}
+        </button>
 
-          <div className="navbar-logo">
-            <Link to="/" aria-label="Ir al inicio">
-              <img src={logo} alt="Observatorio de Datos" />
-            </Link>
-          </div>
-
-          <div className="navbar-tools">
-            <AccessibilityTools />
-
-            <div className="navbar-auth">
-              {!effectiveUser ? (
-                <>
-                  <Link to="/login" className="btn">
-                    <FaUser />
-                    <span>Iniciar sesión</span>
-                  </Link>
-
-                  <Link to="/register" className="btn">
-                    <FaPenToSquare />
-                    <span>Registrarse</span>
-                  </Link>
-                </>
-              ) : (
-                // 👇 El Dropdown recibe la función logout que viene del AuthContext
-                <UserDropdown user={effectiveUser} logout={logout} />
-              )}
-            </div>
-          </div>
+        <div className="navbar-logo">
+          <Link to="/">
+            <img src={logo} alt="Logo" />
+          </Link>
         </div>
 
-        {/* NAV */}
-        <nav
-          id="main-menu"
-          className={`navbar-bottom ${menuOpen ? "open" : ""}`}
-          aria-label="Navegación principal"
-        >
-          <ul className="nav-links">
-            {navLinks.map((link) => (
-              <li key={link.path}>
-                <NavLink
-                  to={link.path}
-                  className={({ isActive }) =>
-                    `nav-btn ${isActive ? "active" : ""}`
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+        <div className="navbar-tools">
+          <AccessibilityTools />
 
-          <DropdownMenu links={aboutLinks} />
-        </nav>
-      </header>
-    </>
+          <div className="navbar-auth">
+            {!effectiveUser ? (
+              <>
+                <Link to="/login" className="btn">
+                  <span>Iniciar sesión</span>
+                </Link>
+                <Link to="/register" className="btn">
+                  <FaPenToSquare />
+                  <span>Registrarse</span>
+                </Link>
+              </>
+            ) : (
+              /* 👇 BLOQUE USUARIO LIMPIO */
+              <UserDropdown user={effectiveUser} logout={logout}>
+                <div className="user-trigger">
+                  <div className="user-avatar-circle">
+                    {userInitial}
+                  </div>
+                  <span className="user-name">
+                    {effectiveUser.full_name}
+                  </span>
+                </div>
+              </UserDropdown>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* BOTTOM */}
+      <nav
+        id="main-menu"
+        className={`navbar-bottom ${menuOpen ? "open" : ""}`}
+        aria-label="Navegación principal"
+      >
+        <ul className="nav-links">
+          {navLinks.map((link) => (
+            <li key={link.path}>
+              <NavLink
+                to={link.path}
+                className={({ isActive }) =>
+                  `nav-btn ${isActive ? "active" : ""}`
+                }
+              >
+                {link.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+
+        <DropdownMenu links={aboutLinks} />
+      </nav>
+    </header>
   );
 }
 

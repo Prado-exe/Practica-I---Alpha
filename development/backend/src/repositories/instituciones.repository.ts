@@ -234,3 +234,38 @@ export async function fetchPublicInstitutionsPaginated(search: string, limit: nu
   
   return { total, data: rows };
 }
+
+
+// En instituciones.repository.ts
+
+export async function fetchInstitutionByIdFromDb(id: number) {
+  const query = `
+    SELECT i.*, afr.file_url as logo_url, afr.storage_key 
+    FROM institutions i
+    INNER JOIN aws_file_references afr ON i.logo_file_id = afr.aws_file_reference_id
+    WHERE i.institution_id = $1
+  `;
+  const result = await pool.query(query, [id]);
+  return result.rows[0] || null;
+}
+
+export async function fetchDatasetsByInstitucionFromDb(id: number, limit: number, offset: number) {
+  // Primero contamos cuántos datasets hay en total para esta institución
+  const countQuery = `SELECT COUNT(*) FROM datasets WHERE institution_id = $1`;
+  const countResult = await pool.query(countQuery, [id]);
+  const total = parseInt(countResult.rows[0].count, 10);
+
+  // Luego traemos los datasets correspondientes a la página actual
+  const dataQuery = `
+    SELECT * FROM datasets 
+    WHERE institution_id = $1 
+    ORDER BY created_at DESC
+    LIMIT $2 OFFSET $3
+  `;
+  const dataResult = await pool.query(dataQuery, [id, limit, offset]);
+
+  return {
+    total,
+    data: dataResult.rows
+  };
+}

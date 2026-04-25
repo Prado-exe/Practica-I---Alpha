@@ -16,6 +16,8 @@
 
 
 import { fetchInstitutionsFromDb, createInstitutionInDb, updateInstitutionInDb, deleteInstitutionFromDb, fetchPublicInstitutionsPaginated} from "../repositories/instituciones.repository";
+import { fetchInstitutionByIdFromDb, fetchDatasetsByInstitucionFromDb } from "../repositories/instituciones.repository";
+
 import { AppError } from "../types/app-error";
 
 import { GetObjectCommand } from "@aws-sdk/client-s3";
@@ -23,7 +25,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { s3Client } from "../config/s3"; 
 import { env } from "../config/env";
-
 
 /**
  * Descripción: Recupera todas las instituciones del sistema e inyecta URLs prefirmadas temporales para sus logos.
@@ -163,3 +164,39 @@ export async function removeInstitution(id: number) {
   return { message: "Institución eliminada correctamente" };
 }
 
+
+
+
+export async function getInstitutionById(id: number) {
+  const inst = await fetchInstitutionByIdFromDb(id);
+  if (!inst) return null;
+
+  // Lógica para desencriptar/firmar la imagen de S3 (igual que en tu función getPublicInstitutions)
+  if (inst.storage_key) {
+    try {
+      const command = new GetObjectCommand({ Bucket: env.S3_BUCKET_NAME, Key: inst.storage_key });
+      const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+      
+      // Workaround para Docker
+      const finalUrl = presignedUrl.replace('storage:9000', 'localhost:9000');
+      
+      return { ...inst, logo_url: finalUrl };
+    } catch (error) {
+      console.error(`Error firmando URL:`, error);
+      return inst;
+    }
+  }
+
+  return inst; 
+}
+
+export async function getDatasetsByInstitution(id: number, page: number = 1, limit: number = 9) {
+  const offset = (page - 1) * limit;
+  const result = await fetchDatasetsByInstitucionFromDb(id, limit, offset);
+  
+  return {
+    total: result.total,
+    totalPages: Math.ceil(result.total / limit),
+    data: result.data
+  };
+}
