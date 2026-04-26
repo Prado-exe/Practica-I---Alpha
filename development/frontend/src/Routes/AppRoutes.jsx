@@ -23,7 +23,7 @@ const Nosotros = lazy(() => import("../Pages/Public/Nosotros"));
 const IndicadoresDefault = lazy(() => import("../Pages/Public/IndicadoresDefault"));
 const IndicadoresAnalisis = lazy(() => import("../Pages/Public/Indicadores")); // Tu componente anterior
 const PreguntasFrecuentes = lazy(() => import("../Pages/Public/PreguntasFrecuentes"));
-
+const DatasetGraficos = lazy(() => import("../Pages/Public/DatasetGraficos"));
 
 //Admin Routes
 const Dashboard = lazy(() => import("../Pages/Admin/Dashboard"));
@@ -140,6 +140,7 @@ function AppRoutes() {
         <Route path="/formulario" element={<Formulario />} />
         <Route path="/conjuntodatos" element={<Datos />} />
         <Route path="/conjuntodatos/:id" element={<DatasetDetalle />} />
+        <Route path="/conjuntodatos/:id/graficos" element={<DatasetGraficos />} />
         <Route path="/publicaciones" element={<Publicaciones />} />
         <Route path="/instituciones" element={<Instituciones />} />
         <Route path="/instituciones/:id" element={<InstitucionDetalle />} />

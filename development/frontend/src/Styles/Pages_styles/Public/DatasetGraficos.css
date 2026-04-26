@@ -1,0 +1,114 @@
+.graficos-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: auto;
+}
+
+/* SIDEBAR STICKY */
+.sidebar-left {
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* MAIN */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* CARDS */
+.chart-card {
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  padding: 1.2rem;
+}
+
+/* DATASET INFO */
+.dataset-info-card {
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  padding: 1.2rem;
+}
+
+/* HEADER */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-add {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* CHART BOX */
+.chart-box {
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* CONTROLS */
+.chart-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.chart-controls select,
+.chart-card select,
+.chart-card input {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* DELETE */
+.chart-controls button {
+  background: #c62828;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+/* TABLE */
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.preview-table th,
+.preview-table td {
+  border-bottom: 1px solid #eee;
+  padding: 8px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .graficos-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-left {
+    position: relative;
+  }
+}
