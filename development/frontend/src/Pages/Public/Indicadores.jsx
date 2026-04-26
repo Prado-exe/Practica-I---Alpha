@@ -249,6 +249,25 @@ function DataTable({ data, columns }) {
   );
 }
 
+/* ─── date helpers ─── */
+function parseRowDate(val) {
+  if (val == null || val === "") return null;
+  const s = String(val).trim();
+  // YYYY, YYYY-MM, YYYY-MM-DD, DD/MM/YYYY
+  const iso = s.match(/^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/);
+  if (iso) {
+    const [, y, m = "01", d = "01"] = iso;
+    return new Date(`${y}-${m}-${d}T00:00:00`);
+  }
+  const dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (dmy) {
+    const [, d, m, y] = dmy;
+    return new Date(`${y}-${m}-${d}T00:00:00`);
+  }
+  const fallback = new Date(s);
+  return isNaN(fallback) ? null : fallback;
+}
+
 /* ─── Main component ─── */
 
 function Indicadores() {
@@ -257,6 +276,7 @@ function Indicadores() {
   const [lastManifest, setLastManifest] = useState(null);
   const [availableDatasets, setAvailableDatasets] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
 
   const { data, columns, mapping, metadata, loading, error, loadDataset } = useDataset();
 
@@ -348,6 +368,9 @@ function Indicadores() {
     if (lastManifest) loadDataset(lastManifest);
   }, [lastManifest, loadDataset]);
 
+  // Reset date range when a new dataset is selected
+  useEffect(() => { setDateRange({ start: "", end: "" }); }, [selectedId]);
+
   // 🚨 2. AUTO-MAPEO SEGURO (Garantiza que siempre haya columnas para graficar)
   const safeMapping = useMemo(() => {
     if (!data || !data.length || !columns || !columns.length) return mapping;
@@ -374,16 +397,32 @@ function Indicadores() {
     return { ...mapping, categoryCol: bestCat, primaryNumericCol: bestNum };
   }, [data, columns, mapping]);
 
-  // Utilizamos safeMapping para calcular las agrupaciones
-  const generalStats = useMemo(() => computeGeneralStats(data, columns), [data, columns]);
-  const pieData = useMemo(() => groupBySum(data, safeMapping?.categoryCol, safeMapping?.primaryNumericCol, 8), [data, safeMapping]);
-  const barData = useMemo(() => groupBySum(data, safeMapping?.regionCol || safeMapping?.categoryCol, safeMapping?.primaryNumericCol, 16), [data, safeMapping]);
+  // Filtered data: apply date range when a timeCol is detected
+  const filteredData = useMemo(() => {
+    const timeCol = safeMapping?.timeCol;
+    if (!timeCol || (!dateRange.start && !dateRange.end)) return data;
+    const start = dateRange.start ? new Date(dateRange.start + "T00:00:00") : null;
+    const end   = dateRange.end   ? new Date(dateRange.end   + "T23:59:59") : null;
+    return data.filter(row => {
+      const d = parseRowDate(row[timeCol]);
+      if (!d) return true; // keep rows with unparseable dates
+      if (start && d < start) return false;
+      if (end   && d > end)   return false;
+      return true;
+    });
+  }, [data, safeMapping, dateRange]);
+
+  // Utilizamos safeMapping y filteredData para calcular las agrupaciones
+  const generalStats = useMemo(() => computeGeneralStats(filteredData, columns), [filteredData, columns]);
+  const pieData = useMemo(() => groupBySum(filteredData, safeMapping?.categoryCol, safeMapping?.primaryNumericCol, 8), [filteredData, safeMapping]);
+  const barData = useMemo(() => groupBySum(filteredData, safeMapping?.regionCol || safeMapping?.categoryCol, safeMapping?.primaryNumericCol, 16), [filteredData, safeMapping]);
   const lineData = useMemo(() => {
     if (!safeMapping?.timeCol) return [];
-    const raw = groupBySum(data, safeMapping.timeCol, safeMapping.primaryNumericCol, 24);
+    const raw = groupBySum(filteredData, safeMapping.timeCol, safeMapping.primaryNumericCol, 24);
     return raw.sort((a, b) => String(a.name).localeCompare(String(b.name)));
-  }, [data, safeMapping]);
+  }, [filteredData, safeMapping]);
 
+  const isDateFiltered = dateRange.start || dateRange.end;
   const hasData    = !loading && !error && data.length > 0;
   const hasBarData = hasData && barData.length > 0;
   const hasPieData = hasData && pieData.length > 0;
@@ -410,8 +449,8 @@ function Indicadores() {
             <div className="select-wrap">
               <select
                 className="dataset-select"
-                value={selectedDataset?.dataset_id ?? ""}
-                onChange={e => handleDatasetChange(e.target.value)}
+                value={selectedId ?? ""}
+                onChange={e => handleSelect(e.target.value)}
                 aria-label="Seleccionar dataset"
                 disabled={loadingList}
               >
@@ -431,6 +470,37 @@ function Indicadores() {
             )}
           </div>
 
+          {safeMapping?.timeCol && hasData && (
+            <div className="sidebar-section">
+              <p className="panel-title"><TrendingUp size={13} /> 2. Filtrar por fecha</p>
+              <label className="date-filter-label" htmlFor="date-start">Desde</label>
+              <input
+                id="date-start"
+                type="date"
+                className="date-filter-input"
+                value={dateRange.start}
+                onChange={e => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+              />
+              <label className="date-filter-label" htmlFor="date-end">Hasta</label>
+              <input
+                id="date-end"
+                type="date"
+                className="date-filter-input"
+                value={dateRange.end}
+                onChange={e => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+              />
+              {isDateFiltered && (
+                <button
+                  className="retry-btn"
+                  style={{ marginTop: "8px", width: "100%" }}
+                  onClick={() => setDateRange({ start: "", end: "" })}
+                >
+                  Limpiar filtro
+                </button>
+              )}
+            </div>
+          )}
+
           {metadata && <MetadataPanel metadata={metadata} />}
           {safeMapping && columns.length > 0 && <MappingPanel mapping={safeMapping} columns={columns} />}
         </aside>
@@ -439,11 +509,18 @@ function Indicadores() {
           {loading && <LoadingState />}
           {!loading && error && <ErrorState error={error} onRetry={handleRetry} />}
           {!loading && !error && !selectedId && <EmptyState onSelect={handleSelect} datasets={availableDatasets} />}
-          {!loading && !error && selectedId && !data.length && !loading && (
+          {!loading && !error && selectedId && !data.length && (
             <div className="ind-loading"><p>Sin datos para mostrar.</p></div>
           )}
+          {hasData && filteredData.length === 0 && (
+            <div className="ind-error" style={{ gap: "12px" }}>
+              <AlertCircle size={36} />
+              <h3>Sin resultados para el rango seleccionado</h3>
+              <p>No hay registros entre las fechas indicadas. Ajusta el rango o <button className="retry-btn" onClick={() => setDateRange({ start: "", end: "" })}>limpia el filtro</button>.</p>
+            </div>
+          )}
 
-          {hasData && (
+          {hasData && filteredData.length > 0 && (
             <>
               <section className="ind-kpis" aria-label="Estadísticas generales">
                 {generalStats.map(s => <StatCard key={s.id} stat={s} />)}
@@ -528,7 +605,7 @@ function Indicadores() {
                 </div>
               )}
 
-              <DataTable data={data} columns={columns} />
+              <DataTable data={filteredData} columns={columns} />
             </>
           )}
         </div>

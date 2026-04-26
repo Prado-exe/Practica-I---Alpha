@@ -74,8 +74,16 @@ import { getAllTagsAction, createTagAction, deleteTagAction } from "./tags.route
 import { getAllLicensesAction} from "./licenses.routes";
 
 
-// Importar los controladores de noticias
-import { createNewsAction, getPublicNewsAction } from "./news.routes";
+// Importar los controladores de noticias y carrusel
+import {
+  createNewsAction,
+  getPublicNewsAction,
+  getPublicCarouselAction,
+  getAdminCarouselAction,
+  createCarouselSlideAction,
+  updateCarouselSlideAction,
+  deleteCarouselSlideAction
+} from "./news.routes";
 
 /**
  * Descripción: Extrae el identificador de la sesión activa desde el Access Token o el Refresh Token.
@@ -204,5 +212,11 @@ authRouter.add("POST", "/api/datasets/:id/validate", [requirePermission("data_va
 authRouter.add("GET", "/api/public/news", [], getPublicNewsAction);
 
 // --- RUTAS PROTEGIDAS (ADMIN) ---
-// Solo usuarios con permiso de escritura en catálogo pueden crear noticias
 authRouter.add("POST", "/api/news", [requirePermission("catalog.write")], createNewsAction);
+
+// --- RUTAS CARRUSEL ---
+authRouter.add("GET", "/api/public/carousel", [], getPublicCarouselAction);
+authRouter.add("GET", "/api/carousel", [requirePermission("catalog.write")], getAdminCarouselAction);
+authRouter.add("POST", "/api/carousel", [requirePermission("catalog.write")], createCarouselSlideAction);
+authRouter.add("PUT", "/api/carousel/:id", [requirePermission("catalog.write")], updateCarouselSlideAction);
+authRouter.add("DELETE", "/api/carousel/:id", [requirePermission("catalog.write")], deleteCarouselSlideAction);

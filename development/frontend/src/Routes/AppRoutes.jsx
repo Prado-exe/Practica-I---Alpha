@@ -45,6 +45,7 @@ const ResetPassword = lazy(() => import("../Pages/ResetPassword"));
 
 
 const NoticiasAdmin = lazy(() => import("../Pages/Admin/NoticiasAdmin"));
+const GestionCarrusel = lazy(() => import("../Pages/Admin/GestionCarrusel"));
 
 
 // not found route
@@ -115,13 +116,22 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
 
-        <Route 
-          path="/administracion/noticias" 
+        <Route
+          path="/administracion/noticias"
           element={
             <ProtectedRoute requiredPermission="catalog.write">
               <NoticiasAdmin />
             </ProtectedRoute>
-          } 
+          }
+        />
+
+        <Route
+          path="/administracion/carrusel"
+          element={
+            <ProtectedRoute requiredPermission="catalog.write">
+              <GestionCarrusel />
+            </ProtectedRoute>
+          }
         />
 
         <Route path="etiquetas" element={

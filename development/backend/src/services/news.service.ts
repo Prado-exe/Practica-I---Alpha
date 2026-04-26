@@ -1,10 +1,14 @@
-import { 
-  createNewsPostInDb, 
+import {
+  createNewsPostInDb,
   fetchPublicNewsFromDb,
   fetchAllNewsAdminFromDb,
   updateNewsPostInDb,
   softDeleteNewsPostInDb,
-  insertNewsFileInDb
+  insertNewsFileInDb,
+  fetchCarouselSlidesFromDb,
+  fetchAllCarouselSlidesAdminFromDb,
+  createCarouselSlideInDb,
+  updateCarouselSlideInDb
 } from "../repositories/news.repository";
 
 import { AppError } from "../types/app-error";
@@ -95,6 +99,44 @@ export async function softDeleteNewsPost(id: number) {
     throw new AppError("ID inválido", 400);
   }
 
+  return await softDeleteNewsPostInDb(id);
+}
+
+
+// =====================================================
+// CAROUSEL
+// =====================================================
+export async function getCarouselSlides() {
+  return await fetchCarouselSlidesFromDb();
+}
+
+export async function getAllCarouselSlidesAdmin() {
+  return await fetchAllCarouselSlidesAdminFromDb();
+}
+
+export async function createCarouselSlide(data: any, authorId: number) {
+  if (!data.title) throw new AppError("Título obligatorio", 400);
+
+  // Remove accents then non-word characters to build a clean slug
+  const slug = data.title
+    .toLowerCase()
+    .trim()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "") + "-" + Date.now();
+
+  return await createCarouselSlideInDb({ ...data, slug }, authorId);
+}
+
+export async function updateCarouselSlide(id: number, data: any) {
+  if (!id) throw new AppError("ID inválido", 400);
+  if (!data.title) throw new AppError("Título obligatorio", 400);
+  return await updateCarouselSlideInDb(id, data);
+}
+
+export async function deleteCarouselSlide(id: number) {
+  if (!id) throw new AppError("ID inválido", 400);
   return await softDeleteNewsPostInDb(id);
 }
 

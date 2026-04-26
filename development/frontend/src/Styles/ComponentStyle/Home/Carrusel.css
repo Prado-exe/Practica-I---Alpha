@@ -1,235 +1,277 @@
-/* ===================== */
-
-/* Wrapper */
+/* =====================
+   Wrapper
+   ===================== */
 .carousel-wrapper {
   position: relative;
   margin: 0.7rem 5rem 2rem;
-  font-size: 1rem; /* escalable vía fontSize */
-  background: rgba(255, 255, 255, 0.637);
-  border-radius: 12px;
+  border-radius: 18px;
+  overflow: hidden;
+  font-size: 1rem;
   box-shadow:
-    0 8px 24px rgba(122, 122, 122, 0.7),
-    0 2px 6px rgba(0, 0, 0, 0.5);
+    0 20px 60px rgba(0, 0, 0, 0.22),
+    0 4px 16px rgba(0, 0, 0, 0.14);
 }
 
 .carousel-wrapper.hc {
-  background: #000;
-  box-shadow: none;
   border: 2px solid #fff;
+  box-shadow: none;
 }
 
-.carousel-wrapper.hc img {
-  filter: grayscale(100%) contrast(120%);
-}
-.carousel-title {
-  font-size: clamp(1.4rem, calc(2.5rem * var(--font-scale)), 3rem);
-}
-
-.carousel-subtitle {
-  font-size: clamp(1rem, calc(1.7rem * var(--font-scale)), 2rem);
-}
-
-.carousel-description {
-  font-size: clamp(0.9rem, calc(1rem * var(--font-scale)), 1.3rem);
+/* =====================
+   Skeleton / loading
+   ===================== */
+.carousel-skeleton {
+  min-height: 480px;
+  background: linear-gradient(90deg, #dde3ed 25%, #edf0f5 50%, #dde3ed 75%);
+  background-size: 300% 100%;
+  animation: carouselShimmer 1.6s ease-in-out infinite;
 }
 
-/* ===================== */
-/* Carrusel */
+@keyframes carouselShimmer {
+  0%   { background-position: 300% 0; }
+  100% { background-position: -300% 0; }
+}
+
+/* =====================
+   Track
+   ===================== */
 .carousel {
   display: flex;
   overflow-x: scroll;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  min-height: 300px;
-  position: relative;
-
-  -ms-overflow-style: none; 
-  scrollbar-width: none;   
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .carousel::-webkit-scrollbar {
   display: none;
 }
 
+/* =====================
+   Slide — hero background
+   ===================== */
 .carousel-item {
   flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  min-height: 480px;
   display: flex;
-  align-items: stretch;
-
-  min-height: 420px; /* altura base */
-  height: auto;      /* permite crecer */
-
-  padding: 2rem;
-  box-sizing: border-box;
+  background-color: #101c3d;        /* color base cuando no hay imagen */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
 }
 
-/* ===================== */
-/* Imagen del slide */
-.carousel-item img {
-  width: 40%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 10px;
-  flex-shrink: 0;
+/* =====================
+   Gradient overlay
+   ===================== */
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(8, 17, 52, 0.96) 0%,
+    rgba(8, 17, 52, 0.86) 38%,
+    rgba(8, 17, 52, 0.52) 62%,
+    rgba(8, 17, 52, 0.10) 100%
+  );
+  display: flex;
+  align-items: center;
 }
 
-/* ===================== */
-/* Contenido derecho */
+/* =====================
+   Content
+   ===================== */
 .carousel-content {
-  width: 60%;
-  padding-left: 2rem;
+  padding: 3rem 4.5rem;
+  max-width: 60%;
+  min-height: 480px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
+  box-sizing: border-box;
 }
 
 .carousel-body {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.85rem;
+  padding-top: 2rem;
 }
 
+/* =====================
+   Badge
+   ===================== */
+.carousel-badge {
+  display: inline-block;
+  background: #1565c0;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  padding: 0.28rem 1rem;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.carousel-wrapper.hc .carousel-badge {
+  background: #ff9800;
+  color: #000;
+}
+
+/* =====================
+   Typography
+   ===================== */
 .carousel-title {
   margin: 0;
-  font-size: calc(2.5rem * var(--font-scale));
-  font-weight: 600;
+  font-size: clamp(1.6rem, calc(2.2rem * var(--font-scale)), 3.4rem);
+  font-weight: 800;
+  line-height: 1.18;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
 }
 
 .carousel-subtitle {
   margin: 0;
-  font-size: calc(1.7rem * var(--font-scale));
-  color: #555;
+  font-size: clamp(0.95rem, calc(1.15rem * var(--font-scale)), 1.75rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.5;
 }
 
 .carousel-description {
-  margin-top: 0.5rem;
-  font-size: calc(1rem * var(--font-scale));
-  line-height: 1.6;
-  color: #333;
-  max-width: 90%;
+  margin: 0;
+  font-size: clamp(0.85rem, calc(0.95rem * var(--font-scale)), 1.2rem);
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.7;
+  max-width: 88%;
+}
+
+/* =====================
+   Footer
+   ===================== */
+.carousel-footer {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-bottom: 2.5rem;
+  margin-top: 2rem;
 }
 
 .carousel-date {
-  font-size: calc(0.9rem * var(--font-scale));
-  color: #666;
+  font-size: clamp(0.78rem, calc(0.88rem * var(--font-scale)), 1rem);
+  color: rgba(255, 255, 255, 0.6);
 }
 
-.carousel-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1rem;
-}
-
-/* ===================== */
-/* Botón del slide */
+/* =====================
+   CTA button
+   ===================== */
 .carousel-btn {
-  padding: 0.55rem 1.4rem;
-  border-radius: 20px;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.75rem;
+  border-radius: 25px;
   background: #1565c0;
-  color: white;
-  cursor: pointer;
-  font-size: calc(0.9rem * var(--font-scale));
+  color: #fff;
+  font-weight: 600;
+  font-size: clamp(0.85rem, calc(0.93rem * var(--font-scale)), 1.1rem);
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.45);
 }
 
 .carousel-btn:hover {
   background: #0d47a1;
-}
-
-/* ===================== */
-/* Flechas del carrusel */
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  font-size: calc(1.6rem * var(--font-scale));
-  line-height: 1;
-  cursor: pointer;
-}
-
-.carousel-arrow.left {
-  left: -20px;
-}
-
-.carousel-arrow.right {
-  right: -20px;
-}
-
-.carousel-arrow:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-/* ===================== */
-/* Dots centrados */
-.carousel-dots {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.6rem;
-  z-index: 20;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  background: #ccc;
-  cursor: pointer;
-}
-
-.dot.active {
-  background: #1565c0;
-}
-
-.carousel-wrapper.hc .dot {
-  background: #fff;
-}
-
-.carousel-wrapper.hc .dot.active {
-  background: #ff9800;
-}
-
-/* ===================== */
-/* Alto contraste */
-.carousel-wrapper.hc .carousel-item {
-  background: #000;
-  color: #fff;
-}
-
-.carousel-wrapper.hc .carousel-subtitle,
-.carousel-wrapper.hc .carousel-date {
-  color: #ddd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.6);
 }
 
 .carousel-wrapper.hc .carousel-btn {
   background: #fff;
   color: #000;
+  box-shadow: none;
+}
+
+/* =====================
+   Navigation arrows — glass morphism
+   ===================== */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.carousel-arrow.left  { left: 16px; }
+.carousel-arrow.right { right: 16px; }
+
+.carousel-arrow:hover {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-50%) scale(1.06);
 }
 
 .carousel-wrapper.hc .carousel-arrow {
   background: #fff;
-  color: #000000;
+  color: #000;
+  border-color: #fff;
 }
 
-/* ===================== */
-/* Focus visible */
+/* =====================
+   Animated pill dots
+   ===================== */
+.carousel-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 20;
+  align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
+}
+
+.dot.active {
+  width: 28px;
+  background: #fff;
+}
+
+.carousel-wrapper.hc .dot         { background: rgba(255, 255, 255, 0.45); }
+.carousel-wrapper.hc .dot.active  { background: #ff9800; width: 28px; }
+
+/* =====================
+   Focus states
+   ===================== */
 .carousel:focus {
   outline: 3px solid #1565c0;
   outline-offset: 4px;
@@ -242,69 +284,86 @@
   outline-offset: 3px;
 }
 
-/* ===================== */
-/* Responsive: móvil */
-@media (max-width: 768px) {
-  .carousel-item {
-    flex-direction: column;
-    height: auto;
-    padding: 1rem;
-  }
+/* =====================
+   High contrast overrides
+   ===================== */
+.carousel-wrapper.hc .carousel-overlay {
+  background: rgba(0, 0, 0, 0.88);
+}
 
-  .carousel-item img {
-    width: 100%;
-    height: 250px;
-    margin-bottom: 1rem;
-  }
+.carousel-wrapper.hc .carousel-title,
+.carousel-wrapper.hc .carousel-subtitle,
+.carousel-wrapper.hc .carousel-description,
+.carousel-wrapper.hc .carousel-date {
+  color: #fff;
+  text-shadow: none;
+}
 
+/* =====================
+   Responsive — tablet
+   ===================== */
+@media (max-width: 1024px) {
   .carousel-content {
-    width: 100%;
-    padding-left: 0;
+    max-width: 72%;
+    padding: 2.5rem 3rem;
   }
 }
-/* ===================== */
-/* Responsive: móvil */
+
+/* =====================
+   Responsive — mobile
+   ===================== */
 @media (max-width: 768px) {
   .carousel-wrapper {
-    margin: 0;              /* quitar márgenes laterales */
-    padding: 0 1rem;        /* opcional: un poco de padding para no pegarse a la pantalla */
+    margin: 0;
+    border-radius: 0;
   }
 
   .carousel-item {
-    flex-direction: column;
-    height: auto;
-    padding: 0;             /* eliminar padding interno */
+    min-height: 380px;
   }
 
-  .carousel-item img {
-    width: 100%;            /* ocupar todo el ancho */
-    height: 250px;
-    margin-bottom: 1rem;
+  /* On mobile, gradient comes from the bottom so text is readable */
+  .carousel-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(8, 17, 52, 0.25) 0%,
+      rgba(8, 17, 52, 0.88) 55%,
+      rgba(8, 17, 52, 0.97) 100%
+    );
+    align-items: flex-end;
   }
 
   .carousel-content {
-    width: 100%;
-    padding-left: 0;        /* quitar padding lateral */
+    padding: 1.5rem 1.5rem 2.8rem;
+    max-width: 100%;
+    min-height: unset;
+    justify-content: flex-end;
   }
 
-  /* Dots centrados y con más espacio */
-  .carousel-dots {
-    bottom: 10px;
+  .carousel-body {
+    padding-top: 0;
     gap: 0.5rem;
   }
 
-  /* Flechas más pequeñas y cercanas */
+  .carousel-footer {
+    padding-bottom: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
   .carousel-arrow {
-    width: 30px;
-    height: 30px;
-    font-size: calc(1.5rem * var(--font-scale));
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 1.4rem;
   }
 
-  .carousel-arrow.left {
-    left: 5px;
-  }
+  .carousel-arrow.left  { left: 10px; }
+  .carousel-arrow.right { right: 10px; }
 
-  .carousel-arrow.right {
-    right: 5px;
-  }
+  .dot        { width: 7px; height: 7px; }
+  .dot.active { width: 22px; }
+
+  .carousel-dots { bottom: 14px; }
 }
