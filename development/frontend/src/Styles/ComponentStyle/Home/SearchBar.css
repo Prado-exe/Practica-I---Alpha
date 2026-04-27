@@ -1,47 +1,180 @@
-.search-bar {
+.global-search-container {
   position: relative;
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 1.5rem;
+  /* En lugar de width 100%, usamos calc para restar los márgenes laterales (5rem + 5rem) */
+  width: calc(100% - 20rem); 
+  margin: 0 auto 2rem auto; /* Lo centramos automáticamente */
+  padding: 0;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-.search-bar input {
-  width: 100%;
-  padding: 0.6rem 2.5rem 0.6rem 2rem; /* espacio para icono y botón */
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 0.95rem;
-  transition: border 0.2s;
+/* Asegúrate de que el envoltorio interno no tenga anchos fijos */
+.global-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 99px;
+  padding: 0.6rem 1.4rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  width: 100%; /* Que ocupe todo el ancho del contenedor calculado arriba */
+  box-sizing: border-box;
 }
 
-.search-bar input:focus {
-  border-color: #1565C0;
-  outline: none;
+.global-search-input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1rem;
-  color: #888;
-  pointer-events: none;
+  color: #94a3b8;
+  margin-right: 0.8rem;
 }
 
-.clear-btn {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
+.global-search-input {
+  flex: 1;
   border: none;
-  background: transparent;
-  cursor: pointer;
+  outline: none;
   font-size: 1rem;
-  color: #888;
-  padding: 0;
+  color: #333;
+  background: transparent;
+  padding: 0.5rem 0;
 }
 
-.clear-btn:hover {
-  color: #1565C0;
+.loading-spinner {
+  color: #3b82f6;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =========================================
+   MENÚ DESPLEGABLE FLOTANTE (PREVIEW)
+   ========================================= */
+.global-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.dropdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+  max-height: 450px; /* Un poco más alto para las previews */
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: flex-start; /* Alinea los items arriba debido a la preview */
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  gap: 1rem;
+  border-bottom: 1px solid transparent;
+}
+
+.dropdown-item:hover {
+  background-color: #f8fafc;
+}
+
+/* Colores de iconos */
+.item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0; /* Evita que el icono se aplaste */
+  margin-top: 2px; /* Alineación óptica con el título */
+}
+
+.item-icon.type-dataset { background: #e0f2fe; color: #0284c7; }
+.item-icon.type-institución { background: #fef08a; color: #a16207; }
+.item-icon.type-noticia { background: #dcfce7; color: #166534; }
+.item-icon.type-publicación { background: #f3e8ff; color: #7e22ce; }
+
+/* Contenedor de Textos */
+.item-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  gap: 0.2rem;
+}
+
+/* Header de la Card del Dropdown */
+.item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.item-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badges para el Tipo de Elemento */
+.item-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 99px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.badge-dataset { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+.badge-institución { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+.badge-noticia { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-publicación { background: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+
+/* Descripción (Mini Preview) */
+.item-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  /* Truncado mágico de 1 línea para CSS */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.dropdown-message {
+  padding: 1.5rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

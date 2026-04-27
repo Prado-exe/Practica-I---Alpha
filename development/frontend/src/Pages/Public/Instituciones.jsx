@@ -46,10 +46,9 @@ function Instituciones() {
       <Breadcrumb paths={["Inicio", "Instituciones"]} />
 
       <SearchBarAdvanced
-        placeholder="Buscar instituciones..."
-        value={searchQuery}
-        onChange={(e) => handleSearch(e.target.value)}
-      />
+        placeholder="Buscar instituciones..."
+        onSearch={(query) => handleSearch(query)}
+      />
 
       <header className="instituciones-header">
         <h1>Instituciones</h1>

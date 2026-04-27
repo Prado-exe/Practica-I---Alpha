@@ -108,13 +108,14 @@ function Publicaciones() {
         <main className="publicaciones-v1-content">
 
           <SearchBarAdvanced
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Buscar publicaciones..."
-          />
+            placeholder="Buscar publicaciones..."
+            onSearch={(query) => {
+              if (query !== search) {
+                setSearch(query);
+                setPage(1);
+              }
+            }}
+          />
 
           {/* HEADER AISLADO */}
           <div className="publicaciones-v1-header">

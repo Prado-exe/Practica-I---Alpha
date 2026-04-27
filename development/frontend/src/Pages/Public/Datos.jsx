@@ -125,9 +125,14 @@ function Datos() {
 
         <main className="datos-content">
           <SearchBarAdvanced
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          />
+            placeholder="Buscar datasets..."
+            onSearch={(query) => { 
+              if (query !== search) {
+                setSearch(query); 
+                setPage(1); 
+              }
+            }}
+          />
 
           <div className="datos-header">
             <div className="header-title">
