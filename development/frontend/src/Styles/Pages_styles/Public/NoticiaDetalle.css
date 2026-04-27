@@ -1,46 +1,199 @@
+/* =========================================================
+   CONTENEDOR PRINCIPAL Y ESTADOS
+========================================================= */
 .noticia-detalle-page {
   padding: 2rem;
-  max-width: 900px;
+  max-width: 1000px; /* Un poco más ancho para mejor lectura */
   margin: 0 auto;
+  color: #333;
 }
 
-.article-header h1 {
-  margin-top: 1rem;
-  color: #1a1a1a;
+.loading-center, .error-center {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
 }
 
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 
+  100% { transform: rotate(360deg); } 
+}
+
+/* =========================================================
+   ARTÍCULO (Diseño tipo Tarjeta/Documento)
+========================================================= */
+.noticia-article {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  padding: 3rem;
+  margin-top: 1.5rem;
+  border: 1px solid #f0f0f0;
+}
+
+/* =========================================================
+   CABECERA (HEADER)
+========================================================= */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #0056b3;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.back-link:hover {
+  color: #003d82;
+  transform: translateX(-5px); /* Pequeña animación hacia atrás */
+}
+
+.article-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #111827; /* Gris muy oscuro, casi negro */
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+/* Metadatos (Fecha y Categoría tipo Badge) */
 .article-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  color: #666;
   margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #eaeaea;
 }
 
-.article-cover-container img {
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  color: #4b5563;
+  border-radius: 9999px; /* Forma de píldora */
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.meta-category {
+  background: #e0f2fe; /* Azul muy clarito */
+  color: #0369a1; /* Texto azul fuerte */
+}
+
+/* =========================================================
+   IMAGEN DE PORTADA
+========================================================= */
+.article-cover-container {
+  margin-bottom: 2.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.article-cover-image {
   width: 100%;
   max-height: 500px;
   object-fit: cover;
-  border-radius: 8px;
+  display: block; /* Evita el margen fantasma inferior de las imágenes */
+  transition: transform 0.4s ease;
+}
+
+.article-cover-container:hover .article-cover-image {
+  transform: scale(1.02); /* Efecto zoom suave */
+}
+
+/* =========================================================
+   CONTENIDO PRINCIPAL
+========================================================= */
+.content-text {
+  white-space: pre-wrap; 
+  line-height: 1.8; /* Mayor interlineado para lectura más cómoda */
+  font-size: 1.15rem;
+  color: #374151;
+  text-align: justify;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break:break-word;
+  hyphens: auto;
+
+}
+
+/* =========================================================
+   GALERÍA DE IMÁGENES
+========================================================= */
+.article-gallery {
+  margin-top: 4rem;
+}
+
+.gallery-divider {
+  border: 0;
+  height: 1px;
+  background: #eaeaea;
   margin-bottom: 2rem;
 }
 
-.content-text {
-  white-space: pre-wrap; /* Esto es vital para que se vean los saltos de línea */
-  line-height: 1.7;
-  font-size: 1.1rem;
-  color: #333;
+.article-gallery h3 {
+  font-size: 1.5rem;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
 }
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
 }
 
-.gallery-grid img {
+.gallery-item {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  background: #fff;
+  cursor: pointer;
+}
+
+.gallery-item img {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  border-radius: 8px;
+  display: block;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.05); /* Efecto zoom al pasar el mouse por la galería */
+}
+
+/* =========================================================
+   RESPONSIVE (MÓVILES)
+========================================================= */
+@media (max-width: 768px) {
+  .noticia-detalle-page {
+    padding: 1rem;
+  }
+  
+  .noticia-article {
+    padding: 1.5rem; /* Menos padding interno en celulares */
+  }
+
+  .article-title {
+    font-size: 1.8rem;
+  }
+  
+  .article-cover-image {
+    max-height: 300px;
+  }
 }

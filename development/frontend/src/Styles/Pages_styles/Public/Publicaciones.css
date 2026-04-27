@@ -1,81 +1,58 @@
+
 /* ===============================
-   CONTENEDOR GENERAL
+   PUBLICACIONES V1 - ROOT
    =============================== */
-.publicaciones-page {
-  width: 100%;
+.publicaciones-v1-page {
   max-width: 1200px;
   margin: 0 auto;
-
-  /* 🔥 ESTE ES EL FIX REAL */
-  padding: 0 20px 2rem 20px;
-
+  padding: 0 20px 2rem;
   font-family: "Inter", system-ui, sans-serif;
   color: #1e293b;
-  box-sizing: border-box;
-}
-
-.publicaciones-container {
-  width: 100%;
-  display: flex;
-  gap: 40px;
-
-  /* 🔥 CLAVE: evita que el sidebar “rompa el centrado visual” */
-  align-items: flex-start;
 }
 
 /* ===============================
    LAYOUT
    =============================== */
-.publicaciones-layout {
+.publicaciones-v1-layout {
   display: flex;
   gap: 40px;
   margin-top: 1.5rem;
-  align-items: flex-start;
-}
-
-.publicaciones-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 10px;
 }
 
 /* ===============================
    SIDEBAR
    =============================== */
-.publicaciones-sidebar {
+.publicaciones-v1-sidebar {
   flex: 0 0 280px;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.sidebar-header {
+/* HEADER SIDEBAR */
+.publicaciones-v1-sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.sidebar-header h3 {
-  margin: 0;
+.publicaciones-v1-sidebar-header h3 {
   font-size: 1.1rem;
   font-weight: 600;
+  color: #0f172a;
 }
 
-.btn-clear-filters-text {
+/* BOTÓN LIMPIAR */
+.publicaciones-v1-clear-btn {
   background: none;
   border: none;
   color: #3b82f6;
-  font-size: 0.85rem;
   cursor: pointer;
+  font-size: 0.85rem;
 }
 
-.btn-clear-filters-text:hover {
-  text-decoration: underline;
-}
-
-/* acordeón estilo Datos */
-.accordion-container {
+/* ACCORDION */
+.publicaciones-v1-accordion-container {
   background: #fff;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -86,7 +63,7 @@
 /* ===============================
    CONTENT
    =============================== */
-.publicaciones-content {
+.publicaciones-v1-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -95,143 +72,159 @@
 }
 
 /* ===============================
-   HEADER (igual Datos)
+   HEADER PRINCIPAL
    =============================== */
-.publicaciones-header {
+.publicaciones-v1-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
 
-.header-title {
+.publicaciones-v1-title {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.header-icon {
+.publicaciones-v1-icon {
   color: #2563eb;
 }
 
-.publicaciones-header h1 {
+.publicaciones-v1-title h1 {
   font-size: 28px;
-  margin: 0;
   font-weight: 700;
+  margin: 0;
 }
 
-.results-badge {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0ea5e9;
+/* BADGE RESULTADOS */
+.publicaciones-v1-badge {
   background: #e0f2fe;
+  color: #0ea5e9;
   padding: 6px 12px;
   border-radius: 20px;
+  font-size: 13px;
 }
 
 /* ===============================
-   SEPARADOR
+   CHIPS
    =============================== */
-.publicaciones-separator {
-  border: none;
-  height: 1px;
-  background: linear-gradient(to right, #e2e8f0, transparent);
-}
-
-/* ===============================
-   COUNT
-   =============================== */
-.publicaciones-count {
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
-/* ===============================
-   CHIPS (idéntico Datos)
-   =============================== */
-.filters-chips {
+.publicaciones-v1-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.publicaciones-v1-chip {
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
 }
 
-.chip:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
-  color: #b91c1c;
+.publicaciones-v1-chip-key {
+  font-weight: 500;
+  color: #334155;
+}
+
+.publicaciones-v1-chip-val {
+  color: #64748b;
 }
 
 /* ===============================
-   LISTA
+   SEPARADOR PROPIO
    =============================== */
-.publicaciones-list {
+.publicaciones-v1-divider {
+  height: 1px;
+  border: none;
+  background: linear-gradient(
+    to right,
+    #e2e8f0,
+    rgba(226, 232, 240, 0)
+  );
+  margin: 4px 0;
+}
+
+/* ===============================
+   COUNTER
+   =============================== */
+.publicaciones-v1-count {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+/* ===============================
+   GRID LIST
+   =============================== */
+.publicaciones-v1-grid {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
 /* ===============================
-   ESTADOS
+   LOADING STATE
    =============================== */
-.loading-state,
-.empty-state {
+.publicaciones-v1-loading {
   text-align: center;
-  padding: 60px 20px;
-  background-color: #f8fafc;
-  border-radius: 16px;
-  border: 2px dashed #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.empty-icon {
-  background-color: #e2e8f0;
-  padding: 20px;
-  border-radius: 50%;
-  margin-bottom: 20px;
+  padding: 60px 0;
   color: #64748b;
 }
 
-.empty-state h3 {
-  font-size: 1.25rem;
-  color: #0f172a;
-  margin-bottom: 8px;
-  font-weight: 600;
+.publicaciones-v1-spinner {
+  animation: pub-v1-spin 1s linear infinite;
+  color: #2563eb;
 }
 
-.empty-state p {
-  color: #64748b;
-  max-width: 400px;
-  margin-bottom: 24px;
-  line-height: 1.5;
+@keyframes pub-v1-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===============================
-   PAGINACIÓN
+   EMPTY STATE
    =============================== */
-.pagination-wrapper {
-  margin-top: 2rem;
+.publicaciones-v1-empty {
+  text-align: center;
+  padding: 60px 0;
+  color: #64748b;
+}
+
+.publicaciones-v1-empty-icon {
+  margin-bottom: 10px;
+  color: #94a3b8;
+}
+
+.publicaciones-v1-btn-empty {
+  margin-top: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ===============================
+   PAGINATION
+   =============================== */
+.publicaciones-v1-pagination {
   display: flex;
   justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 /* ===============================
    RESPONSIVE
    =============================== */
 @media (max-width: 1024px) {
-  .publicaciones-layout {
+  .publicaciones-v1-layout {
     flex-direction: column;
   }
 }

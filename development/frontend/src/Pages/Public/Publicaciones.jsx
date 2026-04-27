@@ -27,16 +27,12 @@ function Publicaciones() {
 
   useEffect(() => {
     getCategories().then(cats => {
-      setDbCategories(
-        cats.map(c => ({ label: c.name, value: c.name }))
-      );
+      setDbCategories(cats.map(c => ({ label: c.name, value: c.name })));
     });
   }, []);
 
   const availableYears = [...new Set(
-    publications.map(p =>
-      p.date ? new Date(p.date).getFullYear().toString() : null
-    )
+    publications.map(p => p.date ? new Date(p.date).getFullYear().toString() : null)
   )]
     .filter(Boolean)
     .sort((a, b) => b - a)
@@ -46,10 +42,7 @@ function Publicaciones() {
     {
       key: "type",
       title: "Tipo de publicación",
-      options: dbCategories.length
-        ? dbCategories
-        : [{ label: "Cargando...", value: "" }],
-      defaultOpen: false
+      options: dbCategories.length ? dbCategories : [{ label: "Cargando...", value: "" }]
     },
     {
       key: "year",
@@ -63,6 +56,12 @@ function Publicaciones() {
     setPage(1);
   };
 
+  const clearFilters = () => {
+    setFilters({});
+    setSearch("");
+    setPage(1);
+  };
+
   const removeFilter = (key) => {
     setFilters(prev => {
       const updated = { ...prev };
@@ -72,43 +71,41 @@ function Publicaciones() {
     setPage(1);
   };
 
-  const clearAll = () => {
-    setFilters({});
-    setSearch("");
-    setPage(1);
-  };
-
   return (
-    <div className="publicaciones-page">
+    <div className="publicaciones-v1-page">
       <Breadcrumb paths={["Inicio", "Publicaciones"]} />
 
-      <div className="publicaciones-layout">
+      <div className="publicaciones-v1-layout">
 
         {/* SIDEBAR */}
-        <aside className="publicaciones-sidebar">
+        <aside className="publicaciones-v1-sidebar">
 
-          <div className="sidebar-header">
+          <div className="publicaciones-v1-sidebar-header">
             <h3>Filtros</h3>
+
             {Object.keys(filters).length > 0 && (
-              <button className="btn-clear-filters-text" onClick={clearAll}>
+              <button
+                className="publicaciones-v1-clear-btn"
+                onClick={clearFilters}
+              >
                 Limpiar
               </button>
             )}
           </div>
 
-          <div className="accordion-container">
+          <div className="publicaciones-v1-accordion-container">
             <AccordionFilter
               filters={filtersConfig}
               selectedFilters={filters}
               onChange={handleFilterChange}
-              onClear={clearAll}
+              onClear={clearFilters}
             />
           </div>
 
         </aside>
 
         {/* CONTENT */}
-        <main className="publicaciones-content">
+        <main className="publicaciones-v1-content">
 
           <SearchBarAdvanced
             value={search}
@@ -119,40 +116,46 @@ function Publicaciones() {
             placeholder="Buscar publicaciones..."
           />
 
-          {/* HEADER estilo Datos */}
-          <div className="publicaciones-header">
-            <div className="header-title">
-              <BookOpen className="header-icon" size={28} />
+          {/* HEADER AISLADO */}
+          <div className="publicaciones-v1-header">
+
+            <div className="publicaciones-v1-title">
+              <BookOpen className="publicaciones-v1-icon" size={28} />
               <h1>Publicaciones</h1>
             </div>
 
-            <span className="results-badge">
+            <span className="publicaciones-v1-badge">
               {totalResults} resultados
             </span>
+
           </div>
 
-          {/* CHIPS (igual Datos) */}
+          {/* CHIPS AISLADOS */}
           {Object.keys(filters).length > 0 && (
-            <div className="filters-chips">
+            <div className="publicaciones-v1-chips">
               {Object.entries(filters).map(([key, values]) =>
                 Array.isArray(values) && values.length > 0 && (
                   <button
                     key={key}
-                    className="chip"
+                    className="publicaciones-v1-chip"
                     onClick={() => removeFilter(key)}
                   >
-                    <span className="chip-key">{key}:</span>
-                    <span className="chip-val">{values.length} sel.</span>
-                    <X size={14} className="chip-icon" />
+                    <span className="publicaciones-v1-chip-key">{key}:</span>
+                    <span className="publicaciones-v1-chip-val">
+                      {values.length} sel.
+                    </span>
+                    <X size={14} />
                   </button>
                 )
               )}
             </div>
           )}
 
-          <hr className="publicaciones-separator" />
+          {/* SEPARADOR PROPIO */}
+          <hr className="publicaciones-v1-divider" />
 
-          <p className="publicaciones-count">
+          {/* COUNT */}
+          <p className="publicaciones-v1-count">
             Mostrando{" "}
             <strong>
               {totalResults === 0 ? 0 : (page - 1) * 7 + 1}-
@@ -161,31 +164,36 @@ function Publicaciones() {
             de <strong>{totalResults}</strong> publicaciones
           </p>
 
-          {/* LISTADO */}
+          {/* STATES */}
           {loading ? (
-            <div className="loading-state">
-              <Loader2 className="spinner-large" size={40} />
+            <div className="publicaciones-v1-loading">
+              <Loader2 className="publicaciones-v1-spinner" size={40} />
               <p>Cargando publicaciones...</p>
             </div>
           ) : publications.length === 0 ? (
-            <div className="empty-state">
-              <FilterX size={48} className="empty-icon" />
+            <div className="publicaciones-v1-empty">
+              <FilterX size={48} className="publicaciones-v1-empty-icon" />
               <h3>No se encontraron publicaciones</h3>
               <p>Intenta ajustar filtros o búsqueda.</p>
-              <button className="btn-empty-clear" onClick={clearAll}>
+
+              <button
+                className="publicaciones-v1-btn-empty"
+                onClick={clearFilters}
+              >
                 Limpiar filtros
               </button>
             </div>
           ) : (
-            <div className="publicaciones-list fade-in">
+            <div className="publicaciones-v1-grid">
               {publications.map(pub => (
                 <PublicationCard key={pub.id} publication={pub} />
               ))}
             </div>
           )}
 
+          {/* PAGINATION */}
           {totalPages > 1 && (
-            <div className="pagination-wrapper">
+            <div className="publicaciones-v1-pagination">
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}

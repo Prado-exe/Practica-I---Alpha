@@ -1,154 +1,228 @@
+
 /* ===============================
-   CONTENEDOR GENERAL
+   NOTICIAS V1 - ROOT
    =============================== */
-.news-page {
+.noticias-v1-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 20px;
-  font-family: "Inter", sans-serif;
-  color: #333;
+  padding: 0 20px 2rem;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #1e293b;
 }
 
 /* ===============================
    LAYOUT
    =============================== */
-.news-container {
+.noticias-v1-layout {
   display: flex;
   gap: 40px;
+  margin-top: 1.5rem;
 }
 
 /* ===============================
    SIDEBAR
    =============================== */
-.news-sidebar {
-  flex: 0 0 260px;
+.noticias-v1-sidebar {
+  flex: 0 0 280px;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
+/* HEADER SIDEBAR */
+.noticias-v1-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.noticias-v1-sidebar-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.noticias-v1-clear-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
 /* ===============================
-   CONTENIDO (🔥 CLON EXACTO)
+   ACCORDION
    =============================== */
-.news-content {
+.noticias-v1-accordion-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+/* ===============================
+   CONTENT
+   =============================== */
+.noticias-v1-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+  min-width: 0;
 }
 
 /* ===============================
-   BUSCADOR
+   SEARCH
    =============================== */
-.news-content .search-bar-advanced {
+.noticias-v1-search {
   width: 100%;
-  box-sizing: border-box;
 }
 
 /* ===============================
-   HEADER
+   HEADER PRINCIPAL
    =============================== */
-.news-header {
+.noticias-v1-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-end;
 }
 
-.news-header h1 {
-  font-size: 26px;
+.noticias-v1-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.noticias-v1-title-icon {
+  color: #2563eb;
+}
+
+.noticias-v1-title h1 {
+  font-size: 28px;
+  font-weight: 700;
   margin: 0;
-  font-weight: 600;
 }
 
-.news-header span {
-  font-size: 14px;
-  color: #666;
+.noticias-v1-badge {
+  background: #e0f2fe;
+  color: #0ea5e9;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
 }
 
 /* ===============================
    SEPARADOR
    =============================== */
-.news-separator {
+.noticias-v1-separator {
   border: none;
-  border-top: 1px solid #ddd;
-  margin: 10px 0;
+  height: 1px;
+  background: linear-gradient(to right, #e2e8f0, transparent);
+  margin: 0;
 }
 
 /* ===============================
-   CONTADOR
+   CHIPS (AISLADOS)
    =============================== */
-.news-count {
-  font-size: 0.9rem;
-  color: #555;
-}
-
-/* ===============================
-   CHIPS
-   =============================== */
-.news-chips {
+.noticias-v1-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
-.news-chips .chip {
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  padding: 5px 12px;
+.noticias-v1-chip {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
   border-radius: 20px;
-  font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
-.news-chips .chip:hover {
-  background-color: #125ea6;
+/* keys internos */
+.noticias-v1-chip-key {
+  font-weight: 500;
+}
+
+.noticias-v1-chip-val {
+  color: #64748b;
 }
 
 /* ===============================
-   LISTA
+   GRID
    =============================== */
-.news-list {
+.noticias-v1-list {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
+  gap: 1.5rem;
+}
+
+/* ⚠️ IMPORTANTE: eliminamos dependencia global datasets-grid */
+.noticias-v1-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 /* ===============================
-   ESTADOS
+   LOADING
    =============================== */
-.loading-state,
-.empty-state {
+.noticias-v1-loading,
+.noticias-v1-empty {
   text-align: center;
-  padding: 50px 0;
-  color: #555;
+  padding: 60px 0;
+  color: #64748b;
+}
+
+.noticias-v1-spinner {
+  animation: noticias-v1-spin 1s linear infinite;
+  color: #2563eb;
+}
+
+@keyframes noticias-v1-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* empty icon wrapper */
+.noticias-v1-empty-icon {
+  margin-bottom: 10px;
+  color: #94a3b8;
+}
+
+/* ===============================
+   BUTTON EMPTY
+   =============================== */
+.noticias-v1-btn-empty {
+  margin-top: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ===============================
+   PAGINATION
+   =============================== */
+.noticias-v1-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 /* ===============================
    RESPONSIVE
    =============================== */
 @media (max-width: 1024px) {
-  .news-container {
+  .noticias-v1-layout {
     flex-direction: column;
-  }
-
-  .news-sidebar {
-    order: 2;
-    flex: 1;
-  }
-
-  .news-content {
-    order: 1;
-  }
-}
-
-/* ===============================
-   PANTALLAS GRANDES
-   =============================== */
-@media (min-width: 1400px) {
-  .news-page {
-    max-width: calc(100% - 300px);
-    padding: 2rem 0;
   }
 }

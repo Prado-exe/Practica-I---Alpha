@@ -1,39 +1,48 @@
 import { useState, useEffect } from "react";
 import "../../Styles/Pages_styles/Public/Noticias.css";
+
 import Breadcrumb from "../../Components/Common/Breadcrumb";
 import SearchBarAdvanced from "../../Components/Common/SearchBarAdvanced";
 import Pagination from "../../Components/Common/Pagination";
-import NoticiasCard from "../../Components/Cards/NoticiasCard";
 import AccordionFilter from "../../Components/Common/AccordionFilter";
+import NoticiasCard from "../../Components/Cards/NoticiasCard";
+
 import { useFetchList } from "../../Components/Hooks/useFetchList";
 import { getNoticias, getNewsCategories } from "../../Services/NoticiasService";
 
+import { Newspaper, X, Loader2, Inbox, FilterX } from "lucide-react";
+
 function Noticias() {
   const [dbCategories, setDbCategories] = useState([]);
+
   const {
-    search, setSearch, filters, setFilters, page, setPage,
-    data: news, totalResults, loading, totalPages
+    search, setSearch,
+    filters, setFilters,
+    page, setPage,
+    data: news,
+    totalResults,
+    loading,
+    totalPages
   } = useFetchList(getNoticias, { limit: 7 });
 
-  // 📡 Cargar categorías maestras de la tabla news_categories
   useEffect(() => {
     getNewsCategories().then(cats => {
-      // Transformamos al formato {label, value} que pide tu Accordion
       setDbCategories(cats.map(c => ({ label: c.name, value: c.name })));
     });
   }, []);
 
-  const availableYears = [...new Set(news.map(n => n.date ? new Date(n.date).getFullYear().toString() : null))]
-    .filter(Boolean).sort((a,b) => b - a)
+  const availableYears = [...new Set(
+    news.map(n => n.date ? new Date(n.date).getFullYear().toString() : null)
+  )]
+    .filter(Boolean)
+    .sort((a, b) => b - a)
     .map(y => ({ label: y, value: y }));
 
-  
   const filtersConfig = [
     {
       key: "category",
       title: "Categoría",
-      options: dbCategories.length > 0 ? dbCategories : [{ label: "Cargando...", value: "" }],
-      defaultOpen: true
+      options: dbCategories.length ? dbCategories : [{ label: "Cargando...", value: "" }]
     },
     {
       key: "year",
@@ -44,79 +53,163 @@ function Noticias() {
 
   const handleFilterChange = (key, values) => {
     setFilters(prev => ({ ...prev, [key]: values }));
+    setPage(1);
   };
 
   const clearFilters = () => {
     setFilters({});
     setSearch("");
+    setPage(1);
+  };
+
+  const removeFilter = (key) => {
+    setFilters(prev => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
+    setPage(1);
   };
 
   return (
-    <main className="news-page">
+    <div className="noticias-v1-page">
       <Breadcrumb paths={["Inicio", "Noticias"]} />
-      <div className="news-container">
-        <aside className="news-sidebar">
-          <AccordionFilter
-            filters={filtersConfig}
-            selectedFilters={filters}
-            onChange={handleFilterChange}
-            onClear={clearFilters}
-          />
+
+      <div className="noticias-v1-layout">
+
+        {/* SIDEBAR */}
+        <aside className="noticias-v1-sidebar">
+
+          <div className="noticias-v1-sidebar-header">
+            <h3>Filtros</h3>
+
+            {Object.keys(filters).length > 0 && (
+              <button
+                className="noticias-v1-clear-btn"
+                onClick={clearFilters}
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+
+          <div className="noticias-v1-accordion-container">
+            <AccordionFilter
+              filters={filtersConfig}
+              selectedFilters={filters}
+              onChange={handleFilterChange}
+              onClear={clearFilters}
+            />
+          </div>
+
         </aside>
 
-        <section className="news-content">
+        {/* CONTENT */}
+        <main className="noticias-v1-content">
+
+          {/* SEARCH */}
           <SearchBarAdvanced
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Buscar noticias..."
           />
 
           {/* HEADER */}
-          <div className="news-header">
-            <h1>Noticias</h1>
-            <span>{totalResults} disponibles</span>
+          <div className="noticias-v1-header">
+
+            <div className="noticias-v1-title">
+              <Newspaper className="noticias-v1-title-icon" size={28} />
+              <h1>Noticias</h1>
+            </div>
+
+            <span className="noticias-v1-badge">
+              {totalResults} resultados
+            </span>
+
           </div>
 
-          <hr className="news-separator" />
+          {/* CHIPS */}
+          {Object.keys(filters).length > 0 && (
+            <div className="noticias-v1-chips">
+              {Object.entries(filters).map(([key, values]) =>
+                Array.isArray(values) && values.length > 0 && (
+                  <button
+                    key={key}
+                    className="noticias-v1-chip"
+                    onClick={() => removeFilter(key)}
+                  >
+                    <span className="noticias-v1-chip-key">
+                      {key}:
+                    </span>
+                    <span className="noticias-v1-chip-val">
+                      {values.length} sel.
+                    </span>
+                    <X size={14} />
+                  </button>
+                )
+              )}
+            </div>
+          )}
 
+          <hr className="noticias-v1-separator" />
+
+          {/* COUNTER */}
+          <p className="noticias-v1-count">
+            Mostrando{" "}
+            <strong>
+              {totalResults === 0 ? 0 : (page - 1) * 7 + 1}-
+              {Math.min(page * 7, totalResults)}
+            </strong>{" "}
+            de <strong>{totalResults}</strong> noticias
+          </p>
+
+          {/* STATES */}
           {loading ? (
-            <p>Cargando noticias...</p>
+            <div className="noticias-v1-loading">
+              <Loader2 className="noticias-v1-spinner" size={40} />
+              <p>Cargando noticias...</p>
+            </div>
           ) : news.length === 0 ? (
-            <p>No se encontraron noticias</p>
-          ) : (
-            <>
-              <p className="news-count">
-                Mostrando <strong>{(page - 1) * 7 + 1}-{Math.min(page * 7, totalResults)}</strong> de <strong>{totalResults}</strong>
-              </p>
-
-              <div className="news-list">
-                {news.map(n => <NoticiasCard key={n.id} news={n} />)}
+            <div className="noticias-v1-empty">
+              <div className="noticias-v1-empty-icon">
+                <Inbox size={48} />
               </div>
-            </>
-          )}
+              <h3>No se encontraron noticias</h3>
+              <p>No hay resultados con los filtros actuales.</p>
 
-          <hr className="news-separator" />
-
-          {/* LISTADO */}
-          <div className="news-list">
-            {loading ? (
-              <div className="loading-state">Cargando noticias...</div>
-            ) : news.length === 0 ? (
-              <div className="empty-state">No se encontraron noticias</div>
-            ) : (
-              news.map(n => (
+              <button
+                className="noticias-v1-btn-empty"
+                onClick={clearFilters}
+              >
+                <FilterX size={18} />
+                Limpiar filtros
+              </button>
+            </div>
+          ) : (
+            <div className="noticias-v1-grid fade-in">
+              {news.map(n => (
                 <NoticiasCard key={n.id} news={n} />
-              ))
-            )}
-          </div>
-
-          {/* PAGINACIÓN */}
-          {totalPages > 1 && (
-            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+              ))}
+            </div>
           )}
-        </section>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="noticias-v1-pagination">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
 

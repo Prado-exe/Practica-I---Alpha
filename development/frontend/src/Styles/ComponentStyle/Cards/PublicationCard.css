@@ -1,96 +1,176 @@
-/* CARD GENERAL */
-.publication-card {
-  width: 100%; /* ocupa todo el contenedor */
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
-  padding: 1.2rem 1.5rem;
+/* =========================================================
+   CONTENEDOR DE LA TARJETA HORIZONTAL
+========================================================= */
+.publication-card-horizontal {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #eaeaea;
+  display: flex; /* ESTO ACTIVA EL DISEÑO HORIZONTAL */
+  flex-direction: row;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 1.5rem; /* Espaciado entre tarjetas en la lista */
+}
+
+.publication-card-horizontal:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  transform: translateY(-3px);
+  border-color: #d0e3ff;
+}
+
+/* =========================================================
+   IMAGEN A LA IZQUIERDA
+========================================================= */
+.publication-image-wrapper-horizontal {
+  width: 30%; /* La imagen ocupa el 30% del ancho de la tarjeta */
+  min-width: 250px; /* Pero no puede ser más pequeña que esto */
+  height: auto; /* La altura se adapta al contenido de la derecha */
+  overflow: hidden;
+  border-right: 1px solid #f0f0f0;
+  flex-shrink: 0; /* Evita que la imagen se aplaste si hay mucho texto */
+}
+
+.publication-image-horizontal {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Mantiene la proporción sin deformar */
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+/* Efecto zoom en la imagen al hacer hover en la tarjeta */
+.publication-card-horizontal:hover .publication-image-horizontal {
+  transform: scale(1.05);
+}
+
+/* =========================================================
+   CONTENIDO INTERNO (A la derecha de la imagen)
+========================================================= */
+.publication-content-horizontal {
+  padding: 2rem; /* Más padding para un aspecto más premium */
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  transition: all 0.25s ease;
+  flex-grow: 1; /* Ocupa todo el espacio restante */
+  justify-content: space-between; /* Separa el header/body de las acciones */
 }
 
-.publication-card:hover {
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  transform: translateY(-2px);
-}
-
-/* HEADER: fecha y autor */
-.publication-header {
+/* HEADER: Etiquetas y Fecha */
+.publication-header-horizontal {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
-  color: #555;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
-/* TÍTULO */
-.publication-title {
-  font-size: 1.2rem;
+.tag-type-horizontal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  background: #e0f2fe; /* Azul clarito */
+  color: #0369a1; /* Texto azul oscuro */
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
   font-weight: 600;
-  color: #222;
-  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* DESCRIPCIÓN */
-.publication-description {
-  font-size: 0.95rem;
-  color: #444;
-  line-height: 1.5;
+.publication-date-horizontal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* CUERPO: Título y Descripción */
+.publication-body-horizontal {
+  margin-bottom: 1.5rem;
+  flex-grow: 1; /* Permite que el texto empuje hacia abajo si es necesario */
+}
+
+.publication-title-horizontal {
+  font-size: 1.4rem; /* Un poco más grande al ser horizontal */
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+}
+
+.publication-description-horizontal {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.7;
+  margin: 0;
+  /* Mantenemos el límite de líneas para uniformidad */
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* limita a 3 líneas */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* TAGS */
-.publication-meta {
+/* =========================================================
+   ACCIONES (Botón al fondo)
+========================================================= */
+.publication-actions-horizontal {
+  margin-top: auto; /* Empuja el botón al fondo del contenedor flex */
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.5rem;
+  justify-content: flex-end; /* Alinea el botón a la derecha */
 }
 
-.tag {
-  font-size: 0.75rem;
-  background: #e3f2fd;
-  color: #1565c0;
-  padding: 0.3rem 0.6rem;
-  border-radius: 12px;
-  font-weight: 500;
+.btn-leer-mas-horizontal {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.7rem 1.5rem;
+  background-color: transparent;
+  color: #0056b3;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border: 2px solid #e0eaff;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-/* FOOTER BOTÓN */
-.publication-footer {
-  margin-top: 0.8rem;
+.btn-leer-mas-horizontal:hover {
+  background-color: #0056b3;
+  color: #ffffff;
+  border-color: #0056b3;
 }
 
-.publication-btn {
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  background: #1976d2;
-  color: white;
-  font-size: 0.85rem;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.publication-btn:hover {
-  background: #125ea2;
-}
-
-/* RESPONSIVE */
+/* =========================================================
+   RESPONSIVE (Vuelve a vertical en móviles)
+========================================================= */
 @media (max-width: 900px) {
-  .publication-card {
-    padding: 1rem;
+  .publication-card-horizontal {
+    flex-direction: column; /* Vuelve a diseño vertical */
   }
 
-  .publication-title {
-    font-size: 1.1rem;
+  .publication-image-wrapper-horizontal {
+    width: 100%; /* Imagen ocupa todo el ancho arriba */
+    height: 200px; /* Altura fija para la imagen en vertical */
+    min-width: auto;
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .publication-content-horizontal {
+    padding: 1.5rem;
   }
 
-  .publication-description {
-    font-size: 0.9rem;
+  .publication-title-horizontal {
+    font-size: 1.2rem;
+  }
+  
+  .publication-actions-horizontal {
+    justify-content: center; /* Botón centrado en móvil */
+  }
+  
+  .btn-leer-mas-horizontal {
+    width: 100%; /* Botón ancho completo en móvil */
   }
 }

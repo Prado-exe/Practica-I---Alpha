@@ -23,7 +23,7 @@ function NoticiaDetalle() {
   if (loading) {
     return (
       <div className="noticia-detalle-page loading-center">
-        <Loader2 className="spin" size={40} color="#004e9a" />
+        <Loader2 className="spin" size={40} color="#0056b3" />
         <p>Cargando noticia...</p>
       </div>
     );
@@ -45,7 +45,9 @@ function NoticiaDetalle() {
       
       <article className="noticia-article">
         <header className="article-header">
-          <Link to="/noticias" className="back-link"><ChevronLeft size={18} /> Volver a noticias</Link>
+          <Link to="/noticias" className="back-link">
+            <ChevronLeft size={18} /> Volver a noticias
+          </Link>
           <h1 className="article-title">{noticia.title}</h1>
           
           <div className="article-meta">

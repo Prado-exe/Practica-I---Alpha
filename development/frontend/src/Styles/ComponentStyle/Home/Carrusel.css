@@ -1,39 +1,40 @@
 /* =====================
-   Wrapper
+   Wrapper Principal
    ===================== */
 .carousel-wrapper {
   position: relative;
-  margin: 0.7rem 5rem 2rem;
-  border-radius: 18px;
+  /* Restauramos tu margen original que estira el carrusel a los lados */
+  margin: 0.7rem 5rem 2rem; 
+  /* (Eliminamos max-width y width para que ocupe todo el espacio) */
+  border-radius: 20px;
   overflow: hidden;
   font-size: 1rem;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.22),
-    0 4px 16px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #101c3d;
 }
 
 .carousel-wrapper.hc {
-  border: 2px solid #fff;
+  border: 3px solid #fff;
   box-shadow: none;
 }
 
 /* =====================
-   Skeleton / loading
+   Skeleton / Loading
    ===================== */
 .carousel-skeleton {
-  min-height: 480px;
-  background: linear-gradient(90deg, #dde3ed 25%, #edf0f5 50%, #dde3ed 75%);
+  min-height: 500px;
+  background: linear-gradient(90deg, #e0e5ec 25%, #f0f3f7 50%, #e0e5ec 75%);
   background-size: 300% 100%;
-  animation: carouselShimmer 1.6s ease-in-out infinite;
+  animation: carouselShimmer 1.8s infinite linear;
 }
 
 @keyframes carouselShimmer {
-  0%   { background-position: 300% 0; }
+  0% { background-position: 300% 0; }
   100% { background-position: -300% 0; }
 }
 
 /* =====================
-   Track
+   Contenedor Scroll
    ===================== */
 .carousel {
   display: flex;
@@ -44,78 +45,88 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 .carousel::-webkit-scrollbar {
   display: none;
 }
 
 /* =====================
-   Slide — hero background
+   Slide Individual
    ===================== */
 .carousel-item {
   flex: 0 0 100%;
   scroll-snap-align: start;
   position: relative;
-  min-height: 480px;
+  min-height: 500px;
   display: flex;
-  background-color: #101c3d;        /* color base cuando no hay imagen */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   overflow: hidden;
 }
 
-/* =====================
-   Gradient overlay
-   ===================== */
+/* 🖼️ Imagen de fondo (ESTO FALTABA CONTROLAR) */
+.carousel-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform 6s ease-in-out;
+}
+
+/* Pequeño efecto Ken Burns para darle vida */
+.carousel-item:hover .carousel-bg-image {
+  transform: scale(1.05);
+}
+
+/* 🌑 Overlay oscuro sobre la imagen para asegurar lectura */
 .carousel-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    105deg,
-    rgba(8, 17, 52, 0.96) 0%,
-    rgba(8, 17, 52, 0.86) 38%,
-    rgba(8, 17, 52, 0.52) 62%,
-    rgba(8, 17, 52, 0.10) 100%
+    95deg,
+    rgba(11, 22, 54, 0.95) 0%,
+    rgba(11, 22, 54, 0.75) 45%,
+    rgba(11, 22, 54, 0.15) 100%
   );
-  display: flex;
-  align-items: center;
+  z-index: 1;
 }
 
 /* =====================
-   Content
+   Contenido Textual
    ===================== */
 .carousel-content {
-  padding: 3rem 4.5rem;
-  max-width: 60%;
-  min-height: 480px;
+  position: relative;
+  z-index: 2; /* Importante para estar sobre el overlay */
+  padding: 4rem 5rem;
+  max-width: 65%;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-sizing: border-box;
 }
 
 .carousel-body {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  padding-top: 2rem;
+  gap: 1.2rem;
+  padding-top: 1rem;
 }
 
 /* =====================
-   Badge
+   Etiqueta (Badge)
    ===================== */
 .carousel-badge {
   display: inline-block;
   background: #1565c0;
   color: #fff;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.13em;
-  padding: 0.28rem 1rem;
-  border-radius: 20px;
+  letter-spacing: 0.1em;
+  padding: 0.35rem 1.2rem;
+  border-radius: 25px;
   width: fit-content;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .carousel-wrapper.hc .carousel-badge {
@@ -124,246 +135,199 @@
 }
 
 /* =====================
-   Typography
+   Tipografía con Límites Anti-Desborde
    ===================== */
 .carousel-title {
   margin: 0;
-  font-size: clamp(1.6rem, calc(2.2rem * var(--font-scale)), 3.4rem);
+  font-size: clamp(1.8rem, calc(2.4rem * var(--font-scale)), 3.5rem);
   font-weight: 800;
-  line-height: 1.18;
+  line-height: 1.2;
   color: #fff;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
-}
-
-.carousel-subtitle {
-  margin: 0;
-  font-size: clamp(0.95rem, calc(1.15rem * var(--font-scale)), 1.75rem);
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.88);
-  line-height: 1.5;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  
+  /* 🚫 EVITAR DESBORDE: Máximo 2 líneas */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .carousel-description {
   margin: 0;
-  font-size: clamp(0.85rem, calc(0.95rem * var(--font-scale)), 1.2rem);
-  color: rgba(255, 255, 255, 0.68);
-  line-height: 1.7;
-  max-width: 88%;
+  font-size: clamp(0.95rem, calc(1.05rem * var(--font-scale)), 1.25rem);
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  max-width: 90%;
+  
+  /* 🚫 EVITAR DESBORDE: Máximo 3 líneas */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* =====================
-   Footer
+   Footer de la Tarjeta
    ===================== */
 .carousel-footer {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding-bottom: 2.5rem;
-  margin-top: 2rem;
+  gap: 2rem;
+  padding-bottom: 2rem;
 }
 
 .carousel-date {
-  font-size: clamp(0.78rem, calc(0.88rem * var(--font-scale)), 1rem);
-  color: rgba(255, 255, 255, 0.6);
+  font-size: clamp(0.85rem, calc(0.9rem * var(--font-scale)), 1rem);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 }
 
 /* =====================
-   CTA button
+   Botón
    ===================== */
 .carousel-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.6rem 1.75rem;
-  border-radius: 25px;
-  background: #1565c0;
-  color: #fff;
-  font-weight: 600;
-  font-size: clamp(0.85rem, calc(0.93rem * var(--font-scale)), 1.1rem);
+  padding: 0.7rem 2rem;
+  border-radius: 30px;
+  background: #fff;
+  color: #101c3d;
+  font-weight: 700;
+  font-size: clamp(0.9rem, calc(0.95rem * var(--font-scale)), 1.1rem);
   text-decoration: none;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.45);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
 }
 
 .carousel-btn:hover {
-  background: #0d47a1;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.6);
-}
-
-.carousel-wrapper.hc .carousel-btn {
-  background: #fff;
-  color: #000;
-  box-shadow: none;
+  background: #1565c0;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(21, 101, 192, 0.4);
 }
 
 /* =====================
-   Navigation arrows — glass morphism
+   Flechas (Glassmorphism)
    ===================== */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; /* Más amigable y moderno */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #fff;
-  font-size: 1.7rem;
-  line-height: 1;
+  font-size: 2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  transition: all 0.3s ease;
 }
 
-.carousel-arrow.left  { left: 16px; }
-.carousel-arrow.right { right: 16px; }
+.carousel-arrow.left  { left: 20px; }
+.carousel-arrow.right { right: 20px; }
 
 .carousel-arrow:hover {
-  background: rgba(255, 255, 255, 0.24);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-50%) scale(1.06);
-}
-
-.carousel-wrapper.hc .carousel-arrow {
-  background: #fff;
-  color: #000;
-  border-color: #fff;
+  background: #1565c0;
+  border-color: #1565c0;
+  transform: translateY(-50%) scale(1.1);
 }
 
 /* =====================
-   Animated pill dots
+   Puntos de Paginación
    ===================== */
 .carousel-dots {
   position: absolute;
-  bottom: 20px;
+  bottom: 25px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
   z-index: 20;
-  align-items: center;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.4);
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.3);
   border: none;
   cursor: pointer;
-  padding: 0;
-  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .dot.active {
-  width: 28px;
+  width: 35px; /* Se estira tipo pastilla */
   background: #fff;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
 }
 
-.carousel-wrapper.hc .dot         { background: rgba(255, 255, 255, 0.45); }
-.carousel-wrapper.hc .dot.active  { background: #ff9800; width: 28px; }
-
 /* =====================
-   Focus states
+   Accesibilidad Focus
    ===================== */
 .carousel:focus {
-  outline: 3px solid #1565c0;
-  outline-offset: 4px;
-}
-
-.carousel-arrow:focus,
-.carousel-btn:focus,
-.dot:focus {
   outline: 3px solid #ff9800;
-  outline-offset: 3px;
+  outline-offset: -3px;
+}
+.carousel-arrow:focus, .carousel-btn:focus, .dot:focus {
+  outline: 3px solid #ff9800;
 }
 
 /* =====================
-   High contrast overrides
-   ===================== */
-.carousel-wrapper.hc .carousel-overlay {
-  background: rgba(0, 0, 0, 0.88);
-}
-
-.carousel-wrapper.hc .carousel-title,
-.carousel-wrapper.hc .carousel-subtitle,
-.carousel-wrapper.hc .carousel-description,
-.carousel-wrapper.hc .carousel-date {
-  color: #fff;
-  text-shadow: none;
-}
-
-/* =====================
-   Responsive — tablet
+   Responsive Adjustments
    ===================== */
 @media (max-width: 1024px) {
   .carousel-content {
-    max-width: 72%;
-    padding: 2.5rem 3rem;
+    max-width: 80%;
+    padding: 3rem 4rem;
   }
 }
 
-/* =====================
-   Responsive — mobile
-   ===================== */
 @media (max-width: 768px) {
   .carousel-wrapper {
+    width: 100%;
     margin: 0;
     border-radius: 0;
   }
 
   .carousel-item {
-    min-height: 380px;
+    min-height: 450px;
   }
 
-  /* On mobile, gradient comes from the bottom so text is readable */
+  /* Degradado hacia arriba para móviles para que el texto se lea al fondo */
   .carousel-overlay {
     background: linear-gradient(
       180deg,
-      rgba(8, 17, 52, 0.25) 0%,
-      rgba(8, 17, 52, 0.88) 55%,
-      rgba(8, 17, 52, 0.97) 100%
+      rgba(11, 22, 54, 0.1) 0%,
+      rgba(11, 22, 54, 0.85) 60%,
+      rgba(11, 22, 54, 0.98) 100%
     );
-    align-items: flex-end;
   }
 
   .carousel-content {
-    padding: 1.5rem 1.5rem 2.8rem;
+    padding: 2rem 1.5rem 3.5rem;
     max-width: 100%;
-    min-height: unset;
-    justify-content: flex-end;
+    justify-content: flex-end; /* Texto empujado abajo */
   }
 
-  .carousel-body {
-    padding-top: 0;
-    gap: 0.5rem;
-  }
-
-  .carousel-footer {
-    padding-bottom: 0.5rem;
-    margin-top: 1rem;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+  .carousel-description {
+    -webkit-line-clamp: 2; /* En móvil dejamos menos texto para no ensuciar */
   }
 
   .carousel-arrow {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    font-size: 1.4rem;
+    display: none; /* En móviles es mejor deslizar con el dedo (swipe) */
   }
 
-  .carousel-arrow.left  { left: 10px; }
-  .carousel-arrow.right { right: 10px; }
-
-  .dot        { width: 7px; height: 7px; }
-  .dot.active { width: 22px; }
-
-  .carousel-dots { bottom: 14px; }
+  .carousel-footer {
+    padding-bottom: 0;
+    margin-top: 1rem;
+    gap: 1rem;
+    justify-content: space-between;
+  }
 }

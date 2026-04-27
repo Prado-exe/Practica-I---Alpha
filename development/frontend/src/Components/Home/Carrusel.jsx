@@ -5,7 +5,7 @@ import "../../Styles/ComponentStyle/Home/Carrusel.css";
 // 📡 Importamos los servicios reales
 import { getNoticias } from "../../Services/NoticiasService";
 import { getPublications } from "../../Services/PublicacionesService";
-// import { getPublicDatasets } from "../../Services/DatasetsService"; // Descomentar cuando esté listo
+// import { getPublicDatasets } from "../../Services/DatasetsService"; 
 
 function Carrusel() {
   const carouselRef = useRef(null);
@@ -21,14 +21,11 @@ function Carrusel() {
     const fetchFeaturedContent = async () => {
       try {
         setLoading(true);
-        // Pedimos los primeros elementos (el backend ya los ordena por is_featured DESC)
         const [newsRes, pubRes] = await Promise.all([
           getNoticias({ limit: 10 }),
           getPublications({ limit: 10 })
-          // getPublicDatasets({ limit: 10 }) // Agregar cuando el servicio exista
         ]);
 
-        // 1. Extraemos y formateamos Noticias Destacadas
         const featuredNews = newsRes.data
           .filter(n => n.isFeatured)
           .map(n => ({
@@ -42,7 +39,6 @@ function Carrusel() {
             link: `/noticias/${n.slug}`
           }));
 
-        // 2. Extraemos y formateamos Publicaciones Destacadas
         const featuredPubs = pubRes.data
           .filter(p => p.isFeatured)
           .map(p => ({
@@ -56,18 +52,16 @@ function Carrusel() {
             link: `/publicaciones/${p.slug}`
           }));
 
-        // 3. Unimos todo
         const combinedSlides = [...featuredNews, ...featuredPubs];
 
-        // 4. Si no hay nada destacado, ponemos un slide por defecto
         if (combinedSlides.length === 0) {
           setSlides([{
             id: "default-slide",
-            img: "/img/default-news.jpg",
+            img: "/img/default-news.jpg", // Asegúrate de tener esta imagen o cambiar la ruta
             alt: "Bienvenido al Observatorio",
             title: "Bienvenido al Observatorio",
             subtitle: "Explora nuestros datos",
-            description: "Encuentra noticias, publicaciones y datasets relevantes.",
+            description: "Encuentra noticias, publicaciones y datasets relevantes en nuestra plataforma centralizada.",
             date: new Date().toLocaleDateString(),
             link: "/noticias"
           }]);
@@ -84,7 +78,6 @@ function Carrusel() {
     fetchFeaturedContent();
   }, []);
 
-  // Lógicas de scroll adaptadas a 'slides' en lugar de 'homeSlides'
   const scrollToIndex = (index) => {
     if (!carouselRef.current) return;
     const width = carouselRef.current.offsetWidth;
@@ -114,6 +107,7 @@ function Carrusel() {
     if (!carouselRef.current) return;
     const scrollPosition = carouselRef.current.scrollLeft;
     const width = carouselRef.current.offsetWidth;
+    // Añadimos un pequeño margen para evitar saltos raros al hacer scroll manual
     const index = Math.round(scrollPosition / width);
     setActiveIndex(index);
   };
@@ -127,7 +121,7 @@ function Carrusel() {
   }, [activeIndex, reducedMotion, slides.length]);
 
   if (loading) {
-    return <div className="carousel-wrapper loading">Cargando destacados...</div>;
+    return <div className="carousel-wrapper carousel-skeleton"></div>;
   }
 
   return (
@@ -159,21 +153,31 @@ function Carrusel() {
             aria-roledescription="slide"
             aria-label={`${index + 1} de ${slides.length}`}
           >
-            <img src={slide.img} alt={slide.alt} loading="lazy" />
+            {/* 1. Imagen controlada como capa inferior */}
+            <img 
+              src={slide.img} 
+              alt={slide.alt} 
+              loading="lazy" 
+              className="carousel-bg-image" 
+            />
 
+            {/* 2. Capa oscura para que el texto resalte (Faltaba en tu código) */}
+            <div className="carousel-overlay"></div>
+
+            {/* 3. Contenido principal */}
             <div className="carousel-content">
               <div className="carousel-body">
-                <h2 className="carousel-title">{slide.title}</h2>
                 {slide.subtitle && (
-                  <h3 className="carousel-subtitle">{slide.subtitle}</h3>
+                  <span className="carousel-badge">{slide.subtitle}</span>
                 )}
+                <h2 className="carousel-title">{slide.title}</h2>
                 <p className="carousel-description">{slide.description}</p>
               </div>
 
               <div className="carousel-footer">
                 <span className="carousel-date">📅 {slide.date}</span>
                 {slide.link && (
-                  <a href={slide.link} className="carousel-btn">Ver más</a>
+                  <a href={slide.link} className="carousel-btn">Leer más</a>
                 )}
               </div>
             </div>
