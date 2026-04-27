@@ -9,7 +9,6 @@ import { useFetchList } from "../../Components/Hooks/useFetchList";
 import "../../Styles/Pages_styles/Public/Publicaciones.css";
 
 function Publicaciones() {
-  // 🔹 hook genérico
   const {
     search,
     setSearch,
@@ -23,7 +22,6 @@ function Publicaciones() {
     loading
   } = useFetchList(getPublications, { limit: 7 });
 
-  // 🔧 Configuración de filtros
   const filtersConfig = [
     {
       key: "type",
@@ -53,7 +51,7 @@ function Publicaciones() {
 
       <div className="publications-container">
 
-        {/* 🔹 FILTROS */}
+        {/* 🔹 SIDEBAR */}
         <aside className="publications-filters">
           <AccordionFilter
             filters={filtersConfig}
@@ -63,37 +61,66 @@ function Publicaciones() {
           />
         </aside>
 
-        {/* 🔹 RESULTADOS */}
+        {/* 🔹 CONTENIDO */}
         <section className="publications-results">
 
+          {/* BUSCADOR */}
           <SearchBarAdvanced
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar publicaciones..."
           />
-          
-          {/* HEADER */}
-          <header className="instituciones-header">
-            <h1>Instituciones</h1>
-            <span>{totalResults} encontradas</span>
-          </header>
 
-          {/* contador */}
-          <p className="publications-count">
-            Mostrando <strong>
+          {/* HEADER */}
+          <div className="publications-header">
+            <h1>Publicaciones</h1>
+            <span>{totalResults} disponibles</span>
+          </div>
+
+          <hr className="publications-separator" />
+
+          {/* CONTADOR */}
+          <div className="publications-count">
+            Mostrando{" "}
+            <strong>
               {totalResults === 0
                 ? 0
                 : (page - 1) * 7 + 1}-
               {Math.min(page * 7, totalResults)}
-            </strong> de <strong>{totalResults}</strong> publicaciones
-          </p>
+            </strong>{" "}
+            de <strong>{totalResults}</strong> publicaciones
+          </div>
+
+          {/* 🔥 CHIPS ACTIVOS */}
+          {Object.entries(filters).some(([_, v]) => v?.length) && (
+            <div className="publications-chips">
+              {Object.entries(filters).map(([key, values]) =>
+                values.map(value => (
+                  <button
+                    key={`${key}-${value}`}
+                    className="chip"
+                    onClick={() =>
+                      handleFilterChange(
+                        key,
+                        values.filter(v => v !== value)
+                      )
+                    }
+                  >
+                    {value} ✕
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+
+          <hr className="publications-separator" />
 
           {/* LISTADO */}
           <div className="publications-list">
             {loading ? (
-              <p>Cargando publicaciones...</p>
+              <div className="loading-state">Cargando publicaciones...</div>
             ) : publications.length === 0 ? (
-              <p>No se encontraron publicaciones</p>
+              <div className="empty-state">No se encontraron publicaciones</div>
             ) : (
               publications.map(pub => (
                 <PublicationCard key={pub.id} publication={pub} />

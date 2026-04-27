@@ -10,7 +10,7 @@
 }
 
 /* ===============================
-   LAYOUT: sidebar + contenido
+   LAYOUT
    =============================== */
 .news-container {
   display: flex;
@@ -18,7 +18,7 @@
 }
 
 /* ===============================
-   SIDEBAR (filtros)
+   SIDEBAR
    =============================== */
 .news-sidebar {
   flex: 0 0 260px;
@@ -28,7 +28,7 @@
 }
 
 /* ===============================
-   CONTENIDO PRINCIPAL
+   CONTENIDO (🔥 CLON EXACTO)
    =============================== */
 .news-content {
   flex: 1;
@@ -42,7 +42,6 @@
    =============================== */
 .news-content .search-bar-advanced {
   width: 100%;
-  max-width: 100%;
   box-sizing: border-box;
 }
 
@@ -76,7 +75,7 @@
 }
 
 /* ===============================
-   CONTADOR DE RESULTADOS
+   CONTADOR
    =============================== */
 .news-count {
   font-size: 0.9rem;
@@ -84,7 +83,31 @@
 }
 
 /* ===============================
-   LISTA DE NOTICIAS
+   CHIPS
+   =============================== */
+.news-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.news-chips .chip {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.news-chips .chip:hover {
+  background-color: #125ea6;
+}
+
+/* ===============================
+   LISTA
    =============================== */
 .news-list {
   display: flex;
@@ -95,25 +118,11 @@
 /* ===============================
    ESTADOS
    =============================== */
+.loading-state,
 .empty-state {
   text-align: center;
   padding: 50px 0;
-  color: #666;
-}
-
-.loading-state {
-  text-align: center;
-  padding: 50px 0;
   color: #555;
-}
-
-/* ===============================
-   PAGINACIÓN
-   =============================== */
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
 }
 
 /* ===============================

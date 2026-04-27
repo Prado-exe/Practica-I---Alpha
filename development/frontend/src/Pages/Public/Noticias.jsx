@@ -22,7 +22,6 @@ function Noticias() {
     loading
   } = useFetchList(getNoticias, { limit: 7 });
 
-  // 🔧 config filtros
   const filtersConfig = [
     {
       key: "category",
@@ -56,7 +55,7 @@ function Noticias() {
 
       <div className="news-container">
 
-        {/* FILTROS */}
+        {/* SIDEBAR */}
         <aside className="news-sidebar">
           <AccordionFilter
             filters={filtersConfig}
@@ -69,43 +68,71 @@ function Noticias() {
         {/* CONTENIDO */}
         <section className="news-content">
 
+          {/* BUSCADOR */}
           <SearchBarAdvanced
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar noticias..."
           />
 
+          {/* HEADER */}
           <div className="news-header">
             <h1>Noticias</h1>
-            <span>{totalResults} resultados</span>
+            <span>{totalResults} disponibles</span>
           </div>
 
           <hr className="news-separator" />
 
-          {/* RESULTADOS */}
-          {loading ? (
-            <p>Cargando noticias...</p>
-          ) : news.length === 0 ? (
-            <p>No se encontraron noticias</p>
-          ) : (
-            <>
-              <p className="news-count">
-                Mostrando{" "}
-                <strong>
-                  {(page - 1) * 7 + 1}-
-                  {Math.min(page * 7, totalResults)}
-                </strong>{" "}
-                de <strong>{totalResults}</strong>
-              </p>
+          {/* CONTADOR */}
+          <div className="news-count">
+            Mostrando{" "}
+            <strong>
+              {totalResults === 0
+                ? 0
+                : (page - 1) * 7 + 1}-
+              {Math.min(page * 7, totalResults)}
+            </strong>{" "}
+            de <strong>{totalResults}</strong> noticias
+          </div>
 
-              <div className="news-list">
-                {news.map(n => (
-                  <NoticiasCard key={n.id} news={n} />
-                ))}
-              </div>
-            </>
+          {/* 🔥 CHIPS */}
+          {Object.entries(filters).some(([_, v]) => v?.length) && (
+            <div className="news-chips">
+              {Object.entries(filters).map(([key, values]) =>
+                values.map(value => (
+                  <button
+                    key={`${key}-${value}`}
+                    className="chip"
+                    onClick={() =>
+                      handleFilterChange(
+                        key,
+                        values.filter(v => v !== value)
+                      )
+                    }
+                  >
+                    {value} ✕
+                  </button>
+                ))
+              )}
+            </div>
           )}
 
+          <hr className="news-separator" />
+
+          {/* LISTADO */}
+          <div className="news-list">
+            {loading ? (
+              <div className="loading-state">Cargando noticias...</div>
+            ) : news.length === 0 ? (
+              <div className="empty-state">No se encontraron noticias</div>
+            ) : (
+              news.map(n => (
+                <NoticiasCard key={n.id} news={n} />
+              ))
+            )}
+          </div>
+
+          {/* PAGINACIÓN */}
           {totalPages > 1 && (
             <Pagination
               currentPage={page}
