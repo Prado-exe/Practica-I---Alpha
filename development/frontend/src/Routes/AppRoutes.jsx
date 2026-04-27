@@ -47,7 +47,6 @@ const RecuperarContrasena = lazy(() => import("../Pages/RecuperarContrasena"));
 const ResetPassword = lazy(() => import("../Pages/ResetPassword"));
 
 
-const NoticiasAdmin = lazy(() => import("../Pages/Admin/NoticiasAdmin"));
 const GestionCarrusel = lazy(() => import("../Pages/Admin/GestionCarrusel"));
 
 

@@ -137,10 +137,11 @@ function IndicadoresDefault() {
     const allOrigins = new Set();
 
     filteredDatasets.forEach(ds => {
-      const dateStr = ds.created_at || ds.updated_at || "2023-01-01T00:00:00Z";
-      const date = new Date(dateStr);
-      const timeKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
+      if (!ds.fecha) return;
+      const date = new Date(ds.fecha);
+      if (isNaN(date.getTime())) return;
+      const timeKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
       const catName = ds.categoria || ds.category?.name || "Sin Categoría";
       const originName = ds.institucion?.nombre || ds.institucion || "Institución Desconocida";
 
@@ -159,9 +160,9 @@ function IndicadoresDefault() {
     let data = Object.values(timeMap).sort((a, b) => a.period.localeCompare(b.period));
 
     data = data.map(item => {
-      const [year, month] = item.period.split('-');
-      const dateObj = new Date(year, parseInt(month) - 1);
-      const formattedPeriod = dateObj.toLocaleDateString('es-CL', { month: 'short', year: 'numeric' });
+      const [year, month, day] = item.period.split('-');
+      const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const formattedPeriod = dateObj.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
       return { ...item, displayPeriod: formattedPeriod.charAt(0).toUpperCase() + formattedPeriod.slice(1) };
     });
 
@@ -368,16 +369,16 @@ function IndicadoresDefault() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                      <XAxis dataKey="displayPeriod" tick={{fontSize: 11, fill: '#666'}} tickMargin={10} />
-                      <YAxis tick={{fontSize: 11, fill: '#666'}} width={40} />
+                      <XAxis dataKey="displayPeriod" tick={{fontSize: 11, fill: '#666'}} tickMargin={10} angle={-35} textAnchor="end" height={55} interval="preserveStartEnd" />
+                      <YAxis tick={{fontSize: 11, fill: '#666'}} width={40} allowDecimals={false} tickCount={undefined} />
                       <Tooltip content={<TimeTooltip />} />
                       <Area type="monotone" dataKey="TotalAcumulado" name="Total Datasets" stroke="#0056b3" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" activeDot={{ r: 6 }} />
                     </AreaChart>
                   ) : (
                     <LineChart data={timeSeriesStats.data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                      <XAxis dataKey="displayPeriod" tick={{fontSize: 11, fill: '#666'}} tickMargin={10} />
-                      <YAxis tick={{fontSize: 11, fill: '#666'}} width={40} />
+                      <XAxis dataKey="displayPeriod" tick={{fontSize: 11, fill: '#666'}} tickMargin={10} angle={-35} textAnchor="end" height={55} interval="preserveStartEnd" />
+                      <YAxis tick={{fontSize: 11, fill: '#666'}} width={40} allowDecimals={false} tickCount={undefined} />
                       <Tooltip content={<TimeTooltip />} />
                       <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '13px' }} />
                       
@@ -501,34 +502,7 @@ function IndicadoresDefault() {
 
           <hr className="ind-separator" />
 
-          {/* Explorador de datasets (Siempre visible al final) */}
-          <div className="chart-card ds-explorer">
-            <div className="chart-header-row">
-              <div>
-                <h2 className="chart-title">Analizar Datos Específicos</h2>
-                <p className="chart-subtitle">Selecciona un conjunto de datos del catálogo para extraer gráficos y mapeos internos.</p>
-              </div>
-            </div>
-            
-            <div className="dataset-grid-links">
-              {filteredDatasets.map(ds => (
-                <button 
-                  key={ds.dataset_id} 
-                  className="ds-link-card" 
-                  onClick={() => handleDatasetClick(ds.dataset_id)}
-                  style={{ "--ds-color": ds.color || '#0056b3' }}
-                >
-                  <div className="ds-link-content">
-                    <span className="ds-cat">{ds.categoria || "Dataset"}</span>
-                    <h3 className="ds-name">{ds.nombre}</h3>
-                  </div>
-                  <div className="ds-link-icon">
-                    <ArrowRight size={20} />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+         
         </div>
       )}
     </main>
