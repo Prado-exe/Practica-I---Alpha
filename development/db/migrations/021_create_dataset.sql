@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS datasets (
 
     dataset_status VARCHAR(30) NOT NULL DEFAULT 'draft',
     access_level VARCHAR(20) NOT NULL DEFAULT 'public',
+    is_featured BOOLEAN NOT NULL DEFAULT FALSE,
 
     creation_date DATE NOT NULL,
     geographic_coverage VARCHAR(255) NULL,
@@ -112,3 +113,6 @@ CREATE INDEX IF NOT EXISTS idx_datasets_creation_date
 
 CREATE INDEX IF NOT EXISTS idx_datasets_created_at
     ON datasets(created_at);
+
+CREATE INDEX IF NOT EXISTS idx_datasets_is_featured 
+    ON datasets(is_featured);

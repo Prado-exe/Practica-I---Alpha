@@ -182,33 +182,20 @@ export async function editDataset(datasetId: number, accountId: number, input: a
   try {
     const result = await updateDatasetInDb(datasetId, accountId, input);
     if (result.s3KeysToDelete && result.s3KeysToDelete.length > 0) {
-      
-      const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-      
-      // Cliente exclusivo para la red interna de Docker
-      const internalS3Client = new S3Client({
-        region: env.S3_REGION || 'us-east-1',
-        // 👇 CAMBIA "minio" por el nombre de tu contenedor si es distinto (ej: minio-dev)
-        endpoint: 'http://minio:9000', 
-        credentials: {
-          accessKeyId: env.S3_ACCESS_KEY || 'admin_minio',    // 👈 Tus credenciales
-          secretAccessKey: env.S3_SECRET_KEY || 'password123',// 👈 Tus credenciales
-        },
-        forcePathStyle: true,
-      });
-
-      const bucketName = env.S3_BUCKET_NAME || 'observatory-files'; 
-      console.log(`\n🗑️ [MINIO] Intentando borrar ${result.s3KeysToDelete.length} archivos del bucket: "${bucketName}"...`);
+      // Usamos la variable de entorno directamente
+      const bucketName = env.S3_BUCKET_NAME; 
+      console.log(`\n🗑️ [S3/MinIO] Intentando borrar ${result.s3KeysToDelete.length} archivos del bucket: "${bucketName}"...`);
 
       for (const key of result.s3KeysToDelete) {
          try {
+           // Usamos el s3Client global, sin hardcodear nada
            const deleteCommand = new DeleteObjectCommand({ 
              Bucket: bucketName, 
              Key: key 
            });
            
-           await internalS3Client.send(deleteCommand);
-           console.log(`   ✅ ÉXITO: Archivo destruido físicamente de MinIO -> ${key}`);
+           await s3Client.send(deleteCommand);
+           console.log(`   ✅ ÉXITO: Archivo destruido físicamente -> ${key}`);
          } catch(e: any) { 
            console.error(`   ❌ FALLO AL BORRAR -> ${key}`);
            console.error(`      Motivo: ${e.message || e.Code}`);
@@ -278,26 +265,16 @@ export async function destroyDataset(datasetId: number) {
     const result = await hardDeleteDatasetInDb(datasetId);
     
     if (result.filesToDelete && result.filesToDelete.length > 0) {
-      const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-      const internalS3Client = new S3Client({
-        region: env.S3_REGION || 'us-east-1',
-        endpoint: 'http://minio:9000', 
-        credentials: {
-          accessKeyId: env.S3_ACCESS_KEY || 'admin_minio',
-          secretAccessKey: env.S3_SECRET_KEY || 'password123',
-        },
-        forcePathStyle: true,
-      });
-
-      const bucketName = env.S3_BUCKET_NAME || 'observatory-files';
+      const bucketName = env.S3_BUCKET_NAME;
 
       for (const file of result.filesToDelete) {
         if (file.storage_key) {
           try {
-            await internalS3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: file.storage_key }));
-            console.log(`✅ Físicamente destruido de MinIO: ${file.storage_key}`);
+            // Usamos s3Client global
+            await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: file.storage_key }));
+            console.log(`✅ Físicamente destruido: ${file.storage_key}`);
           } catch (e: any) {
-            console.error(`❌ Error borrando en MinIO: ${file.storage_key} - ${e.message}`);
+            console.error(`❌ Error borrando: ${file.storage_key} - ${e.message}`);
           }
         }
       }

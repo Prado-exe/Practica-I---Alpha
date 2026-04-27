@@ -23,11 +23,13 @@ const Nosotros = lazy(() => import("../Pages/Public/Nosotros"));
 const IndicadoresDefault = lazy(() => import("../Pages/Public/IndicadoresDefault"));
 const IndicadoresAnalisis = lazy(() => import("../Pages/Public/Indicadores")); // Tu componente anterior
 const PreguntasFrecuentes = lazy(() => import("../Pages/Public/PreguntasFrecuentes"));
+const NoticiaDetalle = lazy(() => import("../Pages/Public/NoticiaDetalle"));
+const PublicacionDetalle = lazy(() => import("../Pages/Public/PublicacionDetalle"));
 
 
 //Admin Routes
 const Dashboard = lazy(() => import("../Pages/Admin/Dashboard"));
-const PublicacionesAdmin = lazy(() => import("../Pages/Admin/PublicacionesAdmin"));
+const NoticiasAdmin = lazy(() => import("../Pages/Admin/NoticiasAdmin"));
 const Configuracion = lazy(() => import("../Pages/Admin/Configuracion"));
 const GestionDatasets = lazy(() => import("../Pages/Admin/GestionDatasets"));
 const GestionUsuarios = lazy(() => import("../Pages/Admin/GestionUsuarios"));
@@ -81,9 +83,9 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
         
-        <Route path="publicaciones" element={
+        <Route path="contenido" element={
           <ProtectedRoute requiredPermission="catalog.write">
-            <PublicacionesAdmin />
+            <NoticiasAdmin />
           </ProtectedRoute>
         } />
         
@@ -124,10 +126,12 @@ function AppRoutes() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/noticias" element={<Noticias />} />
+        <Route path="/noticias/:slug" element={<NoticiaDetalle />} />
         <Route path="/formulario" element={<Formulario />} />
         <Route path="/conjuntodatos" element={<Datos />} />
         <Route path="/conjuntodatos/:id" element={<DatasetDetalle />} />
         <Route path="/publicaciones" element={<Publicaciones />} />
+        <Route path="/publicaciones/:slug" element={<PublicacionDetalle />} />
         <Route path="/instituciones" element={<Instituciones />} />
         <Route path="/instituciones/:id" element={<InstitucionDetalle />} />
         <Route path="/nosotros/:section" element={<Nosotros />} />

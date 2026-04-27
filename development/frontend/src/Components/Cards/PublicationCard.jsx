@@ -1,32 +1,41 @@
-import "../../Styles/ComponentStyle/Cards/PublicationCard.css"
+// src/Components/Cards/PublicationCard.jsx
+import { Link } from "react-router-dom";
+import { Calendar, FileText } from "lucide-react";
+import "../../Styles/ComponentStyle/Cards/PublicationCard.css";
 
 function PublicationCard({ publication }) {
   return (
     <article className="publication-card">
-
-      {/* HEADER */}
-      <div className="publication-header">
-        <p className="publication-date">{new Date(publication.date).toLocaleDateString()}</p>
-        <p className="publication-author">{publication.author}</p>
+      <div className="publication-image-wrapper">
+        <img 
+          src={publication.image} 
+          alt={publication.title} 
+          className="publication-image" 
+          onError={(e) => { e.target.src = "/img/default-publication.jpg"; }} 
+        />
       </div>
 
-      {/* TÍTULO */}
-      <h3 className="publication-title">{publication.title}</h3>
+      <div className="publication-content">
+        <div className="publication-header">
+          <span className="publication-date">
+            <Calendar size={14} /> {new Date(publication.date).toLocaleDateString()}
+          </span>
+        </div>
 
-      {/* DESCRIPCIÓN */}
-      <p className="publication-description">{publication.description}</p>
+        <h3 className="publication-title">{publication.title}</h3>
+        <p className="publication-description">{publication.description}</p>
 
-      {/* TAGS */}
-      <div className="publication-meta">
-        <span className="tag">{publication.type}</span>
-        {publication.tags?.map((tag, i) => (
-          <span key={i} className="tag">{tag}</span>
-        ))}
-      </div>
+        <div className="publication-meta">
+          <span className="tag-type">
+            <FileText size={14} /> {publication.type}
+          </span>
+        </div>
 
-      {/* FOOTER BOTÓN */}
-      <div className="publication-footer">
-        <button className="publication-btn">Ver publicación →</button>
+        <div className="publication-actions">
+          <Link to={`/publicaciones/${publication.slug}`} className="btn-leer-mas">
+            Leer más
+          </Link>
+        </div>
       </div>
     </article>
   );

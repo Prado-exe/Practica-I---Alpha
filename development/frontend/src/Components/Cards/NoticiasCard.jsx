@@ -1,5 +1,5 @@
 import "../../Styles/ComponentStyle/Cards/NoticiasCard.css";
-
+import { Link } from "react-router-dom";
 function NoticiasCard({ news }) {
   return (
     <article className="news-card">
@@ -34,8 +34,10 @@ function NoticiasCard({ news }) {
         </div>
 
         {/* FOOTER */}
-        <div className="news-footer">
-          <button className="news-btn">Leer más →</button>
+        <div className="noticia-actions">
+          <Link to={`/noticias/${news.slug}`} className="btn-leer-mas">
+            Leer más
+          </Link>
         </div>
 
       </div>

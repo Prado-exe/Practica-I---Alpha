@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS news_posts (
 
     post_status VARCHAR(30) NOT NULL DEFAULT 'draft',
     access_level VARCHAR(20) NOT NULL DEFAULT 'public',
+    is_featured BOOLEAN NOT NULL DEFAULT FALSE,
 
     published_at TIMESTAMPTZ NULL,
     deleted_at TIMESTAMPTZ NULL,
@@ -95,3 +96,4 @@ CREATE INDEX IF NOT EXISTS idx_news_posts_status ON news_posts(post_status);
 CREATE INDEX IF NOT EXISTS idx_news_posts_access_level ON news_posts(access_level);
 CREATE INDEX IF NOT EXISTS idx_news_posts_published_at ON news_posts(published_at);
 CREATE INDEX IF NOT EXISTS idx_news_posts_created_at ON news_posts(created_at);
+CREATE INDEX IF NOT EXISTS idx_news_posts_is_featured ON news_posts(is_featured);

@@ -71,7 +71,16 @@ import {
 import { getAllOdsAction } from "./ods.routes";
 import { getAllTagsAction, createTagAction, deleteTagAction } from "./tags.routes";
 import { getAllLicensesAction} from "./licenses.routes";
-
+import { 
+  createNewsAction, 
+  updateNewsAction, 
+  deleteNewsAction, 
+  getPublicNewsAction, 
+  getAdminNewsAction,
+  toggleVisibilityAction,
+  getNewsCategoriesAction,
+  getPublicNewsBySlugAction 
+} from "./news.routes";
 /**
  * Descripción: Extrae el identificador de la sesión activa desde el Access Token o el Refresh Token.
  * POR QUÉ: Implementa una lógica de extracción de doble fuente. Primero intenta obtener el ID del payload del Access Token (transatómico/rápido). Si falla, recurre al Refresh Token en las cookies para asegurar la trazabilidad de la sesión incluso en flujos de renovación o cierre de sesión donde el token de acceso puede haber expirado o ser inexistente.
@@ -191,3 +200,16 @@ authRouter.add("POST", "/api/upload/presigned-url/user", [requirePermission("use
 // 2. Busca la sección de datasets y añade la nueva ruta para las solicitudes de usuarios:
 authRouter.add("POST", "/api/datasets/request", [requirePermission("user_management.write")], requestDatasetAction);
 authRouter.add("POST", "/api/datasets/:id/validate", [requirePermission("data_validation.execute")], validateDatasetAction);
+
+// --- RUTAS DE NOTICIAS ---
+authRouter.add("GET", "/api/news-categories", [], getNewsCategoriesAction);
+// Públicas
+authRouter.add("GET", "/api/public/news", [], getPublicNewsAction);
+authRouter.add("GET", "/api/public/news/:slug", [], getPublicNewsBySlugAction);
+// Privadas (Administrador de contenido)
+
+authRouter.add("GET", "/api/news/admin", [requirePermission("catalog.read")], getAdminNewsAction);
+authRouter.add("POST", "/api/news", [requirePermission("catalog.write")], createNewsAction);
+authRouter.add("PUT", "/api/news/:id", [requirePermission("catalog.write")], updateNewsAction);
+authRouter.add("DELETE", "/api/news/:id", [requirePermission("catalog.write")], deleteNewsAction);
+authRouter.add("PATCH", "/api/news/:id/visibility", [requirePermission("catalog.write")], toggleVisibilityAction);
