@@ -113,3 +113,16 @@
     width: 100px;
   }
 }
+.password-error {
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.password-error ul {
+  padding-left: 1.2rem;
+  margin: 0.3rem 0 0;
+}
+
+.password-error li {
+  margin-bottom: 0.2rem;
+}

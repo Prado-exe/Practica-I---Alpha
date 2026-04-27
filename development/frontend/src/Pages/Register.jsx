@@ -13,9 +13,31 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const validatePassword = (pass) => {
+  const minLength = pass.length >= 8;
+  const hasUpper = /[A-Z]/.test(pass);
+  const hasLower = /[a-z]/.test(pass);
+  const hasNumber = /[0-9]/.test(pass);
+  const hasSymbol = /[^A-Za-z0-9]/.test(pass);
+
+    return {
+      isValid: minLength && hasUpper && hasLower && hasNumber && hasSymbol,
+      minLength,
+      hasUpper,
+      hasLower,
+      hasNumber,
+      hasSymbol
+    };
+  };
+
+  const passwordValidation = validatePassword(password);
+
   const handleRegister = async (e) => {
     e.preventDefault();
-
+    if (!passwordValidation.isValid) {
+      alert("La contraseña no cumple con los requisitos de seguridad");
+      return;
+}
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden");
       return;
@@ -95,6 +117,26 @@ function Register() {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
+      <div className="password-error">
+        <p>La contraseña debe contener:</p>
+        <ul>
+          <li style={{ color: passwordValidation.minLength ? "green" : "red" }}>
+            Mínimo 8 caracteres
+          </li>
+          <li style={{ color: passwordValidation.hasUpper ? "green" : "red" }}>
+            Una mayúscula
+          </li>
+          <li style={{ color: passwordValidation.hasLower ? "green" : "red" }}>
+            Una minúscula
+          </li>
+          <li style={{ color: passwordValidation.hasNumber ? "green" : "red" }}>
+            Un número
+          </li>
+          <li style={{ color: passwordValidation.hasSymbol ? "green" : "red" }}>
+            Un símbolo
+          </li>
+        </ul>
+      </div>
 
       <label htmlFor="confirmPassword">Confirmar contraseña</label>
       <input
@@ -107,7 +149,7 @@ function Register() {
         required
       />
 
-      <button className="login-btn" disabled={loading}>
+      <button className="login-btn" disabled={loading || !passwordValidation.isValid}>
         {loading ? "Registrando..." : "Registrarse"}
       </button>
 
