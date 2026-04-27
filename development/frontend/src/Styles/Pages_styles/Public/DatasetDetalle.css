@@ -3,85 +3,129 @@
 .dataset-detalle-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-  color: #333;
+  padding: 0 20px 2rem 20px; /* 0 arriba, 20px a los lados, 2rem abajo */
+  color: #333333;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Animación de entrada */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* --- LAYOUT PRINCIPAL --- */
 .detalle-layout {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 30px;
-  margin-top: 20px;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
   align-items: start;
+}
+
+/* --- TARJETAS GLOBALES (CARDS) --- */
+.detalle-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.detalle-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
 
 /* --- SIDEBAR IZQUIERDO --- */
 .detalle-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
 }
 
-.institution-card, 
-.history-card {
-  background: #ffffff;
-  border: 1px solid #eaeaea;
-  border-radius: 8px;
-  padding: 25px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+.institution-card {
+  padding: 2rem 1.5rem;
   text-align: center;
 }
 
+.institution-logo-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  background: #f1f5f9;
+  color: #3b82f6;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+}
+
 .institution-card h3 {
-  margin: 15px 0 10px;
-  font-size: 1.2rem;
-  color: #222;
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .institution-card p {
   font-size: 0.9rem;
-  color: #666;
-  line-height: 1.5;
+  color: #64748b;
+  line-height: 1.6;
   margin: 0;
 }
 
-.institution-logo-placeholder {
-  font-size: 3rem;
-  background: #f5f5f5;
-  width: 80px;
-  height: 80px;
-  line-height: 80px;
-  border-radius: 50%;
-  margin: 0 auto;
-}
-
-/* Línea de tiempo (Historial) */
+/* Historial */
 .history-card {
-  text-align: left;
+  padding: 1.5rem;
 }
 
-.history-card h4 {
-  margin-top: 0;
-  margin-bottom: 20px;
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.card-header h4 {
+  margin: 0;
   font-size: 1.1rem;
-  border-bottom: 1px solid #eaeaea;
-  padding-bottom: 10px;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .history-timeline {
   list-style: none;
   padding: 0;
-  margin: 0 0 0 10px;
-  border-left: 2px solid #e0e0e0;
+  margin: 0 0 0 8px;
+  border-left: 2px solid #e2e8f0;
 }
 
 .history-timeline li {
   position: relative;
   padding-left: 20px;
-  margin-bottom: 15px;
-  font-size: 0.85rem;
-  color: #555;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.history-timeline li:last-child {
+  margin-bottom: 0;
+}
+
+.history-timeline p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.timeline-date {
+  font-size: 0.8rem;
+  color: #94a3b8;
 }
 
 .history-timeline .bullet {
@@ -92,141 +136,333 @@
   height: 12px;
   border-radius: 50%;
   background: #ffffff;
-  border: 2px solid #2874e6; /* Azul primario */
+  border: 3px solid #3b82f6;
 }
 
 /* --- CONTENIDO PRINCIPAL (DERECHA) --- */
-.detalle-content h1 {
-  font-size: 2rem;
-  color: #111;
-  margin-top: 0;
-  margin-bottom: 15px;
-}
-
-.detalle-description {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #444;
-  margin-bottom: 40px;
-}
-
-.detalle-section {
-  margin-bottom: 40px;
-}
-
-.detalle-section h2 {
-  font-size: 1.4rem;
-  color: #222;
-  margin-bottom: 15px;
-}
-
-/* --- TABLAS (Distribuciones e Info Adicional) --- */
-.table-responsive {
-  overflow-x: auto;
-}
-
-.distribuciones-table, 
-.info-adicional-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #ffffff;
-  border: 1px solid #eaeaea;
-}
-
-.distribuciones-table th, 
-.info-adicional-table th {
-  background-color: #2874e6; /* Azul estilo gobierno */
-  color: #ffffff;
-  padding: 14px 15px;
-  text-align: left;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.distribuciones-table td, 
-.info-adicional-table td {
-  padding: 15px;
-  border-bottom: 1px solid #eaeaea;
-  color: #444;
-  font-size: 0.95rem;
-  vertical-align: middle;
-}
-
-/* --- CHIPS DE FORMATOS --- */
-.format-chip {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 1px solid #ccc;
-}
-
-/* Colores específicos para cada formato simulando la imagen */
-.format-csv { background-color: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
-.format-json { background-color: #ffebee; color: #c62828; border-color: #ffcdd2; }
-.format-xlsx { background-color: #e3f2fd; color: #1565c0; border-color: #bbdefb; }
-.format-pdf { background-color: #fff3e0; color: #e65100; border-color: #ffe0b2; }
-.format-txt { background-color: #fafafa; color: #616161; border-color: #eeeeee; }
-
-/* --- BOTONES Y ENLACES --- */
-.actions-cell {
+.detalle-header {
   display: flex;
-  gap: 15px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.btn-descargar {
-  color: #2874e6;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.btn-descargar:hover {
-  text-decoration: underline;
-  color: #1a5bb8;
-}
-
-/* --- ESTADOS DE CARGA Y VACÍO --- */
-.loading-state, 
-.empty-state {
-  text-align: center;
-  padding: 50px 20px;
-  font-size: 1.2rem;
-  color: #666;
-}
-
-/* --- RESPONSIVE DESIGN (Móviles) --- */
-@media (max-width: 900px) {
-  .detalle-layout {
-    grid-template-columns: 1fr; /* Pasa a una sola columna en móviles */
-  }
-  
-  .detalle-sidebar {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  
-  .institution-card, .history-card {
-    flex: 1;
-    min-width: 250px;
-  }
+.detalle-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .btn-graficar {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
   background: #2563eb;
-  color: white;
+  color: #ffffff;
   border-radius: 8px;
   text-decoration: none;
-  font-weight: 500;
-  transition: 0.2s;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
 
 .btn-graficar:hover {
   background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
+}
+
+.description-card {
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #475569;
+  background: #f8fafc; /* Un gris muy sutil para diferenciar de las tablas */
+  border: none;
+}
+
+.detalle-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #0f172a;
+}
+
+.section-title h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* --- TABLAS MODERNAS --- */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.modern-table th {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid #2563eb;
+}
+
+
+
+.modern-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+.modern-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.modern-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Clases auxiliares para la tabla */
+.text-right { text-align: right !important; }
+.font-medium { font-weight: 500; }
+.text-dark { color: #0f172a; }
+.text-muted { color: #64748b; }
+.table-empty { text-align: center; padding: 2rem !important; color: #94a3b8; }
+
+/* Tabla de info adicional específica */
+.info-table td {
+  padding: 1.2rem 1.5rem;
+}
+.info-label {
+  width: 35%;
+  font-weight: 600;
+  color: #475569;
+  background-color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-right: 1px solid #f1f5f9;
+}
+.info-value {
+  color: #0f172a;
+}
+
+/* --- CHIPS DE FORMATOS Y BADGES --- */
+.format-chip {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px; /* Forma de píldora redonda */
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.format-csv { background-color: #dcfce7; color: #166534; }
+.format-json { background-color: #fee2e2; color: #991b1b; }
+.format-xlsx { background-color: #dbeafe; color: #1e40af; }
+.format-pdf { background-color: #ffedd5; color: #9a3412; }
+.format-txt { background-color: #f1f5f9; color: #334155; }
+
+.category-badge {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* --- BOTONES DE DESCARGA --- */
+.btn-descargar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background-color: #eff6ff;
+  transition: all 0.2s;
+}
+
+.btn-descargar:hover {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* --- ESTADOS DE CARGA Y VACÍO --- */
+.detalle-loading-state, 
+.detalle-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  color: #64748b;
+}
+
+.detalle-empty-state h2 {
+  color: #0f172a;
+  margin: 1rem 0 0.5rem;
+}
+
+.empty-icon {
+  color: #cbd5e1;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.btn-volver {
+  margin-top: 1.5rem;
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background: #f1f5f9;
+  color: #334155;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.btn-volver:hover { background: #e2e8f0; }
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 900px) {
+  .detalle-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .detalle-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .detalle-sidebar {
+    flex-direction: column;
+  }
+  
+  .info-label {
+    width: auto;
+    border-right: none;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .info-table td, .info-label {
+    display: block;
+    width: 100%;
+  }
+}
+
+
+/* --- NUEVA GRID DE METADATOS (Reemplaza a info-table) --- */
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.2rem;
+}
+
+.metadata-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.metadata-item:hover {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+  transform: translateY(-2px);
+}
+
+.metadata-icon-box {
+  width: 45px;
+  height: 45px;
+  background: #eff6ff;
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.metadata-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.metadata-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.metadata-value {
+  font-size: 1rem;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+/* Badge simple para la categoría dentro de la grid */
+.category-badge-simple {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* Responsivo para tablets/móviles */
+@media (max-width: 600px) {
+  .metadata-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===============================
+   PANTALLAS GRANDES
+   =============================== */
+@media (min-width: 1400px) {
+  .dataset-detalle-page {
+    max-width: calc(100% - 300px);
+    padding: 0 0 3rem 0; 
+  }
 }

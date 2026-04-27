@@ -1,56 +1,90 @@
-// frontend/src/Components/Cards/DatasetCard.jsx
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import { Calendar, Building2, Tag, ArrowRight } from "lucide-react";
 import "../../Styles/ComponentStyle/Cards/DatasetCard.css";
 
 function DatasetCard({ dataset }) {
-  const navigate = useNavigate(); // 👈 2. Inicializar
+  const navigate = useNavigate();
 
-  // 3. Crear función de redirección (Asegúrate de usar el ID correcto)
+  // 🔥 NORMALIZACIÓN LOCAL (CLAVE)
+  const normalized = {
+    id: dataset.id || dataset.dataset_id,
+
+    nombre: dataset.nombre || dataset.title || "Sin título",
+
+    descripcion:
+      dataset.descripcion ||
+      dataset.description ||
+      dataset.summary ||
+      "Sin descripción disponible.",
+
+    institucion:
+      dataset.institucion ||
+      dataset.institution_name ||
+      "Institución no disponible",
+
+    categoria:
+      dataset.categoria ||
+      dataset.category_name ||
+      null,
+
+    fecha:
+      dataset.fecha ||
+      dataset.creation_date?.split("T")[0] ||
+      "Sin fecha"
+  };
+
   const handleVerDetalle = () => {
-    const id = dataset.id || dataset.dataset_id;
-    navigate(`/conjuntodatos/${id}`);
+    if (normalized.id) {
+      navigate(`/conjuntodatos/${normalized.id}`);
+    }
   };
 
   return (
-    <article className="dataset-card">
-      <div className="dataset-header">
-        <span className="dataset-date">
-          {dataset.fecha || "Sin fecha"}
-        </span>
+    <article className="dataset-card" onClick={handleVerDetalle}>
+      
+      <div className="dataset-card-content">
 
-        {/* 4. Agregar el evento onClick al botón */}
-        <button className="dataset-btn" onClick={handleVerDetalle}>
-          Ver →
-        </button>
-      </div>
+        {/* Meta */}
+        <div className="dataset-meta">
+          {normalized.categoria && (
+            <span className="dataset-badge">
+              <Tag size={12} />
+              {normalized.categoria}
+            </span>
+          )}
 
-      {/* Institución responsable */}
-      {dataset.institucion && (
-        <p className="dataset-institution">
-          {dataset.institucion}
-        </p>
-      )}
-
-      {/* Título principal del Dataset */}
-      <h3 className="dataset-title">
-        {dataset.nombre}
-      </h3>
-
-      {/* Breve descripción (opcional) */}
-      {dataset.description && (
-        <p className="dataset-description">
-          {dataset.description}
-        </p>
-      )}
-
-      {/* Etiquetas / Categoría */}
-      {dataset.categoria && (
-        <div className="dataset-tags">
-          <span className="dataset-tag">
-            {dataset.categoria}
+          <span className="dataset-date">
+            <Calendar size={14} />
+            {normalized.fecha}
           </span>
         </div>
-      )}
+
+        {/* Título */}
+        <h3 className="dataset-title">
+          {normalized.nombre}
+        </h3>
+
+        {/* Institución */}
+        <p className="dataset-institution">
+          <Building2 size={16} />
+          {normalized.institucion}
+        </p>
+
+        {/* Descripción */}
+        <p className="dataset-description">
+          {normalized.descripcion}
+        </p>
+
+      </div>
+
+      {/* Footer */}
+      <div className="dataset-card-footer">
+        <span className="footer-text">Ver detalle del dataset</span>
+        <div className="icon-wrapper">
+          <ArrowRight size={18} className="arrow-icon" />
+        </div>
+      </div>
+
     </article>
   );
 }

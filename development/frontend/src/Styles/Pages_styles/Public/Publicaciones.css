@@ -1,211 +1,184 @@
 /* ===============================
    CONTENEDOR GENERAL
    =============================== */
-.publications-page {
+.publicaciones-page {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 20px;
-  font-family: "Inter", sans-serif;
-  color: #333;
+
+  /* 🔥 ESTE ES EL FIX REAL */
+  padding: 0 20px 2rem 20px;
+
+  font-family: "Inter", system-ui, sans-serif;
+  color: #1e293b;
+  box-sizing: border-box;
+}
+
+.publicaciones-container {
+  width: 100%;
+  display: flex;
+  gap: 40px;
+
+  /* 🔥 CLAVE: evita que el sidebar “rompa el centrado visual” */
+  align-items: flex-start;
 }
 
 /* ===============================
    LAYOUT
    =============================== */
-.publications-container {
+.publicaciones-layout {
   display: flex;
   gap: 40px;
+  margin-top: 1.5rem;
+  align-items: flex-start;
+}
+
+.publicaciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 10px;
 }
 
 /* ===============================
    SIDEBAR
    =============================== */
-.publications-filters {
-  flex: 0 0 260px;
+.publicaciones-sidebar {
+  flex: 0 0 280px;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-/* ===============================
-   CONTENIDO
-   =============================== */
-.publications-results {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-/* ===============================
-   BUSCADOR
-   =============================== */
-.publications-results .search-bar-advanced {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* ===============================
-   HEADER (🔥 igual que datos)
-   =============================== */
-.publications-header {
+.sidebar-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
 }
 
-.publications-header h1 {
-  font-size: 26px;
+.sidebar-header h3 {
   margin: 0;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
-.publications-header span {
-  font-size: 14px;
-  color: #666;
-}
-
-/* ===============================
-   SEPARADOR (🔥 clave)
-   =============================== */
-.publications-separator {
+.btn-clear-filters-text {
+  background: none;
   border: none;
-  border-top: 1px solid #ddd;
-  margin: 10px 0;
+  color: #3b82f6;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-clear-filters-text:hover {
+  text-decoration: underline;
+}
+
+/* acordeón estilo Datos */
+.accordion-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  overflow: hidden;
 }
 
 /* ===============================
-   CONTADOR / INFO
+   CONTENT
    =============================== */
-.publications-count {
+.publicaciones-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* ===============================
+   HEADER (igual Datos)
+   =============================== */
+.publicaciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  color: #2563eb;
+}
+
+.publicaciones-header h1 {
+  font-size: 28px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.results-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0ea5e9;
+  background: #e0f2fe;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+/* ===============================
+   SEPARADOR
+   =============================== */
+.publicaciones-separator {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, #e2e8f0, transparent);
+}
+
+/* ===============================
+   COUNT
+   =============================== */
+.publicaciones-count {
   font-size: 0.9rem;
-  color: #555;
+  color: #64748b;
 }
 
 /* ===============================
-   CHIPS (🔥 igual que datos)
+   CHIPS (idéntico Datos)
    =============================== */
-.publications-chips {
+.filters-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
-.publications-chips .chip {
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  padding: 5px 12px;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
   border-radius: 20px;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.publications-chips .chip:hover {
-  background-color: #125ea6;
+.chip:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
 }
 
 /* ===============================
    LISTA
    =============================== */
-.publications-list {
+.publicaciones-list {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
-}
-
-/* ===============================
-   CARD
-   =============================== */
-.publication-card {
-  border: 1px solid #e4e4e4;
-  border-radius: 12px;
-  background: #fff;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.publication-card:hover {
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  transform: translateY(-3px);
-}
-
-/* ===============================
-   CONTENIDO CARD
-   =============================== */
-.publication-content h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #222;
-}
-
-.publication-date,
-.publication-author {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.publication-content p {
-  font-size: 0.9rem;
-  color: #444;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ===============================
-   TAGS
-   =============================== */
-.publication-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.tag {
-  font-size: 0.75rem;
-  background: #e8f0fe;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-weight: 500;
-  transition: background 0.2s ease;
-}
-
-.tag:hover {
-  background: #d0e2fd;
-}
-
-/* ===============================
-   FOOTER
-   =============================== */
-.publication-footer {
-  margin-top: 0.8rem;
-}
-
-.publication-btn {
-  padding: 0.35rem 0.7rem;
-  border: none;
-  border-radius: 6px;
-  background: #1565C0;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.publication-btn:hover {
-  background: #0d47a1;
-  transform: scale(1.05);
+  gap: 1.5rem;
 }
 
 /* ===============================
@@ -214,34 +187,51 @@
 .loading-state,
 .empty-state {
   text-align: center;
-  padding: 50px 0;
-  color: #555;
+  padding: 60px 20px;
+  background-color: #f8fafc;
+  border-radius: 16px;
+  border: 2px dashed #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-icon {
+  background-color: #e2e8f0;
+  padding: 20px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  color: #64748b;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  color: #0f172a;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: #64748b;
+  max-width: 400px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+/* ===============================
+   PAGINACIÓN
+   =============================== */
+.pagination-wrapper {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
 }
 
 /* ===============================
    RESPONSIVE
    =============================== */
 @media (max-width: 1024px) {
-  .publications-container {
+  .publicaciones-layout {
     flex-direction: column;
-  }
-
-  .publications-filters {
-    order: 2;
-    flex: 1;
-  }
-
-  .publications-results {
-    order: 1;
-  }
-}
-
-/* ===============================
-   PANTALLAS GRANDES
-   =============================== */
-@media (min-width: 1400px) {
-  .publications-page {
-    max-width: calc(100% - 300px);
-    padding: 2rem 0;
   }
 }

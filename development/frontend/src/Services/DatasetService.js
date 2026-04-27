@@ -33,6 +33,19 @@ export async function getDatasets({ search = "", filters = {}, page = 1, limit =
       totalPages: json.totalPages || 1,
       data: json.data || []
     };
+
+    const normalizedData = rawData.map(ds => ({
+  ...ds, // 👈 IMPORTANTE: mantienes todo lo original
+
+      // 🔥 solo agregas compatibilidad
+      id: ds.id || ds.dataset_id,
+      nombre: ds.nombre || ds.title,
+      descripcion: ds.description || ds.summary || ds.descripcion,
+      institucion: ds.institution_name || ds.institucion,
+      categoria: ds.category_name || ds.categoria,
+      fecha: ds.creation_date
+    }));
+    
   } catch (error) {
     return { data: [], total: 0, totalPages: 1 };
   }

@@ -241,6 +241,7 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
     SELECT 
       d.dataset_id, 
       d.title as nombre, 
+      d.description, 
       c.name as categoria, 
       i.legal_name as institucion, 
       TO_CHAR(d.created_at, 'YYYY-MM-DD') as fecha, 

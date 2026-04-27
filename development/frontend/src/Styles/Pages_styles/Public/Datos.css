@@ -2,11 +2,11 @@
    CONTENEDOR GENERAL
    =============================== */
 .datos-page {
-  max-width: 1200px; /* 🔥 igual que news */
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 20px;
-  font-family: "Inter", sans-serif;
-  color: #333;
+  padding: 0 20px 2rem 20px; 
+  font-family: "Inter", system-ui, sans-serif;
+  color: #1e293b;
 }
 
 /* ===============================
@@ -14,36 +14,83 @@
    =============================== */
 .datos-layout {
   display: flex;
-  gap: 40px; /* 🔥 consistente */
+  gap: 40px;
+  margin-top: 1.5rem;
 }
 
 /* ===============================
    SIDEBAR (filtros)
    =============================== */
 .datos-sidebar {
-  flex: 0 0 260px; /* 🔥 igual que news */
+  flex: 0 0 280px; /* Un poco más de espacio para respirar */
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-/* AccordionFilter interno */
-.datos-sidebar .accordion {
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  padding: 10px;
-  border: 1px solid #ddd;
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.btn-clear-filters-text {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  padding: 0;
+}
+
+.btn-clear-filters-text:hover {
+  text-decoration: underline;
+  color: #2563eb;
+}
+
+/* Contenedor del acordeón con estilo de tarjeta */
+.accordion-container {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+/* Ajustes para el AccordionFilter interno si hereda estas clases */
+.datos-sidebar .accordion {
+  background-color: transparent;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.datos-sidebar .accordion:last-child {
+  border-bottom: none;
 }
 
 .datos-sidebar .accordion:hover {
-  background-color: #e0f0ff;
+  background-color: #f8fafc;
 }
 
-.datos-sidebar .accordion-content {
-  margin-top: 5px;
-  padding-left: 10px;
+.sidebar-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: #64748b;
+  gap: 10px;
 }
 
 /* ===============================
@@ -53,16 +100,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-}
-
-/* ===============================
-   BUSCADOR
-   =============================== */
-.datos-content .search-bar-advanced {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  gap: 20px;
+  min-width: 0; /* Previene desbordamientos en flex */
 }
 
 /* ===============================
@@ -71,35 +110,45 @@
 .datos-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-end;
+  margin-top: 10px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  color: #2563eb; /* Azul corporativo moderno */
 }
 
 .datos-header h1 {
-  font-size: 26px; /* 🔥 igual que news */
+  font-size: 28px;
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.5px;
 }
 
-.datos-header span {
-  font-size: 14px;
-  color: #666;
+.results-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0ea5e9;
+  background-color: #e0f2fe;
+  padding: 6px 12px;
+  border-radius: 20px;
 }
 
 /* ===============================
-   SEPARADOR (igual que news)
+   SEPARADOR
    =============================== */
 .datos-separator {
   border: none;
-  border-top: 1px solid #ddd;
-  margin: 10px 0;
-}
-
-/* ===============================
-   CONTADOR / INFO
-   =============================== */
-.datos-count {
-  font-size: 0.9rem;
-  color: #555;
+  height: 1px;
+  background: linear-gradient(to right, #e2e8f0, transparent);
+  margin: 0;
 }
 
 /* ===============================
@@ -108,50 +157,159 @@
 .filters-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  margin-top: -5px;
 }
 
 .filters-chips .chip {
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  padding: 5px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 6px 12px;
   border-radius: 20px;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
+.chip-key {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.chip-val {
+  color: #64748b;
+}
+
 .filters-chips .chip:hover {
-  background-color: #125ea6;
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.filters-chips .chip:hover .chip-val {
+  color: #b91c1c;
+}
+
+.chip-icon {
+  margin-left: 4px;
+  opacity: 0.6;
+}
+
+.filters-chips .chip:hover .chip-icon {
+  opacity: 1;
 }
 
 /* ===============================
-   LISTADO (igual lógica que news-list)
+   LISTADO Y ANIMACIONES
    =============================== */
 .datasets-grid {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem; /* 🔥 igual que news */
+  gap: 1.5rem;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ===============================
-   ESTADOS
+   ESTADOS (VACÍO Y CARGANDO)
    =============================== */
-.loading-state,
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  color: #64748b;
+  gap: 15px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.spinner-large {
+  animation: spin 1s linear infinite;
+  color: #3b82f6;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .empty-state {
   text-align: center;
-  padding: 50px 0;
-  color: #555;
+  padding: 60px 20px;
+  background-color: #f8fafc;
+  border-radius: 16px;
+  border: 2px dashed #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-icon-wrapper {
+  background-color: #e2e8f0;
+  padding: 20px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  color: #64748b;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  color: #0f172a;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: #64748b;
+  max-width: 400px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.btn-empty-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: white;
+  border: 1px solid #cbd5e1;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-empty-clear:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
 }
 
 /* ===============================
    PAGINACIÓN
    =============================== */
-.pagination {
+.pagination-wrapper {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
   display: flex;
   justify-content: center;
-  margin-top: 20px;
 }
 
 /* ===============================
@@ -163,12 +321,12 @@
   }
 
   .datos-sidebar {
-    order: 2;
-    flex: 1;
+    order: 1; /* En móviles, los filtros van arriba */
+    flex: auto;
   }
 
   .datos-content {
-    order: 1;
+    order: 2;
   }
 }
 
@@ -177,7 +335,8 @@
    =============================== */
 @media (min-width: 1400px) {
   .datos-page {
-    max-width: calc(100% - 300px); /* 🔥 igual que news */
-    padding: 2rem 0;
+    max-width: calc(100% - 300px);
+    /* Cambiamos '3rem 0' por: 0 arriba, 0 lados, 3rem abajo */
+    padding: 0 0 3rem 0; 
   }
 }
