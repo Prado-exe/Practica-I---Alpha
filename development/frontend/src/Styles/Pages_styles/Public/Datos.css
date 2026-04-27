@@ -1,28 +1,27 @@
 /* ===============================
-   Datos.css
+   CONTENEDOR GENERAL
    =============================== */
-
-/* Contenedor general */
 .datos-page {
-  max-width: 1400px;
+  max-width: 1200px; /* 🔥 igual que news */
   margin: 0 auto;
   padding: 2rem 20px;
   font-family: "Inter", sans-serif;
   color: #333;
 }
 
-/* Layout principal: sidebar + main */
+/* ===============================
+   LAYOUT: sidebar + contenido
+   =============================== */
 .datos-layout {
   display: flex;
-  flex-direction: row;
-  gap: 40px;
+  gap: 40px; /* 🔥 consistente */
 }
 
 /* ===============================
-   SIDEBAR / filtros
+   SIDEBAR (filtros)
    =============================== */
 .datos-sidebar {
-  flex: 0 0 250px; /* ancho fijo */
+  flex: 0 0 260px; /* 🔥 igual que news */
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -48,23 +47,27 @@
 }
 
 /* ===============================
-   MAIN / contenido
+   CONTENIDO PRINCIPAL
    =============================== */
 .datos-content {
-  flex: 1; /* ocupa todo el espacio restante */
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-/* Buscador */
-/* Asegurar que el buscador ocupe todo el ancho del main */
+/* ===============================
+   BUSCADOR
+   =============================== */
 .datos-content .search-bar-advanced {
   width: 100%;
-  max-width: 100%; /* eliminar limitación anterior */
-  box-sizing: border-box; /* incluye padding en el ancho */
+  max-width: 100%;
+  box-sizing: border-box;
 }
-/* Header principal */
+
+/* ===============================
+   HEADER
+   =============================== */
 .datos-header {
   display: flex;
   justify-content: space-between;
@@ -72,9 +75,9 @@
 }
 
 .datos-header h1 {
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 26px; /* 🔥 igual que news */
   margin: 0;
+  font-weight: 600;
 }
 
 .datos-header span {
@@ -83,13 +86,29 @@
 }
 
 /* ===============================
-   Chips de filtros
+   SEPARADOR (igual que news)
+   =============================== */
+.datos-separator {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 10px 0;
+}
+
+/* ===============================
+   CONTADOR / INFO
+   =============================== */
+.datos-count {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* ===============================
+   CHIPS DE FILTROS
    =============================== */
 .filters-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .filters-chips .chip {
@@ -108,27 +127,22 @@
 }
 
 /* ===============================
-   Grid / listado de datasets
+   LISTADO (igual lógica que news-list)
    =============================== */
 .datasets-grid {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 1.4rem; /* 🔥 igual que news */
 }
-/* Estados: loading / vacío */
+
+/* ===============================
+   ESTADOS
+   =============================== */
 .loading-state,
 .empty-state {
   text-align: center;
   padding: 50px 0;
-  font-size: 16px;
   color: #555;
-}
-
-/* Separador opcional */
-.datos-content hr {
-  border: none;
-  border-top: 1px solid #ccc;
-  margin: 10px 0;
 }
 
 /* ===============================
@@ -149,7 +163,7 @@
   }
 
   .datos-sidebar {
-    order: 2; /* sidebar abajo */
+    order: 2;
     flex: 1;
   }
 
@@ -158,8 +172,12 @@
   }
 }
 
+/* ===============================
+   PANTALLAS GRANDES
+   =============================== */
 @media (min-width: 1400px) {
   .datos-page {
-    padding: 2rem 40px;
+    max-width: calc(100% - 300px); /* 🔥 igual que news */
+    padding: 2rem 0;
   }
 }

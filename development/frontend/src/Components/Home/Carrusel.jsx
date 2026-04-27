@@ -15,6 +15,22 @@ function Carrusel() {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [slides, setSlides] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/public/carousel`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ok && data.data?.length > 0) {
+          setSlides(data.data);
+        } else {
+          setSlides(homeSlides.map(toStaticSlide));
+        }
+      })
+      .catch(() => setSlides(homeSlides.map(toStaticSlide)))
+      .finally(() => setLoading(false));
+  }, []);
 
   // 🔄 Cargar contenido destacado al montar el componente
   useEffect(() => {
@@ -89,7 +105,7 @@ function Carrusel() {
     if (!carouselRef.current) return;
     const width = carouselRef.current.offsetWidth;
     carouselRef.current.scrollTo({
-      left: width * index,
+      left: carouselRef.current.offsetWidth * index,
       behavior: reducedMotion ? "auto" : "smooth",
     });
     setActiveIndex(index);
@@ -153,7 +169,7 @@ function Carrusel() {
       >
         {slides.map((slide, index) => (
           <article
-            key={slide.id}
+            key={slide.news_post_id ?? index}
             className="carousel-item"
             role="group"
             aria-roledescription="slide"

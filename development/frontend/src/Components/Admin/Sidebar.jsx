@@ -1,15 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { 
-  LayoutDashboard, 
-  Database, 
-  Newspaper, 
-  Users, 
-  ShieldCheck, 
-  Building2, 
-  Settings, 
-  Menu, 
-  LogOut 
+import {
+  LayoutDashboard,
+  Database,
+  Newspaper,
+  Users,
+  ShieldCheck,
+  Building2,
+  Settings,
+  Menu,
+  LogOut,
+  Images
 } from "lucide-react";
 import "../../Styles/ComponentStyle/Admin/Sidebar.css";
 

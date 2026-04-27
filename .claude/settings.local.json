@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const pkg = require\\('c:/Users/basti/Desktop/Kpi/Practica-I---Alpha/development/frontend/node_modules/lucide-react/package.json'\\); console.log\\(pkg.version\\);\")",
+      "Bash(node -e \"const lr = require\\('c:/Users/basti/Desktop/Kpi/Practica-I---Alpha/development/frontend/node_modules/lucide-react'\\); console.log\\('Images:', typeof lr.Images\\); console.log\\('Newspaper:', typeof lr.Newspaper\\); console.log\\('Image:', typeof lr.Image\\);\")"
+    ]
+  }
+}

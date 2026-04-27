@@ -71,9 +71,10 @@ function Noticias() {
             placeholder="Buscar noticias..."
           />
 
+          {/* HEADER */}
           <div className="news-header">
             <h1>Noticias</h1>
-            <span>{totalResults} resultados</span>
+            <span>{totalResults} disponibles</span>
           </div>
 
           <hr className="news-separator" />
@@ -94,6 +95,22 @@ function Noticias() {
             </>
           )}
 
+          <hr className="news-separator" />
+
+          {/* LISTADO */}
+          <div className="news-list">
+            {loading ? (
+              <div className="loading-state">Cargando noticias...</div>
+            ) : news.length === 0 ? (
+              <div className="empty-state">No se encontraron noticias</div>
+            ) : (
+              news.map(n => (
+                <NoticiasCard key={n.id} news={n} />
+              ))
+            )}
+          </div>
+
+          {/* PAGINACIÓN */}
           {totalPages > 1 && (
             <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           )}

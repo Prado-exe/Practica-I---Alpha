@@ -26,6 +26,7 @@ const PreguntasFrecuentes = lazy(() => import("../Pages/Public/PreguntasFrecuent
 const NoticiaDetalle = lazy(() => import("../Pages/Public/NoticiaDetalle"));
 const PublicacionDetalle = lazy(() => import("../Pages/Public/PublicacionDetalle"));
 
+const DatasetGraficos = lazy(() => import("../Pages/Public/DatasetGraficos"));
 
 //Admin Routes
 const Dashboard = lazy(() => import("../Pages/Admin/Dashboard"));
@@ -44,6 +45,11 @@ const Register = lazy(() => import("../Pages/Register"));
 const VerificacionSeguridad = lazy(() => import("../Pages/Verificacionseguridad"));
 const RecuperarContrasena = lazy(() => import("../Pages/RecuperarContrasena"));
 const ResetPassword = lazy(() => import("../Pages/ResetPassword"));
+
+
+const NoticiasAdmin = lazy(() => import("../Pages/Admin/NoticiasAdmin"));
+const GestionCarrusel = lazy(() => import("../Pages/Admin/GestionCarrusel"));
+
 
 // not found route
 const Error404 = lazy(() => import("../Pages/Public/Error404"));
@@ -71,7 +77,7 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
 
         <Route path="proponer-dataset" element={
-          <ProtectedRoute requiredPermission="user_management.write">
+          <ProtectedRoute requiredPermission="data_management.write">
             <CrearDatasetUsuario />
           </ProtectedRoute>
         } />
@@ -113,6 +119,24 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
 
+        <Route
+          path="/administracion/noticias"
+          element={
+            <ProtectedRoute requiredPermission="catalog.write">
+              <NoticiasAdmin />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/administracion/carrusel"
+          element={
+            <ProtectedRoute requiredPermission="catalog.write">
+              <GestionCarrusel />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="etiquetas" element={
           <ProtectedRoute requiredPermission="admin_general.manage">
             <MantenedorTags />
@@ -130,6 +154,7 @@ function AppRoutes() {
         <Route path="/formulario" element={<Formulario />} />
         <Route path="/conjuntodatos" element={<Datos />} />
         <Route path="/conjuntodatos/:id" element={<DatasetDetalle />} />
+        <Route path="/conjuntodatos/:id/graficos" element={<DatasetGraficos />} />
         <Route path="/publicaciones" element={<Publicaciones />} />
         <Route path="/publicaciones/:slug" element={<PublicacionDetalle />} />
         <Route path="/instituciones" element={<Instituciones />} />

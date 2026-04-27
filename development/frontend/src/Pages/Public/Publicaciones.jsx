@@ -82,9 +82,9 @@ function Publicaciones() {
 
           <div className="publications-list">
             {loading ? (
-              <p>Cargando publicaciones...</p>
+              <div className="loading-state">Cargando publicaciones...</div>
             ) : publications.length === 0 ? (
-              <p>No se encontraron publicaciones</p>
+              <div className="empty-state">No se encontraron publicaciones</div>
             ) : (
               publications.map(pub => (
                 <PublicationCard key={pub.id} publication={pub} />

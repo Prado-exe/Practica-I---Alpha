@@ -72,6 +72,10 @@ function DatasetDetalle() {
         <main className="detalle-content">
           <h1>{dataset.title || dataset.nombre}</h1>
           
+          <Link to={`/conjuntodatos/${id}/graficos`} className="btn-graficar">
+            📊 Ver datos graficados
+          </Link>
+
           <div className="detalle-description">
             <p>{dataset.description || dataset.summary || "No hay descripción disponible para este conjunto de datos."}</p>
           </div>
