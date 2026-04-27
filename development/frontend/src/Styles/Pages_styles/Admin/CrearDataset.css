@@ -6,13 +6,14 @@
 /* Contenedor Principal (Capa de aislamiento) */
 .crear-dataset-container {
   max-width: 750px;
+  width: 90%; /* Asegura margen en móviles */
   margin: 30px auto;
   padding: 40px;
   background-color: #ffffff;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  color: #333;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Sombra suave para dar profundidad */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box; /* Fundamental para incluir el padding en el ancho */
+  overflow: hidden; /* Corta cualquier cosa que intente salir de las esquinas redondeadas */
 }
 
 /* Cabecera y Títulos */
@@ -99,12 +100,14 @@
 
 .crear-dataset-container .form-row {
   display: flex;
+  flex-wrap: wrap; /* Permite que los elementos bajen si no caben */
   gap: 20px;
   margin-bottom: 25px;
 }
 
 .crear-dataset-container .form-col {
   flex: 1;
+  min-width: 280px; /* Evita que los inputs se vuelvan demasiado delgados */
 }
 
 /* Ajustes específicos para Textareas */
@@ -222,3 +225,38 @@
 
 .crear-dataset-container .d-none { display: none !important; }
 .crear-dataset-container .d-block { display: block !important; }
+
+.crear-dataset-container .form-control {
+  width: 100%;
+  max-width: 100%; /* Evita que crezcan más que el contenedor */
+  box-sizing: border-box; /* Incluye el padding en el cálculo del ancho */
+  font-family: inherit;
+}
+
+.textarea-short, 
+.textarea-long {
+  min-height: 80px;
+  resize: vertical; /* Solo permite estirar hacia abajo, no hacia los lados */
+  line-height: 1.5;
+  padding: 12px;
+  
+  /* Protección contra palabras extremadamente largas o URLs */
+  word-break: break-word; 
+  overflow-wrap: break-word;
+}
+
+.textarea-long {
+  min-height: 200px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* CLAVE: Si no caben, el segundo baja */
+  margin-bottom: 15px;
+}
+
+.form-col {
+  flex: 1;
+  min-width: 250px; /* Evita que los campos se vuelvan ilegibles de tan angostos */
+}

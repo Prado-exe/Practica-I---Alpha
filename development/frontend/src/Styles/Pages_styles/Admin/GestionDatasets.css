@@ -26,6 +26,8 @@
   margin: 0;
   font-size: 14px;
   max-width: 600px;
+  /* NUEVO: Evita que el texto empuje al botón de crear fuera de la pantalla */
+  overflow-wrap: break-word;
 }
 
 .btn-create {
@@ -73,13 +75,15 @@
   display: flex;
   flex-direction: column;
   background-color: transparent;
+  /* NUEVO: Evita que se encojan demasiado */
+  min-width: 180px; 
+  flex: 1; /* Permite que crezcan para llenar el espacio */
 }
 
 .search-wrapper {
-  flex-grow: 1; 
-  max-width: 350px;
+  flex-grow: 2; /* Dale más importancia a la barra de búsqueda */
+  min-width: 250px;
 }
-
 .input-wrapper label {
   position: absolute;
   top: -8px;
@@ -161,14 +165,16 @@
 /* TABLA */
 .table-container {
   background: white;
-  border-radius: 0;
+  border-radius: 8px; /* Un poco de redondeado se ve mejor */
   overflow-x: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  width: 100%;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 800px; /* FUERZA el scroll horizontal en móviles en lugar de aplastar celdas */
 }
 
 thead th {
@@ -186,6 +192,12 @@ tbody td {
   color: #333;
   border-bottom: 1px solid #eee;
   vertical-align: middle;
+  
+  /* NUEVO: Control de desborde */
+  max-width: 200px; /* Ajusta según tu necesidad */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Filas alternas */
@@ -232,6 +244,9 @@ tbody tr:nth-child(odd) {
   gap: 14px;
   justify-content: center;
   align-items: center;
+  /* NUEVO: Asegura que los iconos no se bajen uno debajo de otro */
+  white-space: nowrap; 
+  flex-wrap: nowrap;
 }
 
 .action-icon {

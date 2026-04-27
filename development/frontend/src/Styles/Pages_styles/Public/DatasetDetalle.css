@@ -69,6 +69,10 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: #0f172a;
+  
+  /* Asegura que no se salga del cuadro */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .institution-card p {
@@ -178,14 +182,19 @@
   box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
 }
 
+/* Busca .description-card y reemplaza/agrega: */
 .description-card {
   padding: 1.5rem;
   margin-bottom: 2.5rem;
   font-size: 1.05rem;
   line-height: 1.7;
   color: #475569;
-  background: #f8fafc; /* Un gris muy sutil para diferenciar de las tablas */
+  background: #f8fafc;
   border: none;
+  
+  /* SOLUCIÓN AL DESBORDE: */
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .detalle-section {
@@ -431,7 +440,7 @@
 }
 
 .metadata-label {
-  font-size: 0.8rem;
+  font-size: 0.8rem;  
   text-transform: uppercase;
   letter-spacing: 0.025em;
   color: #64748b;
@@ -442,6 +451,13 @@
   font-size: 1rem;
   color: #0f172a;
   font-weight: 500;
+
+  /* SOLUCIÓN: Truncar a máximo 2 líneas si es muy largo */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Número de líneas visibles */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Badge simple para la categoría dentro de la grid */
