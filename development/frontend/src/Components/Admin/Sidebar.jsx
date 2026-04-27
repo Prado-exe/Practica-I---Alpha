@@ -10,7 +10,8 @@ import {
   Settings,
   Menu,
   LogOut,
-  Images
+  Images,
+  Mail
 } from "lucide-react";
 import "../../Styles/ComponentStyle/Admin/Sidebar.css";
 
@@ -36,6 +37,7 @@ function Sidebar() {
     { name: "Usuarios", path: "/administracion/usuarios", icon: Users, requiredPermission: "user_management.read" },
     { name: "Roles", path: "/administracion/roles", icon: ShieldCheck, requiredPermission: "roles_permissions.read" },
     { name: "Instituciones", path: "/administracion/instituciones", icon: Building2, requiredPermission: "admin_general.manage" },
+    { name: "Mensajes", path: "/administracion/contacto", icon: Mail, requiredPermission: "admin_general.manage" },
     { name: "Etiquetas", path: "/administracion/etiquetas", icon: "🏷️", requiredPermission: "admin_general.manage" },
     
   ];

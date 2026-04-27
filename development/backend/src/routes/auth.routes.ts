@@ -83,6 +83,15 @@ import {
   getNewsCategoriesAction,
   getPublicNewsBySlugAction 
 } from "./news.routes";
+
+import { 
+  submitContactAction, 
+  getContactsAction, 
+  markContactReadAction, 
+  deleteContactAction,
+  getContactByIdAction 
+} from "./contact.routes";
+
 /**
  * Descripción: Extrae el identificador de la sesión activa desde el Access Token o el Refresh Token.
  * POR QUÉ: Implementa una lógica de extracción de doble fuente. Primero intenta obtener el ID del payload del Access Token (transatómico/rápido). Si falla, recurre al Refresh Token en las cookies para asegurar la trazabilidad de la sesión incluso en flujos de renovación o cierre de sesión donde el token de acceso puede haber expirado o ser inexistente.
@@ -217,3 +226,13 @@ authRouter.add("POST", "/api/news", [requirePermission("catalog.write")], create
 authRouter.add("PUT", "/api/news/:id", [requirePermission("catalog.write")], updateNewsAction);
 authRouter.add("DELETE", "/api/news/:id", [requirePermission("catalog.write")], deleteNewsAction);
 authRouter.add("PATCH", "/api/news/:id/visibility", [requirePermission("catalog.write")], toggleVisibilityAction);
+
+// --- RUTAS DE CONTACTO ---
+// Público (Formulario)
+authRouter.add("POST", "/api/public/contact", [], submitContactAction);
+
+// Privado (Administrador)
+authRouter.add("GET", "/api/contact", [requirePermission("admin_general.manage")], getContactsAction);
+authRouter.add("PATCH", "/api/contact/:id/read", [requirePermission("admin_general.manage")], markContactReadAction);
+authRouter.add("DELETE", "/api/contact/:id", [requirePermission("admin_general.manage")], deleteContactAction);
+authRouter.add("GET", "/api/contact/:id", [requirePermission("admin_general.manage")], getContactByIdAction);
