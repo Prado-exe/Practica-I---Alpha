@@ -1,88 +1,111 @@
-.nosotros-container{
-display:flex;
-max-width:1200px;
-margin:auto;
-padding:40px 20px;
-gap:40px;
+/* ===============================
+   CONTENEDOR GENERAL
+   =============================== */
+.nosotros-container {
+  display: flex;
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+  gap: 40px;
+  min-width: 0; /* 🔥 evita desbordes en flex */
 }
 
-/* MENU LATERAL */
-
-.nosotros-menu{
-width:250px;
-border-right:1px solid #ddd;
-padding-right:20px;
+/* ===============================
+   MENU LATERAL
+   =============================== */
+.nosotros-menu {
+  width: 250px;
+  border-right: 1px solid #ddd;
+  padding-right: 20px;
+  min-width: 0;
 }
 
-
-.nosotros-menu h3{
-margin-bottom:20px;
+.nosotros-menu h3 {
+  margin-bottom: 20px;
 }
 
-.nosotros-menu ul{
-list-style:none;
-padding:0;
-margin:0;
+.nosotros-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.nosotros-menu li{
-padding:10px 12px;
-cursor:pointer;
-border-radius:6px;
-margin-bottom:6px;
-transition:all 0.2s;
+.nosotros-menu li {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  transition: all 0.2s;
 }
 
-.nosotros-menu li:hover{
-background:#f2f2f2;
+.nosotros-menu li:hover {
+  background: #f2f2f2;
 }
 
-.nosotros-menu li.active{
-background:#e9eef6;
-font-weight:600;
+.nosotros-menu li.active {
+  background: #e9eef6;
+  font-weight: 600;
 }
 
-/* CONTENIDO */
-
+/* ===============================
+   CONTENIDO
+   =============================== */
 .nosotros-content {
-  flex: 1; /* O el ancho que le hayas dado */
+  flex: 1;
   padding: 20px;
-  max-width: 100%; /* Evita que crezca más que su padre */
-  overflow-wrap: break-word; /* Rompe palabras muy largas si es necesario */
-  box-sizing: border-box; /* Asegura que el padding no sume ancho extra */
-}
-.nosotros-content h1{
-margin-bottom:10px;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+  min-width: 0; /* 🔥 importante */
 }
 
-.content-image {
-  max-width: 100%; /* Nunca se pasará del borde */
-  height: auto;    /* Mantiene la proporción */
-  display: block;  /* Evita espacios extra abajo */
-  margin: 20px 0;  /* Centrado vertical */
-  border-radius: 8px;
+.nosotros-content h1 {
+  margin-bottom: 10px;
 }
+
+.nosotros-content p {
+  line-height: 1.7;
+  color: #444;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 .text-paragraph {
   white-space: pre-line;
   width: 100%;
-  text-align: justify; /* Alinea al límite derecho e izquierdo */
+  text-align: justify;
   line-height: 1.6;
   margin-bottom: 1.5rem;
-}
-.separator{
-height:1px;
-background:#ddd;
-margin:15px 0 25px 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-.nosotros-content p{
-line-height:1.7;
-color:#444;
+/* ===============================
+   IMÁGENES
+   =============================== */
+.content-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 20px 0;
+  border-radius: 8px;
 }
 
+/* ===============================
+   SEPARADOR
+   =============================== */
+.separator {
+  height: 1px;
+  background: #ddd;
+  margin: 15px 0 25px 0;
+}
 
+/* ===============================
+   TABLAS
+   =============================== */
 .table-container {
-  overflow-x: auto; /* Permite scroll horizontal en móviles */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 25px 0;
 }
 
@@ -107,75 +130,147 @@ color:#444;
   vertical-align: top;
 }
 
-/* Color intercalado para las filas */
 .nosotros-table tr:nth-child(even) {
   background-color: #fafafa;
 }
+
+/* ===============================
+   EQUIPO
+   =============================== */
 .member-image-container {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%; /* Esto las hace circulares */
-    overflow: hidden;
-    margin: 0 auto 15px auto;
-    border: 4px solid #f0f0f0;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 15px auto;
+  border: 4px solid #f0f0f0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .member-photo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* MUY IMPORTANTE: evita que se deformen */
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-/* =========================================
-   GRILLA DE EQUIPO (Agrega esto al final)
-   ========================================= */
-
 .equipo-grid {
-    display: grid;
-    /* Esto crea columnas automáticas que se adaptan al ancho. 
-       Si caben 3, pone 3. Si es celular, pone 1 o 2. */
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 2rem; /* Espacio entre las tarjetas */
-    padding: 20px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem;
+  padding: 20px 0;
+  width: 100%;
 }
 
 .member-card {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
 }
 
 .member-card:hover {
-    transform: translateY(-5px); /* Pequeño efecto al pasar el mouse */
+  transform: translateY(-5px);
 }
 
-/* Tipografía de las tarjetas */
 .member-name {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #333;
-    margin: 0.5rem 0 0.2rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0.5rem 0 0.2rem 0;
 }
 
 .member-role {
-    font-size: 0.9rem;
-    color: #666;
-    font-style: italic;
-    margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+  margin: 0;
 }
 
-/* Ajuste específico para celulares */
-@media (max-width: 600px) {
-    .equipo-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 1rem;
-    }
-    .member-image-container {
-        width: 120px;
-        height: 120px;
-    }
+/* ===============================
+   📱 RESPONSIVE TABLET
+   =============================== */
+@media (max-width: 1024px) {
+
+  .nosotros-container {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 15px;
+  }
+
+  .nosotros-menu {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding-right: 0;
+    padding-bottom: 10px;
+  }
+
+  .nosotros-menu ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nosotros-menu li {
+    margin-bottom: 0;
+    padding: 8px 10px;
+    background: #f8fafc;
+  }
+}
+
+/* ===============================
+   📱 RESPONSIVE MÓVIL
+   =============================== */
+@media (max-width: 768px) {
+
+  .nosotros-content {
+    padding: 15px 10px;
+  }
+
+  .equipo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .member-image-container {
+    width: 130px;
+    height: 130px;
+  }
+}
+
+/* ===============================
+   📱 CELULARES PEQUEÑOS
+   =============================== */
+@media (max-width: 480px) {
+
+  .nosotros-container {
+    padding: 15px 10px;
+  }
+
+  .nosotros-content {
+    padding: 10px;
+  }
+
+  .nosotros-menu li {
+    font-size: 13px;
+  }
+
+  .equipo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  .member-image-container {
+    width: 110px;
+    height: 110px;
+  }
+
+  .member-name {
+    font-size: 1rem;
+  }
+
+  .member-role {
+    font-size: 0.8rem;
+  }
 }

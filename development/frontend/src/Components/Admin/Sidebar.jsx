@@ -11,8 +11,10 @@ import {
   Menu,
   LogOut,
   Images,
-  Mail
+  Mail,
+  Tag   // 👈 agrega esto
 } from "lucide-react";
+
 import "../../Styles/ComponentStyle/Admin/Sidebar.css";
 
 // Importamos las herramientas reales de seguridad
@@ -31,15 +33,15 @@ function Sidebar() {
 
   // Reemplazamos los emojis por componentes de iconos
   const menu = [
-    { name: "Dashboard", path: "/administracion", icon: LayoutDashboard }, 
+    { name: "Panel administracion", path: "/administracion", icon: LayoutDashboard }, 
     { name: "Mis Datasets", path: "/administracion/mis-datasets", icon: Database, requiredPermission: "data_management.read" },
-    { name: "Datasets globales", path: "/administracion/datasets", icon: Database, requiredPermission: "data_management.read" },
+    { name: "Gestion de datasets", path: "/administracion/datasets", icon: Database, requiredPermission: "data_management.read" },
     { name: "Contenido Web", path: "/administracion/contenido", icon: Newspaper, requiredPermission: "catalog.write" },
     { name: "Usuarios", path: "/administracion/usuarios", icon: Users, requiredPermission: "user_management.read" },
     { name: "Roles", path: "/administracion/roles", icon: ShieldCheck, requiredPermission: "roles_permissions.read" },
     { name: "Instituciones", path: "/administracion/instituciones", icon: Building2, requiredPermission: "admin_general.manage" },
     { name: "Mensajes", path: "/administracion/contacto", icon: Mail, requiredPermission: "admin_general.manage" },
-    { name: "Etiquetas", path: "/administracion/etiquetas", icon: "🏷️", requiredPermission: "admin_general.manage" },
+    { name: "Etiquetas", path: "/administracion/etiquetas", icon: Tag, requiredPermission: "admin_general.manage" },
     
   ];
 

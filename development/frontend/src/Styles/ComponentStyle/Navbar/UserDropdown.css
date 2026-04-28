@@ -1,3 +1,4 @@
+/* ── Trigger ───────────────────────────────────────── */
 .user-dropdown {
   position: relative;
 }
@@ -9,45 +10,176 @@
   background: none;
   border: none;
   cursor: pointer;
+  padding: 0;
   font-size: 14px;
 }
 
-.user-dropdown-menu {
-  position: absolute;
-  top: 120%;
-  right: 0;
-
-  width: 200px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-
-  display: flex;
-  flex-direction: column;
-  padding: 10px 0;
-  z-index: 9999; /* 🔥 subido por seguridad */
+.ud-chevron {
+  font-size: 0.65rem;
+  color: #666;
+  transition: transform 0.25s ease;
+  margin-left: 2px;
 }
 
-.user-dropdown-menu a,
-.user-dropdown-menu button {
-  padding: 10px 15px;
-  text-align: left;
+.ud-chevron--open {
+  transform: rotate(180deg);
+}
+
+/* ── Panel ─────────────────────────────────────────── */
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 235px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    0 14px 32px rgba(0, 0, 0, 0.13);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9999;
+  animation: ud-slide-in 0.18s ease both;
+}
+
+@keyframes ud-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── Header del perfil ─────────────────────────────── */
+.ud-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #0B5ED7 0%, #1565c0 100%);
+}
+
+.ud-avatar {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.ud-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ud-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ud-role {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.71rem;
+  margin-top: 2px;
+}
+
+/* ── Separadores ───────────────────────────────────── */
+.ud-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 3px 0;
+  flex-shrink: 0;
+}
+
+.ud-divider--labeled {
+  height: auto;
+  background: none;
+  margin: 8px 12px 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ud-divider--labeled span {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #b0b0b0;
+  white-space: nowrap;
+}
+
+.ud-divider--labeled::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ebebeb;
+}
+
+/* ── Items ─────────────────────────────────────────── */
+.ud-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.52rem 1rem;
+  text-decoration: none;
+  color: #2c2c2c;
+  font-size: 0.875rem;
+  font-weight: 500;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  width: 100%;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
 }
 
-.user-dropdown-menu a:hover,
-.user-dropdown-menu button:hover {
-  background: #f2f2f2;
+.ud-item:hover {
+  background: #eef4ff;
+  color: #0B5ED7;
 }
 
-.logout {
-  color: red;
-  font-weight: bold;
+.ud-item:hover .ud-icon {
+  color: #0B5ED7;
 }
 
+.ud-icon {
+  font-size: 0.82rem;
+  color: #999;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+/* ── Logout ────────────────────────────────────────── */
+.ud-logout {
+  color: #c62828;
+  margin-bottom: 4px;
+}
+
+.ud-logout .ud-icon {
+  color: #c62828;
+}
+
+.ud-logout:hover {
+  background: #fff5f5;
+  color: #b71c1c;
+}
+
+.ud-logout:hover .ud-icon {
+  color: #b71c1c;
+}
+
+/* ── Legacy — usados en Navbar.jsx ────────────────── */
 .user-trigger {
   display: flex;
   align-items: center;
@@ -62,8 +194,17 @@
   white-space: nowrap;
 }
 
-.user-btn {
-  background: none;
-  border: none;
-  padding: 0;
+.user-avatar-circle {
+  width: 35px;
+  height: 35px;
+  background-color: #d32f2f;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

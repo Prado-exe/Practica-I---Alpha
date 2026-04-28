@@ -1,10 +1,30 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUser } from "react-icons/fa";
+import {
+  FaTachometerAlt,
+  FaPlus,
+  FaDatabase,
+  FaNewspaper,
+  FaUsers,
+  FaKey,
+  FaBuilding,
+  FaEnvelope,
+  FaTags,
+  FaSignOutAlt,
+  FaChevronDown,
+} from "react-icons/fa";
 import "../../styles/ComponentStyle/Navbar/UserDropdown.css";
+
+const ROLE_LABELS = {
+  super_admin: "Super Administrador",
+  data_admin: "Administrador de Datos",
+  user_admin: "Administrador de Usuarios",
+  registered_user: "Usuario Registrado",
+};
 
 function UserDropdown({ user, logout, children }) {
   if (!user) return null;
+
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef();
 
@@ -18,65 +38,120 @@ function UserDropdown({ user, logout, children }) {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // Definición de roles basada en tus códigos de BD
-  const role = user.role_code || user.role; 
-  const isSuperAdmin = role === 'super_admin';
-  const isDataAdmin = role === 'data_admin';
-  const isUserAdmin = role === 'user_admin';
-  
-  // Condición: ¿Es algún tipo de administrador?
-  const isAdminAny = isSuperAdmin || isDataAdmin || isUserAdmin;
+  const perms = user.permissions || [];
+  const has = (p) => perms.includes(p);
+  const hasAnyAdmin = perms.length > 0;
+
+  const close = () => setOpen(false);
+
+  const roleLabel = ROLE_LABELS[user.role_code || user.role] || "Usuario";
+  const initial = user.full_name?.charAt(0).toUpperCase() || "U";
 
   return (
     <div className="user-dropdown" ref={dropdownRef}>
       <button className="user-btn" onClick={() => setOpen(!open)}>
         {children}
+        <FaChevronDown className={`ud-chevron ${open ? "ud-chevron--open" : ""}`} />
       </button>
 
       {open && (
         <div className="user-dropdown-menu">
-          
-          {/* SOLUCIÓN: Solo mostramos "Proponer Dataset" si NO es registered_user 
-             (Es decir, si es cualquier tipo de Admin)
-          */}
-          {/* SOLUCIÓN: Solo los administradores de DATOS pueden proponer datasets */}
-          {(isDataAdmin || isSuperAdmin) && (
-            <Link to="/administracion/proponer-dataset" onClick={() => setOpen(false)}>
-              Proponer Dataset
-            </Link>
-          )}
 
-          {/* Gestión de Datos (Data Admin y Super Admin) */}
-          {(isDataAdmin || isSuperAdmin) && (
+          {/* Header del perfil */}
+          <div className="ud-header">
+            <div className="ud-avatar">{initial}</div>
+            <div className="ud-info">
+              <span className="ud-name">{user.full_name || "Usuario"}</span>
+              <span className="ud-role">{roleLabel}</span>
+            </div>
+          </div>
+
+          {/* Panel Admin */}
+          {hasAnyAdmin && (
             <>
-              <div className="dropdown-divider"></div>
-              <Link to="/administracion" onClick={() => setOpen(false)}>Panel Admin</Link>
-              <Link to="/administracion/datasets" onClick={() => setOpen(false)}>Gestión de Datasets</Link>
-              <Link to="/administracion/publicaciones" onClick={() => setOpen(false)}>Publicaciones</Link>
+              <div className="ud-divider" />
+              <Link to="/administracion" className="ud-item" onClick={close}>
+                <FaTachometerAlt className="ud-icon" />
+                Panel Admin
+              </Link>
             </>
           )}
 
-          {/* Gestión de Usuarios y Seguridad (User Admin y Super Admin) */}
-          {(isUserAdmin || isSuperAdmin) && (
+          {/* Datos */}
+          {(has("data_management.write") || has("data_management.read")) && (
             <>
-              <div className="dropdown-divider"></div>
-              <Link to="/administracion/usuarios" onClick={() => setOpen(false)}>Usuarios</Link>
-              <Link to="/administracion/roles" onClick={() => setOpen(false)}>Roles</Link>
+              <div className="ud-divider ud-divider--labeled"><span>Datos</span></div>
+              {has("data_management.write") && (
+                <Link to="/administracion/proponer-dataset" className="ud-item" onClick={close}>
+                  <FaPlus className="ud-icon" />
+                  Proponer Dataset
+                </Link>
+              )}
+              {has("data_management.read") && (
+                <Link to="/administracion/datasets" className="ud-item" onClick={close}>
+                  <FaDatabase className="ud-icon" />
+                  Gestión de Datasets
+                </Link>
+              )}
             </>
           )}
 
-          {/* Configuración (Solo Super Admin) */}
-          {isSuperAdmin && (
+          {/* Catálogo */}
+          {has("catalog.write") && (
             <>
-              <Link to="/administracion/instituciones" onClick={() => setOpen(false)}>Instituciones</Link>
-              <Link to="/administracion/configuracion" onClick={() => setOpen(false)}>Configuración</Link>
+              <div className="ud-divider ud-divider--labeled"><span>Catálogo</span></div>
+              <Link to="/administracion/contenido" className="ud-item" onClick={close}>
+                <FaNewspaper className="ud-icon" />
+                Noticias
+              </Link>
             </>
           )}
 
-          <div className="dropdown-divider"></div>
-          <button onClick={logout} className="logout">
+          {/* Usuarios y Roles */}
+          {(has("user_management.read") || has("roles_permissions.read")) && (
+            <>
+              <div className="ud-divider ud-divider--labeled"><span>Gestión</span></div>
+              {has("user_management.read") && (
+                <Link to="/administracion/usuarios" className="ud-item" onClick={close}>
+                  <FaUsers className="ud-icon" />
+                  Usuarios
+                </Link>
+              )}
+              {has("roles_permissions.read") && (
+                <Link to="/administracion/roles" className="ud-item" onClick={close}>
+                  <FaKey className="ud-icon" />
+                  Roles
+                </Link>
+              )}
+            </>
+          )}
+
+          {/* Administración general */}
+          {has("admin_general.manage") && (
+            <>
+              <div className="ud-divider ud-divider--labeled"><span>Sistema</span></div>
+              <Link to="/administracion/instituciones" className="ud-item" onClick={close}>
+                <FaBuilding className="ud-icon" />
+                Instituciones
+              </Link>
+              <Link to="/administracion/contacto" className="ud-item" onClick={close}>
+                <FaEnvelope className="ud-icon" />
+                Contacto
+              </Link>
+              <Link to="/administracion/etiquetas" className="ud-item" onClick={close}>
+                <FaTags className="ud-icon" />
+                Etiquetas
+              </Link>
+            </>
+          )}
+
+          {/* Cerrar sesión */}
+          <div className="ud-divider" />
+          <button onClick={logout} className="ud-item ud-logout">
+            <FaSignOutAlt className="ud-icon" />
             Cerrar sesión
           </button>
+
         </div>
       )}
     </div>

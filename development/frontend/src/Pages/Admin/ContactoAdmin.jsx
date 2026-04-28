@@ -36,77 +36,97 @@ function ContactoAdmin() {
   );
 
   return (
-    <div className="admin-page-container">
-      <div className="admin-header-flex">
-        <div>
-          <h1 className="admin-title">Bandeja de Contacto</h1>
-          <p className="admin-subtitle">Administra los mensajes recibidos desde el formulario público.</p>
+    <div className="gestion-datasets">
+      {/* HEADER ALINEADO */}
+      <div className="header">
+        <div className="header-info">
+          <h1>Bandeja de Contacto</h1>
+          <p>Administra los mensajes recibidos desde el formulario público del observatorio.</p>
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        <button 
-          onClick={() => setFiltroActivo("unread")}
-          style={{ padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", background: filtroActivo === "unread" ? "#004e9a" : "#e0e0e0", color: filtroActivo === "unread" ? "white" : "#333", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}
-        >
-          <Mail size={18} /> No Leídos ({mensajes.filter(m => !m.is_read).length})
-        </button>
-        <button 
-          onClick={() => setFiltroActivo("read")}
-          style={{ padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", background: filtroActivo === "read" ? "#28a745" : "#e0e0e0", color: filtroActivo === "read" ? "white" : "#333", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}
-        >
-          <MailOpen size={18} /> Leídos ({mensajes.filter(m => m.is_read).length})
-        </button>
+      {/* SECCIÓN DE FILTROS (TABS ESTILO DASHBOARD) */}
+      <div className="filters-section">
+        <div className="filter-actions" style={{ justifyContent: "flex-start", gap: "15px" }}>
+          <button 
+            className={`btn-aplicar ${filtroActivo === "unread" ? "" : "inactive-tab"}`}
+            onClick={() => setFiltroActivo("unread")}
+            style={{ background: filtroActivo === "unread" ? "#1a6bf0" : "#e2e8f0", color: filtroActivo === "unread" ? "white" : "#4a5568" }}
+          >
+            <Mail size={16} /> No Leídos ({mensajes.filter(m => !m.is_read).length})
+          </button>
+          
+          <button 
+            className="btn-create" 
+            onClick={() => setFiltroActivo("read")}
+            style={{ background: filtroActivo === "read" ? "#1a6bf0" : "#e2e8f0", color: filtroActivo === "read" ? "white" : "#4a5568" }}
+          >
+            <MailOpen size={16} /> Leídos ({mensajes.filter(m => m.is_read).length})
+          </button>
+        </div>
       </div>
 
-      <div className="admin-card fade-in">
+      {/* CONTENEDOR DE TABLA ADMINISTRATIVA */}
+      <div className="table-container">
         {loading ? (
-           <div className="loading-state"><Loader2 className="spin" /> Cargando mensajes...</div>
+          <div className="loading-state" style={{ padding: "40px", textAlign: "center" }}>
+            <Loader2 className="spin" /> Cargando mensajes...
+          </div>
         ) : (
-          <div className="admin-table-container">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Remitente</th>
-                  <th>Motivo</th>
-                  <th>Categoría</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mensajesFiltrados.length > 0 ? (
-                  mensajesFiltrados.map((m) => (
-                    <tr key={m.id} style={{ fontWeight: !m.is_read ? "bold" : "normal", background: !m.is_read ? "#f4f9ff" : "transparent" }}>
-                      <td>{new Date(m.created_at).toLocaleDateString()}</td>
-                      <td>
-                        {m.name} <br/>
-                        <small style={{ color: "#666", fontWeight: "normal" }}>{m.email}</small>
-                      </td>
-                      <td>{m.reason}</td>
-                      <td><span className="badge draft">{m.category}</span></td>
-                      <td className="actions-cell">
-                        <Link to={`/administracion/contacto/${m.id}`} className="btn-icon" title="Ver detalle">
-                          <Eye size={18} color="#004e9a" />
-                        </Link>
-                        {m.is_read && (
-                          <button className="btn-icon delete" title="Borrar" onClick={() => eliminarMensaje(m.id)}>
-                            <Trash2 size={18} />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: "center", padding: "30px", color: "#666" }}>
-                      No hay mensajes en esta bandeja.
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Remitente</th>
+                <th>Motivo</th>
+                <th style={{ textAlign: 'center' }}>Categoría</th>
+                <th style={{ textAlign: 'center' }}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mensajesFiltrados.length > 0 ? (
+                mensajesFiltrados.map((m) => (
+                  <tr key={m.id}>
+                    <td style={{ fontWeight: !m.is_read ? "700" : "400" }}>
+                      {new Date(m.created_at).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: !m.is_read ? "700" : "500" }}>{m.name}</span>
+                        <small style={{ color: "#666" }}>{m.email}</small>
+                      </div>
+                    </td>
+                    <td>{m.reason}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span className={`estado-badge archived`}>
+                        {m.category}
+                      </span>
+                    </td>
+                    <td className="acciones">
+                      <Link to={`/administracion/contacto/${m.id}`} title="Ver Detalle">
+                        <Eye className="action-icon" size={20} />
+                      </Link>
+                      
+                      {m.is_read && (
+                        <Trash2 
+                          className="action-icon btn-destruir-icon" 
+                          size={20} 
+                          title="Eliminar Mensaje"
+                          onClick={() => eliminarMensaje(m.id)}
+                        />
+                      )}
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center", padding: "40px", color: "#757575" }}>
+                    No hay mensajes disponibles en esta bandeja.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

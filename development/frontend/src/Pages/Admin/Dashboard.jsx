@@ -130,11 +130,6 @@ function Dashboard() {
           <div className="title-indicator"></div>
           <h2>Actividad reciente</h2>
         </div>
-        <div className="section-header">
-          <CanView requiredPermission="activity_log.read">
-            <button onClick={() => navigate("/administracion/actividad")}>Ver todo</button>
-          </CanView>
-        </div>
         <div className="table-container">
           <table className="table">
             <thead>
@@ -171,11 +166,6 @@ function Dashboard() {
           <div className="title-indicator"></div>
           <h2>Validaciones pendientes</h2>
         </div>
-        <div className="section-header">
-          <CanView requiredPermission="data_validation.execute">
-            <button onClick={() => navigate("/administracion/validaciones")}>Revisar</button>
-          </CanView>
-        </div>
         <div className="table-container">
           <table className="table">
             <thead>
@@ -203,16 +193,20 @@ function Dashboard() {
       </div>
 
       {/* ÚLTIMOS DATASETS */}
-      <div className="dashboard-section">
+      <div className="dashboard-section ultimos-datasets">
         <div className="section-title">
           <div className="title-indicator"></div>
           <h2>Últimos datasets</h2>
         </div>
+
         <div className="section-header">
           <CanView requiredPermission="data_management.read">
-            <button onClick={() => navigate("/administracion/datasets")}>Ver todos</button>
+            <button onClick={() => navigate("/administracion/datasets")}>
+              Ver todos
+            </button>
           </CanView>
         </div>
+
         <div className="table-container">
           <table className="table">
             <thead>
@@ -225,13 +219,22 @@ function Dashboard() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={4} style={{ textAlign: "center" }}>Cargando…</td></tr>
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "center" }}>
+                    Cargando…
+                  </td>
+                </tr>
               ) : latestDatasets.length === 0 ? (
-                <tr><td colSpan={4} style={{ textAlign: "center" }}>Sin datasets</td></tr>
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "center" }}>
+                    Sin datasets
+                  </td>
+                </tr>
               ) : latestDatasets.map((ds, i) => (
                 <tr key={i}>
-                  <td>{ds.title}</td>
-                  <td>{ds.institucion}</td>
+                  {/* 🔥 IMPORTANTE: agregamos title para ver texto completo */}
+                  <td title={ds.title}>{ds.title}</td>
+                  <td title={ds.institucion}>{ds.institucion}</td>
                   <td>{ds.fecha}</td>
                   <td>
                     <span className={`badge ${STATUS_BADGE[ds.dataset_status] ?? "neutral"}`}>

@@ -1,80 +1,62 @@
 import { useNavigate } from "react-router-dom";
-import "../../Styles/ComponentStyle/Home/PopularData.css";
 import { useFetchList } from "../../Components/Hooks/useFetchList";
 import { getDatasets } from "../../Services/DatasetService";
+import { Database, LayoutGrid, ArrowRight, Loader2, Info } from "lucide-react";
+import "../../Styles/ComponentStyle/Home/PopularData.css";
 
 function PopularData() {
   const navigate = useNavigate();
-  const { data: datasets, loading } = useFetchList(getDatasets, { limit: 3 });
-
-  const handleVerDetalle = (id) => {
-    navigate(`/conjuntodatos/${id}`);
-  };
+  // Forzamos el límite a 6 para las 2 filas de 3
+  const { data: datasets, loading } = useFetchList(getDatasets, { limit: 6 });
 
   return (
-    <section className="expositor-wrapper">
-      <div className="expositor-popdata">
-
-        {/* HEADER */}
-        <div className="expositor-header">
-          <h2>datasets recientes</h2>
-          <hr className="expositor-separator" />
-          <p>Explora los datasets más recientes del observatorio</p>
+    <section className="popdata-wrapper">
+      <div className="popdata-inner">
+        
+        {/* HEADER CON LÍNEA DE ACENTO */}
+        <div className="popdata-header">
+          <div className="popdata-title-box">
+            <span className="popdata-subtitle">Datos Abiertos</span>
+            <h2>Información Estratégica</h2>
+            <div className="popdata-accent-line"></div>
+          </div>
+          <button className="popdata-btn-all" onClick={() => navigate('/datasets')}>
+            Explorar Catálogo <ArrowRight size={18} />
+          </button>
         </div>
 
-        {/* LOADING */}
         {loading ? (
-          <div className="expositor-loading">
-            <span className="loader-spinner"></span>
-            <p>Cargando datasets...</p>
+          <div className="popdata-loading">
+            <Loader2 className="animate-spin" size={40} />
+            <p>Sincronizando biblioteca de datos...</p>
           </div>
         ) : (
-          <div className="expositor-grid">
+          <div className="popdata-grid">
             {datasets?.map((item) => (
-              <article
-                key={item.id || item.dataset_id}
-                className="expositor-card"
-              >
-                {/* TOP */}
-                <div className="card-top-section">
-                  <div className="institution-logo-box">
+              <article key={item.id || item.dataset_id} className="popdata-card">
+                {/* Barra de color superior sutil para variación */}
+                <div className="card-color-strip"></div>
+                
+                <div className="card-top">
+                  <div className="card-logo">
                     <img
-                      src={
-                        item.institucion_logo ||
-                        item.institution?.image_url ||
-                        "https://via.placeholder.com/60"
-                      }
-                      alt={item.institucion || "Logo"}
-                      className="inst-logo"
+                      src={item.institucion_logo || item.institution?.image_url || "/img/default-inst.png"}
+                      alt="Logo"
+                      onError={(e) => { e.target.src = "/img/default-inst.png"; }}
                     />
                   </div>
-
-                  <span className="card-category">
-                    {item.categoria || "General"}
-                  </span>
+                  <span className="card-badge">{item.categoria || "General"}</span>
                 </div>
 
-                {/* CONTENT */}
-                <div className="card-content">
-                  <h3 title={item.nombre}>
-                    {item.nombre || "Sin título"}
-                  </h3>
-
-                  <p>
-                    {item.description ||
-                      "No hay descripción disponible para este dataset."}
-                  </p>
+                <div className="card-body">
+                  <h3 title={item.nombre}>{item.nombre || "Sin título"}</h3>
+                  <p>{item.description || "Explora los detalles técnicos y estadísticos de este conjunto de datos."}</p>
                 </div>
 
-                {/* FOOTER */}
                 <div className="card-footer">
-                  <button
-                    onClick={() =>
-                      handleVerDetalle(item.id || item.dataset_id)
-                    }
-                    className="card-button"
-                  >
-                    Ver dataset
+                  <button onClick={() => navigate(`/conjuntodatos/${item.id || item.dataset_id}`)}>
+                    <Info size={16} />
+                    Ficha Técnica
                   </button>
                 </div>
               </article>

@@ -276,13 +276,6 @@ const requestDatasetSchema = createDatasetSchema.extend({
 export async function submitDatasetRequest(accountId: number, input: any) {
   const validatedData = requestDatasetSchema.parse(input);
   
-  // 2. Validación de negocio: El mensaje es obligatorio SOLO si va a revisión
-  if (validatedData.dataset_status === 'pending_validation') {
-    if (!validatedData.message || validatedData.message.trim().length < 10) {
-      throw new AppError("Por favor, incluye un mensaje descriptivo para el revisor (mínimo 10 caracteres).", 400);
-    }
-  }
-  
   const result = await createDatasetRequestInDb(accountId, validatedData);
   return result;
 }

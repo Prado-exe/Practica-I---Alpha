@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../Styles/Pages_styles/Admin/GestionDatasets.css"; 
+import { Upload, FileText, X, CheckCircle, ChevronDown } from "lucide-react";
+import "../../Styles/Pages_styles/Admin/CrearDataset.css";
 import { useAuth } from "../../Context/AuthContext";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -28,7 +29,7 @@ function CrearDatasetUsuario() {
     institution_id: "", 
     ods_objective_id: "",
     access_level: "public",
-    creation_date: new Date().toISOString().split('T')[0],
+    creation_date: new Date().toISOString().split("T")[0],
     temporal_coverage_start: "",
     temporal_coverage_end: "",
     geographic_coverage: "",
@@ -40,12 +41,14 @@ function CrearDatasetUsuario() {
   });
 
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [tagsOpen, setTagsOpen] = useState(false);
+  const isDraft = formData.dataset_status === "draft";
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const catRes = await fetch(`${API_URL}/api/categories`);
-        if (catRes.ok) setCategories((await catRes.json()).data || []); 
+        if (catRes.ok) setCategories((await catRes.json()).data || []);
 
         const licRes = await fetch(`${API_URL}/api/licenses`);
         if (licRes.ok) setLicenses((await licRes.json()).data || []);
@@ -112,7 +115,8 @@ function CrearDatasetUsuario() {
   };
 
   const handleFileChange = (e) => setSelectedFiles(Array.from(e.target.files));
-  const removeFile = (indexToRemove) => setSelectedFiles(files => files.filter((_, index) => index !== indexToRemove));
+  const removeFile = (indexToRemove) =>
+    setSelectedFiles((files) => files.filter((_, index) => index !== indexToRemove));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -130,20 +134,32 @@ function CrearDatasetUsuario() {
       for (const file of selectedFiles) {
         const presignedRes = await fetch(`${API_URL}/api/upload/presigned-url`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
-          body: JSON.stringify({ fileName: file.name, contentType: file.type })
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ fileName: file.name, contentType: file.type }),
         });
-        
+
         if (!presignedRes.ok) throw new Error("Error obteniendo URL de subida");
         const { uploadUrl, fileUrl, storageKey } = await presignedRes.json();
 
-        const uploadRes = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+        const uploadRes = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
         if (!uploadRes.ok) throw new Error(`Error subiendo el archivo ${file.name}`);
 
         uploadedFilesData.push({
-          storage_key: storageKey, file_url: fileUrl, display_name: file.name,
-          file_format: file.name.split('.').pop().toLowerCase(), mime_type: file.type,
-          file_size_bytes: file.size, file_role: 'source', is_primary: uploadedFilesData.length === 0 
+          storage_key: storageKey,
+          file_url: fileUrl,
+          display_name: file.name,
+          file_format: file.name.split(".").pop().toLowerCase(),
+          mime_type: file.type,
+          file_size_bytes: file.size,
+          file_role: "source",
+          is_primary: uploadedFilesData.length === 0,
         });
       }
 
@@ -154,36 +170,43 @@ function CrearDatasetUsuario() {
         institution_id: formData.institution_id ? Number(formData.institution_id) : null,
         ods_objective_id: formData.ods_objective_id ? Number(formData.ods_objective_id) : null,
         source_url: formData.source_url?.trim() !== "" ? formData.source_url : null,
-        temporal_coverage_start: formData.temporal_coverage_start !== "" ? formData.temporal_coverage_start : null,
-        temporal_coverage_end: formData.temporal_coverage_end !== "" ? formData.temporal_coverage_end : null,
-        geographic_coverage: formData.geographic_coverage?.trim() !== "" ? formData.geographic_coverage : null,
+        temporal_coverage_start:
+          formData.temporal_coverage_start !== "" ? formData.temporal_coverage_start : null,
+        temporal_coverage_end:
+          formData.temporal_coverage_end !== "" ? formData.temporal_coverage_end : null,
+        geographic_coverage:
+          formData.geographic_coverage?.trim() !== "" ? formData.geographic_coverage : null,
         update_frequency: formData.update_frequency !== "" ? formData.update_frequency : null,
+        tags: formData.tags.map(Number),
         files: uploadedFilesData,
         tags: formData.tags, // 👈 NUEVO: Enviamos las etiquetas en el payload
         message: formData.dataset_status === 'draft' ? null : formData.message 
       };
 
-      const res = await fetch(`${API_URL}/api/datasets/request`, { 
-        method: "POST", 
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
-        body: JSON.stringify(payload) 
+      const res = await fetch(`${API_URL}/api/datasets/request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const err = await res.json();
         let errorMsg = "Error del servidor al procesar la solicitud";
-        if (Array.isArray(err.message)) errorMsg = err.message.map(e => e.message).join(", ");
+        if (Array.isArray(err.message)) errorMsg = err.message.map((e) => e.message).join(", ");
         else if (err.message) errorMsg = err.message;
         throw new Error(errorMsg);
       }
-      
-      const successMsg = formData.dataset_status === 'draft' 
-        ? "¡Borrador guardado exitosamente en tu área de trabajo!" 
-        : "¡Tu propuesta de Dataset ha sido enviada a revisión con éxito!";
-      
+
+      const successMsg =
+        formData.dataset_status === "draft"
+          ? "¡Borrador guardado exitosamente en tu área de trabajo!"
+          : "¡Tu propuesta de Dataset ha sido enviada a revisión con éxito!";
+
       alert(successMsg);
       navigate(-1);
-
     } catch (error) {
       console.error(error);
       alert(error.message || "Ocurrió un error al procesar la solicitud.");
@@ -193,13 +216,31 @@ function CrearDatasetUsuario() {
   };
 
   return (
-    <div className="gestion-datasets" style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
-      
-      <div className="header" style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-        <button type="button" onClick={() => navigate(-1)} style={{ cursor: 'pointer', padding: '5px 10px' }}>← Volver</button>
-        <div>
+    <div className="crear-dataset-container">
+
+      {/* ── Header ── */}
+      <div className="crear-header">
+        <button type="button" onClick={() => navigate(-1)} className="btn-back">
+          ← Volver
+        </button>
+        <div className="crear-header__text">
           <h1>Proponer Nuevo Dataset</h1>
-          <p>Paso {step} de 2: {step === 1 ? 'Metadatos y Acción' : 'Subida de archivos'}</p>
+          <p>Comparte datos de valor público con la comunidad</p>
+        </div>
+      </div>
+
+      {/* ── Indicador de pasos ── */}
+      <div className="step-indicator">
+        <div className={`step-item${step >= 1 ? " step-item--active" : ""}${step > 1 ? " step-item--done" : ""}`}>
+          <div className="step-item__circle">
+            {step > 1 ? <CheckCircle size={16} /> : "1"}
+          </div>
+          <span className="step-item__label">Información</span>
+        </div>
+        <div className={`step-line${step > 1 ? " step-line--done" : ""}`} />
+        <div className={`step-item${step >= 2 ? " step-item--active" : ""}`}>
+          <div className="step-item__circle">2</div>
+          <span className="step-item__label">Archivos</span>
         </div>
       </div>
 
@@ -229,27 +270,48 @@ function CrearDatasetUsuario() {
             </div>
           )}
 
-          <div style={{ marginBottom: '15px' }}>
-            <label>Título del Dataset *</label>
-            <input type="text" name="title" required value={formData.title} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+                  {formData.tags.length === 0 && (
+                    <p className="tags-error">Selecciona al menos 1 etiqueta para continuar.</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-            <div style={{ flex: 1 }}>
-              <label>Fecha de Creación de los Datos *</label>
-              <input type="date" name="creation_date" required value={formData.creation_date} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+          {/* Sección: Cobertura y fechas */}
+          <div className="form-section">
+            <h3 className="form-section__title">Cobertura y fechas</h3>
+
+            <div className="form-row">
+              <div className="form-col form-group">
+                <label>
+                  Fecha de creación de los datos <span className="req">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="creation_date"
+                  required
+                  value={formData.creation_date}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="form-col form-group">
+                <label>Frecuencia de actualización</label>
+                <select
+                  name="update_frequency"
+                  value={formData.update_frequency}
+                  onChange={handleChange}
+                  className="form-control"
+                >
+                  <option value="">No definida</option>
+                  <option value="Anual">Anual</option>
+                  <option value="Semestral">Semestral</option>
+                  <option value="Trimestral">Trimestral</option>
+                  <option value="Mensual">Mensual</option>
+                </select>
+              </div>
             </div>
-            <div style={{ flex: 1 }}>
-              <label>Frecuencia de Actualización</label>
-              <select name="update_frequency" value={formData.update_frequency} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
-                <option value="">No definida</option>
-                <option value="Anual">Anual</option>
-                <option value="Semestral">Semestral</option>
-                <option value="Trimestral">Trimestral</option>
-                <option value="Mensual">Mensual</option>
-              </select>
-            </div>
-          </div>
 
           <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
             <div style={{ flex: 1 }}>
@@ -361,72 +423,99 @@ function CrearDatasetUsuario() {
             {formData.tags.length === 0 && <small style={{color: '#d32f2f', display: 'block', marginTop: '5px'}}>* Selecciona al menos 1 etiqueta para continuar.</small>}
           </div>
 
-          <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-            <div style={{ flex: 1 }}>
-              <label>Cobertura Temporal (Inicio)</label>
-              <input type="date" name="temporal_coverage_start" value={formData.temporal_coverage_start} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label>Cobertura Temporal (Término)</label>
-              <input type="date" name="temporal_coverage_end" value={formData.temporal_coverage_end} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+            <div className="form-row">
+              <div className="form-col form-group">
+                <label>Cobertura geográfica</label>
+                <input
+                  type="text"
+                  name="geographic_coverage"
+                  placeholder="Ej: Chile, Regional..."
+                  value={formData.geographic_coverage}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="form-col form-group">
+                <label>URL de la organización / fuente</label>
+                <input
+                  type="url"
+                  name="source_url"
+                  placeholder="https://ejemplo.org"
+                  value={formData.source_url}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-            <div style={{ flex: 1 }}>
-              <label>Cobertura Geográfica</label>
-              <input type="text" name="geographic_coverage" placeholder="Ej: Chile, Regional..." value={formData.geographic_coverage} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label>URL de la Organización / Fuente</label>
-              <input type="url" name="source_url" placeholder="https://ejemplo.org" value={formData.source_url} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '15px' }}>
-            <label>Resumen Corto (Máx 500 caract.) *</label>
-            <textarea name="summary" required maxLength="500" value={formData.summary} onChange={handleChange} style={{ width: '100%', padding: '8px', height: '60px' }} />
-          </div>
-
-          <div style={{ marginBottom: '25px' }}>
-            <label>Descripción Completa *</label>
-            <textarea name="description" required value={formData.description} onChange={handleChange} style={{ width: '100%', padding: '8px', height: '120px' }} />
-          </div>
-
-          <div style={{ textAlign: 'right' }}>
-            <button type="submit" style={{ padding: '10px 20px', backgroundColor: formData.dataset_status === 'draft' ? '#2196F3' : '#ff9800', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+          <div className="form-actions form-actions--right">
+            <button type="submit" className="btn-primary btn-primary--validation">
               Continuar a Archivos →
             </button>
           </div>
         </div>
 
-        {/* PASO 2: ARCHIVOS */}
-        <div style={{ display: step === 2 ? 'block' : 'none' }}>
-          <div style={{ border: '2px dashed #ccc', padding: '40px', textAlign: 'center', marginBottom: '20px', borderRadius: '8px' }}>
-            <input type="file" multiple onChange={handleFileChange} id="file-upload" style={{ display: 'none' }} />
-            <label htmlFor="file-upload" style={{ cursor: 'pointer', color: formData.dataset_status === 'draft' ? '#2196F3' : '#ff9800', fontWeight: 'bold' }}>
-              📁 Haz clic aquí para seleccionar archivos
-            </label>
+        {/* ══════════════════ PASO 2 ══════════════════ */}
+        <div className={step !== 2 ? "d-none" : ""}>
+
+          <div className="form-section">
+            <h3 className="form-section__title">Sube los archivos del dataset</h3>
+
+            <div className="file-drop-area">
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                id="file-upload"
+                className="d-none"
+              />
+              <Upload size={40} strokeWidth={1.5} className="file-drop-area__icon" />
+              <p className="file-drop-area__title">Arrastra tus archivos aquí</p>
+              <p className="file-drop-area__subtitle">o</p>
+              <label htmlFor="file-upload" className="file-upload-label">
+                Seleccionar archivos
+              </label>
+              <p className="file-drop-area__hint">CSV, XLSX, JSON, PDF y más</p>
+            </div>
+
+            {selectedFiles.length > 0 && (
+              <div className="file-list">
+                <p className="file-list__header">
+                  {selectedFiles.length} archivo{selectedFiles.length > 1 ? "s" : ""} seleccionado
+                  {selectedFiles.length > 1 ? "s" : ""}
+                </p>
+                {selectedFiles.map((f, i) => (
+                  <div key={i} className="file-item">
+                    <FileText size={18} className="file-item__icon" />
+                    <div className="file-item__info">
+                      <span className="file-item__name">{f.name}</span>
+                      <span className="file-item__size">
+                        {(f.size / 1024 / 1024).toFixed(2)} MB
+                      </span>
+                    </div>
+                    <span className="file-item__badge">
+                      {f.name.split(".").pop().toUpperCase()}
+                    </span>
+                    <button type="button" onClick={() => removeFile(i)} className="btn-remove-file">
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {selectedFiles.length > 0 && (
-            <div style={{ marginBottom: '25px' }}>
-              <h3>Archivos a subir:</h3>
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {selectedFiles.map((f, i) => (
-                  <li key={i} style={{ padding: '10px', backgroundColor: '#f9f9f9', marginBottom: '5px', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>📄 {f.name} ({(f.size / 1024 / 1024).toFixed(2)} MB)</span>
-                    <button type="button" onClick={() => removeFile(i)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>✖</button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
-            <button type="button" onClick={() => setStep(1)} style={{ padding: '10px 20px', cursor: 'pointer' }}>← Atrás</button>
-            <button type="submit" disabled={isSubmitting || selectedFiles.length === 0} style={{ padding: '10px 20px', backgroundColor: isSubmitting ? '#ccc' : (formData.dataset_status === 'draft' ? '#2196F3' : '#ff9800'), color: 'white', border: 'none', fontWeight: 'bold' }}>
-              {isSubmitting ? 'Procesando...' : (formData.dataset_status === 'draft' ? '💾 Guardar Borrador' : '📤 Enviar a Revisión')}
+          <div className="form-actions">
+            <button type="button" onClick={() => setStep(1)} className="btn-secondary">
+              ← Atrás
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || selectedFiles.length === 0}
+              className="btn-primary btn-primary--validation"
+            >
+              {isSubmitting ? "Procesando..." : "📤 Enviar a Revisión"}
             </button>
           </div>
         </div>

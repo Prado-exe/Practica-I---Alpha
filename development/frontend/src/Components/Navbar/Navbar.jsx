@@ -37,10 +37,8 @@ function Navbar() {
   const [hidden, setHidden] = useState(false);
 
   const { user, logout } = useAuth();
-
   const effectiveUser = user;
 
-  // Inicial del usuario
   const userInitial = effectiveUser?.full_name
     ? effectiveUser.full_name.charAt(0).toUpperCase()
     : "U";
@@ -106,7 +104,6 @@ function Navbar() {
                 </Link>
               </>
             ) : (
-              /* 👇 BLOQUE USUARIO LIMPIO */
               <UserDropdown user={effectiveUser} logout={logout}>
                 <div className="user-trigger">
                   <div className="user-avatar-circle">
@@ -133,6 +130,7 @@ function Navbar() {
             <li key={link.path}>
               <NavLink
                 to={link.path}
+                onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
                   `nav-btn ${isActive ? "active" : ""}`
                 }
@@ -143,7 +141,11 @@ function Navbar() {
           ))}
         </ul>
 
-        <DropdownMenu links={aboutLinks} />
+        {/* 👇 PASAMOS LA FUNCIÓN */}
+        <DropdownMenu
+          links={aboutLinks}
+          onNavigate={() => setMenuOpen(false)}
+        />
       </nav>
     </header>
   );

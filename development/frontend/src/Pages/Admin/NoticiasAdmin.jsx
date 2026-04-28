@@ -1,5 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, List, Save, X, FileText, Loader2, Trash2, Edit, Star, EyeOff, Eye } from "lucide-react";
+import { 
+  Plus, 
+  List, 
+  Save, 
+  X, 
+  Loader2, 
+  Trash2, 
+  Edit, 
+  Star, 
+  EyeOff, 
+  Eye, 
+  Search, 
+  RotateCcw,
+  PlusCircle
+} from "lucide-react";
 import "../../Styles/Pages_styles/Admin/NoticiasAdmin.css";
 import { useAuth } from "../../Context/AuthContext";
 import { getDatasets } from "../../Services/DatasetService";
@@ -11,16 +25,21 @@ function NoticiasAdmin() {
   const [loadingList, setLoadingList] = useState(true);
   const [noticias, setNoticias] = useState([]);
   
-  // Estados para datos dinámicos
   const [newsCategories, setNewsCategories] = useState([]);
   const [generalCategories, setGeneralCategories] = useState([]);
   const [datasetsList, setDatasetsList] = useState([]);
   const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
 
-  // Archivos físicos y Edición
+  const [filters, setFilters] = useState({
+    titulo: "",
+    tipo: "",
+    estado: "",
+    categoria: ""
+  });
+
   const [coverFile, setCoverFile] = useState(null);
   const [galleryFiles, setGalleryFiles] = useState([]);
-  const [editingId, setEditingId] = useState(null); // 👈 Controla si estamos creando o editando
+  const [editingId, setEditingId] = useState(null);
 
   const initialForm = {
     title: "", summary: "", content: "",
@@ -30,10 +49,19 @@ function NoticiasAdmin() {
 
   const [formData, setFormData] = useState(initialForm);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (appliedFilters = filters) => {
     try {
       setLoadingList(true);
-      const resNews = await fetch(`${import.meta.env.VITE_API_URL}/api/news/admin`, {
+      const params = new URLSearchParams();
+      if (appliedFilters.titulo) params.append("search", appliedFilters.titulo);
+      if (appliedFilters.tipo) params.append("tipo", appliedFilters.tipo);
+      if (appliedFilters.estado) params.append("estado", appliedFilters.estado);
+      if (appliedFilters.categoria) params.append("categoria", appliedFilters.categoria);
+
+      const queryString = params.toString();
+      const endpoint = `${import.meta.env.VITE_API_URL}/api/news/admin${queryString ? `?${queryString}` : ''}`;
+
+      const resNews = await fetch(endpoint, {
         headers: { "Authorization": `Bearer ${user?.token}` }
       });
       const dataNews = await resNews.json();
@@ -59,11 +87,23 @@ function NoticiasAdmin() {
     } finally {
       setLoadingList(false);
     }
-  }, [user?.token]);
+  }, [user?.token, filters]);
 
   useEffect(() => {
     if (user?.token) fetchData();
   }, [user?.token, fetchData]);
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
+  const handleApplyFilters = () => fetchData(filters);
+
+  const handleClearFilters = () => {
+    const empty = { titulo: "", tipo: "", estado: "", categoria: "" };
+    setFilters(empty);
+    fetchData(empty);
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -105,7 +145,6 @@ function NoticiasAdmin() {
         files: uploadedFiles.length > 0 ? uploadedFiles : undefined
       };
 
-      // 👈 Diferenciamos entre Crear (POST) y Editar (PUT)
       const url = editingId 
         ? `${import.meta.env.VITE_API_URL}/api/news/${editingId}` 
         : `${import.meta.env.VITE_API_URL}/api/news`;
@@ -130,10 +169,6 @@ function NoticiasAdmin() {
     }
   };
 
-  // ==========================================
-  // 🚀 FUNCIONES DE LOS BOTONES DE LA TABLA
-  // ==========================================
-
   const startEdit = (noticia) => {
     setFormData({
       title: noticia.title, summary: noticia.summary || "", content: noticia.content,
@@ -146,7 +181,7 @@ function NoticiasAdmin() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Estás seguro de destruir esta publicación y sus imágenes?")) return;
+    if (!window.confirm("¿Estás seguro de destruir esta publicación permanentemente?")) return;
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/news/${id}`, {
         method: "DELETE", headers: { "Authorization": `Bearer ${user?.token}` }
@@ -172,152 +207,231 @@ function NoticiasAdmin() {
   };
 
   return (
-    <div className="admin-page-container">
-      <div className="admin-header-flex">
-        <div>
-          <h1 className="admin-title">Gestión de Contenido</h1>
-          <p className="admin-subtitle">Administra las noticias y publicaciones.</p>
+    <div className="na-main-layout">
+      {/* CABECERA ALINEADA */}
+      <div className="na-top-header">
+        <div className="na-header-texts">
+          <h1>Gestión de Noticias y Publicaciones</h1>
+          <p>Administra el contenido informativo y educativo del observatorio.</p>
         </div>
-        <button className="btn-primary" onClick={() => { 
-          setView(view === "list" ? "create" : "list"); 
-          if (view === "list") { setFormData(initialForm); setEditingId(null); }
-        }}>
-          {view === "list" ? <><Plus size={18} /> Nuevo</> : <><List size={18} /> Ver Lista</>}
+        <button 
+          className="na-btn-primary na-btn-add" 
+          onClick={() => { 
+            setView(view === "list" ? "create" : "list"); 
+            if (view === "list") { setFormData(initialForm); setEditingId(null); }
+          }}
+        >
+          {view === "list" ? (
+            <><PlusCircle size={18} /> Agregar Contenido</>
+          ) : (
+            <><List size={18} /> Ver Listado</>
+          )}
         </button>
       </div>
 
-      {view === "list" && (
-        <div className="admin-card fade-in">
-          {loadingList ? (
-             <div className="loading-state"><Loader2 className="spin" /> Cargando...</div>
-          ) : (
-            <div className="admin-table-container">
-              <table className="admin-table">
+      {view === "list" ? (
+        <div className="na-list-view na-fade-in">
+          {/* SECCIÓN DE FILTROS TIPO TARJETA */}
+          <div className="na-filters-card">
+            <div className="na-filters-grid">
+              <div className="na-field-group na-search-field">
+                <label>Buscar</label>
+                <input 
+                  type="text" 
+                  name="titulo"
+                  placeholder="Título de la entrada..." 
+                  value={filters.titulo}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="na-field-group">
+                <label>Tipo</label>
+                <select name="tipo" value={filters.tipo} onChange={handleFilterChange}>
+                  <option value="">Todos los tipos</option>
+                  <option value="news">Noticias</option>
+                  <option value="post">Publicaciones</option>
+                </select>
+              </div>
+
+              <div className="na-field-group">
+                <label>Estado</label>
+                <select name="estado" value={filters.estado} onChange={handleFilterChange}>
+                  <option value="">Cualquier estado</option>
+                  <option value="published">Publicado</option>
+                  <option value="draft">Borrador</option>
+                  <option value="archived">Oculto</option>
+                </select>
+              </div>
+
+              <div className="na-filters-buttons">
+                <button className="na-btn-apply" onClick={handleApplyFilters}>
+                  <Search size={16} /> APLICAR
+                </button>
+                <button className="na-btn-reset" onClick={handleClearFilters} title="Limpiar filtros">
+                  <RotateCcw size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* CONTENEDOR DE TABLA TIPO PANEL */}
+          <div className="na-data-table-wrapper">
+            {loadingList ? (
+              <div className="na-loading-placeholder">
+                <Loader2 className="na-spin-icon" /> 
+                <span>Cargando contenido...</span>
+              </div>
+            ) : (
+              <table className="na-admin-table">
                 <thead>
                   <tr>
                     <th>Título</th>
                     <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Destacado</th>
-                    <th>Acciones</th>
+                    <th style={{ textAlign: 'center' }}>Estado</th>
+                    <th style={{ textAlign: 'center' }}>Destacado</th>
+                    <th style={{ textAlign: 'center' }}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {noticias.map((n) => (
-                    <tr key={n.news_post_id} className={n.post_status === 'archived' ? 'row-archived' : ''}>
-                      <td>{n.title}</td>
-                      <td><span className={`type-tag ${n.post_type}`}>{n.post_type === 'news' ? 'Noticia' : 'Publicación'}</span></td>
-                      <td>
-                        <span className={`badge ${n.post_status}`}>
-                           {n.post_status === 'archived' ? 'Oculto' : n.post_status}
-                        </span>
-                      </td>
-                      <td>{n.is_featured ? <Star size={16} fill="#f59e0b" color="#f59e0b" /> : "—"}</td>
-                      <td className="actions-cell">
-                        {/* 🚀 BOTONES CONECTADOS */}
-                        <button className="btn-icon" title="Editar" onClick={() => startEdit(n)}><Edit size={16} /></button>
-                        <button className="btn-icon" title={n.post_status === 'archived' ? "Mostrar" : "Ocultar"} onClick={() => handleToggleVisibility(n.news_post_id, n.post_status)}>
-                          {n.post_status === 'archived' ? <Eye size={16} /> : <EyeOff size={16} />}
-                        </button>
-                        <button className="btn-icon delete" title="Borrar" onClick={() => handleDelete(n.news_post_id)}><Trash2 size={16} /></button>
+                  {noticias.length > 0 ? noticias.map((n) => {
+                    const status = (n.post_status || 'draft').toLowerCase();
+                    return (
+                      <tr key={n.news_post_id}>
+                        <td className="na-td-title">{n.title}</td>
+                        <td>
+                          <span className={`na-type-label na-type-${n.post_type}`}>
+                            {n.post_type === 'news' ? 'Noticia' : 'Publicación'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span className={`na-status-pill na-status-${status}`}>
+                            {status === 'published' ? 'Publicado' : 
+                             status === 'draft' ? 'Borrador' : 
+                             status === 'archived' ? 'Oculto' : status}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          {n.is_featured ? <Star size={18} fill="#ffcc00" color="#ffcc00" /> : "—"}
+                        </td>
+                        <td className="na-actions-cell">
+                          <Edit 
+                            className="na-icon-action na-icon-edit" 
+                            size={20} 
+                            title="Editar" 
+                            onClick={() => startEdit(n)} 
+                          />
+                          <div onClick={() => handleToggleVisibility(n.news_post_id, n.post_status)}>
+                            {n.post_status === 'archived' ? (
+                              <Eye className="na-icon-action na-icon-view" size={20} title="Mostrar" />
+                            ) : (
+                              <EyeOff className="na-icon-action na-icon-hide" size={20} title="Ocultar" />
+                            )}
+                          </div>
+                          <Trash2 
+                            className="na-icon-action na-icon-delete" 
+                            size={20} 
+                            title="Eliminar" 
+                            onClick={() => handleDelete(n.news_post_id)} 
+                          />
+                        </td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan="5" className="na-td-empty">
+                        No se encontraron registros de contenido.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      )}
-
-      {view === "create" && (
-        <div className="admin-card fade-in">
-          <form onSubmit={handleSubmit} className="news-form">
-            <div className="form-grid">
-              <div className="form-column">
-                <div className="form-group">
-                  <label>Tipo de Contenido</label>
-                  <select name="post_type" value={formData.post_type} onChange={handleInputChange} disabled={editingId !== null}>
-                    <option value="news">Noticia</option>
-                    <option value="post">Publicación</option>
-                  </select>
+      ) : (
+        /* FORMULARIO ORGANIZADO */
+        <div className="na-form-card na-fade-in">
+          <form onSubmit={handleSubmit} className="na-admin-form">
+            <div className="na-form-columns">
+              <div className="na-col-main">
+                <div className="na-form-field">
+                  <label>Título de la entrada *</label>
+                  <input type="text" name="title" value={formData.title} onChange={handleInputChange} placeholder="Ej: Importancia del Desarrollo Sostenible" required />
                 </div>
-                <div className="form-group">
-                  <label>Título *</label>
-                  <input type="text" name="title" value={formData.title} onChange={handleInputChange} required />
+                <div className="na-form-field">
+                  <label>Resumen informativo</label>
+                  <textarea name="summary" value={formData.summary} onChange={handleInputChange} rows="3" placeholder="Breve descripción para la vista previa..." maxLength="500" />
                 </div>
-                <div className="form-group">
-                  <label>Resumen (Máx 500 caracteres)</label>
-                  <textarea name="summary" value={formData.summary} onChange={handleInputChange} rows="3" maxLength="500" />
-                </div>
-                <div className="form-group">
-                  <label>Contenido *</label>
-                  <textarea name="content" className="content-textarea" value={formData.content} onChange={handleInputChange} required />
+                <div className="na-form-field">
+                  <label>Contenido extendido *</label>
+                  <textarea name="content" className="na-textarea-large" value={formData.content} onChange={handleInputChange} placeholder="Desarrolla la noticia o publicación aquí..." required />
                 </div>
               </div>
 
-              <div className="form-column side-column">
-                <div className="form-group">
-                  <label>Imagen Portada</label>
-                  <input type="file" accept=".jpg, .jpeg, .png, .webp" onChange={(e) => setCoverFile(e.target.files[0])} />
-                </div>
-
-                <div className="form-group">
-                  <label>Galería (Múltiples Imágenes)</label>
-                  <input type="file" accept=".jpg, .jpeg, .png, .webp" multiple onChange={(e) => setGalleryFiles(Array.from(e.target.files))} />
-                  {galleryFiles.length > 0 && <small>{galleryFiles.length} imágenes seleccionadas</small>}
-                </div>
-
-                <div className="form-group checkbox-group">
-                  <label className="checkbox-label">
-                    <input type="checkbox" name="is_featured" checked={formData.is_featured} onChange={handleInputChange} />
-                    Marcar como Destacado
-                  </label>
-                </div>
-
-                <div className="form-group">
-                  <label>Estado Inicial</label>
-                  <select name="post_status" value={formData.post_status} onChange={handleInputChange}>
-                    <option value="draft">Borrador</option>
-                    <option value="published">Publicado</option>
-                    <option value="archived">Oculto (Archivado)</option>
-                  </select>
-                </div>
-
-                {formData.post_type === "news" ? (
-                  <div className="form-group">
-                    <label>Categoría de Noticia</label>
-                    <select name="news_category_id" value={formData.news_category_id} onChange={handleInputChange} required>
-                      <option value="">Seleccione...</option>
-                      {newsCategories.map(c => <option key={c.news_category_id} value={c.news_category_id}>{c.name}</option>)}
+              <div className="na-col-sidebar">
+                <div className="na-sidebar-box">
+                  <div className="na-form-field">
+                    <label>Naturaleza del contenido</label>
+                    <select name="post_type" value={formData.post_type} onChange={handleInputChange} disabled={editingId !== null}>
+                      <option value="news">Noticia</option>
+                      <option value="post">Publicación</option>
                     </select>
                   </div>
-                ) : (
-                  <div className="form-group">
-                    <label>Categoría General</label>
-                    <select name="category_id" value={formData.category_id} onChange={handleInputChange} required>
-                      <option value="">Seleccione...</option>
-                      {generalCategories.map(cat => <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>)}
+
+                  <div className="na-form-field">
+                    <label>Imagen principal (Portada)</label>
+                    <input type="file" accept="image/*" className="na-file-input" onChange={(e) => setCoverFile(e.target.files[0])} />
+                  </div>
+
+                  <div className="na-form-field">
+                    <label>Estado de visibilidad</label>
+                    <select name="post_status" value={formData.post_status} onChange={handleInputChange}>
+                      <option value="draft">Borrador</option>
+                      <option value="published">Publicado</option>
+                      <option value="archived">Oculto</option>
                     </select>
                   </div>
-                )}
 
-                <div className="form-group">
-                  <label>Vincular Dataset (Opcional)</label>
-                  <select name="dataset_id" value={formData.dataset_id} onChange={handleInputChange}>
-                    <option value="">-- Ninguno --</option>
-                    {datasetsList.map(ds => <option key={ds.dataset_id} value={ds.dataset_id}>{ds.nombre || ds.title}</option>)}
-                  </select>
+                  <div className="na-check-group">
+                    <input type="checkbox" id="is_featured" name="is_featured" checked={formData.is_featured} onChange={handleInputChange} />
+                    <label htmlFor="is_featured">Marcar como destacado</label>
+                  </div>
+
+                  {formData.post_type === "news" ? (
+                    <div className="na-form-field">
+                      <label>Categoría de noticia</label>
+                      <select name="news_category_id" value={formData.news_category_id} onChange={handleInputChange} required>
+                        <option value="">Seleccionar categoría...</option>
+                        {newsCategories.map(c => <option key={c.news_category_id} value={c.news_category_id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="na-form-field">
+                      <label>Área temática</label>
+                      <select name="category_id" value={formData.category_id} onChange={handleInputChange} required>
+                        <option value="">Seleccionar área...</option>
+                        {generalCategories.map(cat => <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>)}
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {mensaje.texto && <div className={`form-message ${mensaje.tipo}`}>{mensaje.texto}</div>}
+            {mensaje.texto && (
+              <div className={`na-alert-msg na-alert-${mensaje.tipo}`}>
+                {mensaje.texto}
+              </div>
+            )}
 
-            <div className="form-actions">
-              <button type="button" className="btn-ghost" onClick={() => { setView("list"); setEditingId(null); setFormData(initialForm); }}><X size={18} /> Cancelar</button>
-              <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? <Loader2 size={18} className="spin" /> : <Save size={18} />} {editingId ? 'Actualizar' : 'Guardar'}
+            <div className="na-form-actions">
+              <button type="button" className="na-btn-secondary" onClick={() => { setView("list"); setEditingId(null); }}>
+                Cancelar
+              </button>
+              <button type="submit" className="na-btn-primary na-btn-submit" disabled={loading}>
+                {loading ? <Loader2 className="na-spin-icon" size={18} /> : <Save size={18} />}
+                {editingId ? 'Actualizar Contenido' : 'Publicar Contenido'}
               </button>
             </div>
           </form>

@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
 import "../../Styles/Pages_styles/Admin/GestionRoles.css";
+import { 
+  PlusCircle, 
+  Edit3, 
+  Trash2, 
+  ShieldCheck, 
+  Users, 
+  Lock,
+  ArrowLeft,
+  Save
+} from "lucide-react";
 import CanView from "../../Components/Common/CanView";
 import { useAuth } from "../../Context/AuthContext";
 
@@ -7,18 +17,20 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function GestionRoles() {
   const { user } = useAuth();
-  const [roles, setRoles] = useState([]);
-  const [permisosDisponibles, setPermisosDisponibles] = useState([]);
   
-  // Estados para el Modal
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modoEdicion, setModoEdicion] = useState(false);
+  // --- ESTADOS DE LISTADO ---
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [permisosDisponibles, setPermisosDisponibles] = useState([]);
+
+  // --- ESTADOS DE NAVEGACIÓN INTERNA ---
+  const [isEditing, setIsEditing] = useState(false); // Controla si mostramos el formulario
   const [formData, setFormData] = useState({
     id: null,
     name: "",
     code: "",
     description: "",
-    permisos: [] // Array de IDs de permisos seleccionados
+    permisos: []
   });
 
   useEffect(() => {
@@ -28,8 +40,9 @@ function GestionRoles() {
     }
   }, [user?.token]);
 
-  // 1. Obtener Roles (Asumimos que el backend enviará cantidad de permisos y usuarios)
+  // --- PETICIONES API ---
   const fetchRoles = async () => {
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/roles/detalles`, {
         headers: { "Authorization": `Bearer ${user.token}` }
@@ -40,10 +53,11 @@ function GestionRoles() {
       }
     } catch (error) {
       console.error("Error obteniendo roles:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 2. Obtener la lista maestra de Permisos para las casillas
   const fetchPermisosDisponibles = async () => {
     try {
       const res = await fetch(`${API_URL}/api/permisos`, {
@@ -58,50 +72,44 @@ function GestionRoles() {
     }
   };
 
-  // 3. Abrir Modal para CREAR
-  const abrirModalCrear = () => {
-    setModoEdicion(false);
-    setFormData({ id: null, name: "", code: "", description: "", permisos: [] });
-    setModalOpen(true);
+  // --- LÓGICA DE FORMULARIO ---
+  const abrirFormulario = (rol = null) => {
+    if (rol) {
+      // Modo Edición
+      setFormData({
+        id: rol.role_id,
+        name: rol.name,
+        code: rol.code,
+        description: rol.description || "",
+        permisos: rol.permisos_ids || []
+      });
+    } else {
+      // Modo Creación
+      setFormData({ id: null, name: "", code: "", description: "", permisos: [] });
+    }
+    setIsEditing(true);
   };
 
-  // 4. Abrir Modal para EDITAR
-  const abrirModalEditar = (rol) => {
-    setModoEdicion(true);
-    setFormData({
-      id: rol.role_id,
-      name: rol.name,
-      code: rol.code,
-      description: rol.description || "",
-      permisos: rol.permisos_ids || [] // El backend debe enviarnos qué permisos ya tiene
-    });
-    setModalOpen(true);
-  };
-
-  // 5. Manejar cambio en los Checkboxes de permisos
   const handleCheckboxChange = (permisoId) => {
     setFormData((prev) => {
       const tienePermiso = prev.permisos.includes(permisoId);
-      if (tienePermiso) {
-        return { ...prev, permisos: prev.permisos.filter(id => id !== permisoId) };
-      } else {
-        return { ...prev, permisos: [...prev.permisos, permisoId] };
-      }
+      return {
+        ...prev,
+        permisos: tienePermiso 
+          ? prev.permisos.filter(id => id !== permisoId) 
+          : [...prev.permisos, permisoId]
+      };
     });
   };
 
-  // 6. Enviar Formulario (Crear o Editar)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.permisos.length === 0) {
-      alert("Debes seleccionar al menos un permiso para este rol.");
+      alert("Debes seleccionar al menos un permiso.");
       return;
     }
-
-    const url = modoEdicion 
-      ? `${API_URL}/api/roles/${formData.id}` 
-      : `${API_URL}/api/roles`;
-    
+    const modoEdicion = !!formData.id;
+    const url = modoEdicion ? `${API_URL}/api/roles/${formData.id}` : `${API_URL}/api/roles`;
     const method = modoEdicion ? "PUT" : "POST";
 
     try {
@@ -113,119 +121,87 @@ function GestionRoles() {
         },
         body: JSON.stringify(formData)
       });
-
       if (res.ok) {
-        alert(`Rol ${modoEdicion ? "actualizado" : "creado"} correctamente`);
-        setModalOpen(false);
-        fetchRoles(); // Recargar la tabla
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.message}`);
+        setIsEditing(false);
+        fetchRoles();
       }
     } catch (error) {
       console.error("Error al guardar rol:", error);
     }
   };
 
-  // 7. Eliminar Rol
   const handleEliminar = async (rol) => {
-    if (window.confirm(`⚠️ ¿Estás seguro de eliminar el rol "${rol.name}"? Los ${rol.cantidad_usuarios} usuarios con este rol pasarán a ser "Usuario Registrado".`)) {
+    if (window.confirm(`⚠️ ¿Estás seguro de eliminar el rol "${rol.name}"?`)) {
       try {
         const res = await fetch(`${API_URL}/api/roles/${rol.role_id}`, {
           method: "DELETE",
           headers: { "Authorization": `Bearer ${user.token}` }
         });
-
-        if (res.ok) {
-          alert("Rol eliminado. Usuarios reasignados.");
-          fetchRoles();
-        } else {
-          const err = await res.json();
-          alert(`Error: ${err.message}`);
-        }
+        if (res.ok) fetchRoles();
       } catch (error) {
         console.error("Error eliminando rol:", error);
       }
     }
   };
 
-  return (
-    <div className="gestion-roles">
-      <div className="roles-header">
-        <h1>Gestión de Roles</h1>
-        <CanView requiredPermission="roles_permissions.write">
-          <button className="btn-crear" onClick={abrirModalCrear}>+ Crear Rol</button>
-        </CanView>
-      </div>
-
-      <div className="roles-tabla">
-        <div className="roles-fila roles-cabecera">
-          <span>Nombre</span>
-          <span>Permisos</span>
-          <span>Usuarios</span>
-          <span>Acciones</span>
+  // --- VISTA 1: FORMULARIO (NUEVO / EDITAR) ---
+  if (isEditing) {
+    return (
+      <div className="groles-container">
+        <div className="groles-header">
+          <div className="groles-header-info">
+            <button className="btn-back-link" onClick={() => setIsEditing(false)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: '#1a6bf0', cursor: 'pointer', padding: 0, marginBottom: '10px', fontWeight: '600' }}>
+              <ArrowLeft size={16} /> Volver a la gestión
+            </button>
+            <h1>{formData.id ? `Editando Rol: ${formData.name}` : "Crear Nuevo Rol"}</h1>
+            <p>Configura los permisos y el código identificador del nivel de acceso.</p>
+          </div>
         </div>
 
-        {roles.map((rol) => {
-          
-          const rolesProtegidos = ["super_admin", "data_admin", "user_admin", "registered_user"];
-          
-          // Verificamos si el código del rol actual está dentro de la lista de protegidos
-          const esRolProtegido = rolesProtegidos.includes(rol.code);
-
-          return (
-            <div key={rol.role_id} className="roles-fila">
-              <span>{rol.name} <br/><small style={{color: '#666'}}>{rol.code}</small></span>
-              <span>{rol.cantidad_permisos} permisos</span>
-              <span>{rol.cantidad_usuarios} usuarios</span>
-
-              <div className="acciones">
-                <CanView requiredPermission="roles_permissions.write">
-                  
-                  {/* 👇 2. Evaluamos: Si NO es protegido, mostramos Editar y Eliminar 👇 */}
-                  {!esRolProtegido ? (
-                    <>
-                      <button onClick={() => abrirModalEditar(rol)}>Editar</button>
-                      <button onClick={() => handleEliminar(rol)} className="eliminar">
-                        Eliminar
-                      </button>
-                    </>
-                  ) : (
-                    /* 👇 3. Si ES protegido, mostramos un único botón gris de solo lectura 👇 */
-                    <button disabled style={{ background: "#e0e0e0", color: "#666", cursor: "not-allowed", width: "100%", border: "1px dashed #ccc" }} title="Rol del sistema protegido contra cambios">
-                      🔒 Sistema (Protegido)
-                    </button>
-                  )}
-
-                </CanView>
+        <div className="groles-table-wrapper" style={{ padding: '30px' }}>
+          <form onSubmit={handleSubmit} className="groles-modal-form" style={{ padding: 0 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="groles-input-group">
+                <label>Nombre del Rol</label>
+                <input 
+                  type="text" 
+                  value={formData.name} 
+                  onChange={e => setFormData({...formData, name: e.target.value})} 
+                  required 
+                  placeholder="Ej: Editor de Contenidos" 
+                />
+              </div>
+              <div className="groles-input-group">
+                <label>Código Identificador</label>
+                <input 
+                  type="text" 
+                  value={formData.code} 
+                  onChange={e => setFormData({...formData, code: e.target.value.toLowerCase().replace(/\s+/g, '_')})} 
+                  required 
+                  placeholder="Ej: editor_cont" 
+                  disabled={!!formData.id}
+                />
               </div>
             </div>
-          );
-        })}
-      </div>
 
-      {/* MODAL DE CREACIÓN / EDICIÓN */}
-      {modalOpen && (
-        <div className="modal-overlay" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-          <div className="modal-content" style={{ background: "white", padding: "25px", borderRadius: "8px", width: "500px", maxHeight: "90vh", overflowY: "auto", color: "black" }}>
-            <h2>{modoEdicion ? "Editar Rol" : "Crear Nuevo Rol"}</h2>
-            
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "15px" }}>
-              <label><strong>Nombre del rol:</strong></label>
-              <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required placeholder="Ej: Observador de datos" style={{ padding: "8px" }} />
-              
-              <label><strong>Código del rol (Único):</strong></label>
-              <input type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value.toLowerCase().replace(/\s+/g, '_')})} required placeholder="Ej: data_observer" disabled={modoEdicion && (formData.code === 'super_admin' || formData.code === 'registered_user')} style={{ padding: "8px" }} />
+            <div className="groles-input-group">
+              <label>Descripción</label>
+              <textarea 
+                value={formData.description} 
+                onChange={e => setFormData({...formData, description: e.target.value})} 
+                required 
+                placeholder="Explica qué funciones cumple este rol..."
+                style={{ minHeight: '80px' }}
+              />
+            </div>
 
-              <label><strong>Descripción:</strong></label>
-              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required placeholder="Breve descripción del propósito de este rol..." style={{ padding: "8px", resize: "vertical", minHeight: "60px" }} />
-
-              <hr style={{ margin: "15px 0" }}/>
-
-              <label><strong>Permisos Asignados ({formData.permisos.length}):</strong></label>
-              <div style={{ maxHeight: "200px", overflowY: "auto", border: "1px solid #ccc", padding: "10px", borderRadius: "4px", display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div className="groles-permissions-section">
+              <label style={{ fontWeight: '600', marginBottom: '10px', display: 'block' }}>
+                Asignar Permisos ({formData.permisos.length})
+              </label>
+              <div className="groles-permissions-grid" style={{ maxHeight: 'none', gridTemplateColumns: '1fr 1fr 1fr' }}>
                 {permisosDisponibles.map(permiso => (
-                  <label key={permiso.permission_id} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                  <label key={permiso.permission_id} className="groles-checkbox-item">
                     <input 
                       type="checkbox" 
                       checked={formData.permisos.includes(permiso.permission_id)}
@@ -235,19 +211,104 @@ function GestionRoles() {
                   </label>
                 ))}
               </div>
+            </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
-                <button type="button" onClick={() => setModalOpen(false)} style={{ background: "#ccc", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer" }}>Cancelar</button>
-                <button type="submit" disabled={formData.permisos.length === 0} style={{ background: formData.permisos.length === 0 ? "#999" : "#2196F3", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer" }}>
-                  {modoEdicion ? "Guardar Cambios" : "Crear Rol"}
-                </button>
-              </div>
-            </form>
-
-          </div>
+            <div className="groles-modal-actions">
+              <button type="button" className="btn-cancelar" onClick={() => setIsEditing(false)}>
+                Cancelar
+              </button>
+              <button type="submit" className="btn-guardar" disabled={formData.permisos.length === 0}>
+                <Save size={18} style={{marginRight: '8px'}} />
+                {formData.id ? "Actualizar Rol" : "Crear Rol"}
+              </button>
+            </div>
+          </form>
         </div>
-      )}
+      </div>
+    );
+  }
 
+  // --- VISTA 2: LISTADO PRINCIPAL ---
+  return (
+    <div className="groles-container">
+      <div className="groles-header">
+        <div className="groles-header-info">
+          <h1>Gestión de Roles</h1>
+          <p>Define niveles de acceso y permisos para los usuarios del sistema.</p>
+        </div>
+        <CanView requiredPermission="roles_permissions.write">
+          <button className="groles-btn-create" onClick={() => abrirFormulario()}>
+            <PlusCircle size={18} /> Crear Rol
+          </button>
+        </CanView>
+      </div>
+
+      <div className="groles-table-wrapper">
+        <table className="groles-table">
+          <thead>
+            <tr>
+              <th>Nombre del Rol</th>
+              <th style={{ textAlign: 'center' }}>Permisos</th>
+              <th style={{ textAlign: 'center' }}>Usuarios</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan="4" style={{textAlign: 'center', padding: '30px'}}>Cargando roles...</td></tr>
+            ) : roles.map((rol) => {
+              const rolesProtegidos = ["super_admin", "data_admin", "user_admin", "registered_user"];
+              const esRolProtegido = rolesProtegidos.includes(rol.code);
+
+              return (
+                <tr key={rol.role_id}>
+                  <td>
+                    <div className="groles-role-info">
+                      <strong>{rol.name}</strong>
+                      <span>{rol.code}</span>
+                    </div>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className="groles-badge badge-permisos">
+                      <ShieldCheck size={14} /> {rol.cantidad_permisos}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className="groles-badge badge-users">
+                      <Users size={14} /> {rol.cantidad_usuarios}
+                    </span>
+                  </td>
+                  <td className="groles-actions">
+                    <CanView requiredPermission="roles_permissions.write">
+                      {!esRolProtegido ? (
+                        <>
+                          <Edit3 
+                            className="groles-action-icon edit" 
+                            size={20} 
+                            onClick={() => abrirFormulario(rol)} 
+                            title="Editar Rol"
+                          />
+                          <Trash2 
+                            className="groles-action-icon delete" 
+                            size={20} 
+                            onClick={() => handleEliminar(rol)} 
+                            title="Eliminar Rol"
+                          />
+                        </>
+                      ) : (
+                        <div className="groles-locked" title="Rol del sistema protegido">
+                          <Lock size={18} />
+                          <span>Sistema</span>
+                        </div>
+                      )}
+                    </CanView>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

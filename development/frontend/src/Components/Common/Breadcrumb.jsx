@@ -8,20 +8,26 @@ function formatLabel(value) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function Breadcrumb() {
+function Breadcrumb({ paths }) {
   const location = useLocation();
 
   const breadcrumbs = useMemo(() => {
     const pathnames = location.pathname.split("/").filter(Boolean);
+    // paths prop: ["Inicio", "Label1", "Label2", ...] — slice(1) to skip the Home entry
+    const customLabels = paths && paths.length > 1 ? paths.slice(1) : null;
 
     return pathnames.map((value, index) => {
+      const label =
+        customLabels && customLabels[index] != null
+          ? customLabels[index]
+          : formatLabel(value);
       return {
-        label: formatLabel(value),
+        label,
         to: "/" + pathnames.slice(0, index + 1).join("/"),
         isLast: index === pathnames.length - 1,
       };
     });
-  }, [location.pathname]);
+  }, [location.pathname, paths]);
 
   return (
     <nav className="breadcrumb" aria-label="Ruta de navegación">

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Building2, Clock, BarChart2, Download, FileText, Info, Calendar, Layers, Globe } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { 
+  Building2, Clock, BarChart2, Download, FileText, 
+  Info, Calendar, Layers, Globe, X, CheckCircle2 
+} from "lucide-react";
 import Breadcrumb from "../../Components/Common/Breadcrumb";
 import { getPublicDatasetById } from "../../Services/DatasetService";
 
@@ -8,8 +11,12 @@ import "../../Styles/Pages_styles/Public/DatasetDetalle.css";
 
 function DatasetDetalle() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [dataset, setDataset] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Estado para controlar el modal de selección
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchDetalle = async () => {
@@ -25,6 +32,12 @@ function DatasetDetalle() {
 
     if (id) fetchDetalle();
   }, [id]);
+
+  // Lógica para filtrar archivos que se pueden graficar (CSV, XLSX, XLS)
+  const archivosGraficables = dataset?.files?.filter(file => {
+    const extension = file.display_name.split('.').pop().toLowerCase();
+    return ['csv', 'xlsx', 'xls', 'json'].includes(extension);
+  }) || [];
 
   if (loading) {
     return (
@@ -51,10 +64,8 @@ function DatasetDetalle() {
       <Breadcrumb paths={["Inicio", "Conjunto de datos", dataset.title || dataset.nombre]} />
 
       <div className="detalle-layout">
-        
-        {/* 🔹 COLUMNA IZQUIERDA (Institución e Historial) */}
+        {/* COLUMNA IZQUIERDA */}
         <aside className="detalle-sidebar">
-          {/* Tarjeta de la Institución */}
           <div className="detalle-card institution-card">
             <div className="institution-logo-box">
               <Building2 size={36} strokeWidth={1.5} />
@@ -63,7 +74,6 @@ function DatasetDetalle() {
             <p>Agencia responsable de la publicación y mantenimiento de este conjunto de datos.</p>
           </div>
 
-          {/* Tarjeta de Historial */}
           <div className="detalle-card history-card">
             <div className="card-header">
               <Clock size={18} />
@@ -97,21 +107,26 @@ function DatasetDetalle() {
           </div>
         </aside>
 
-        {/* 🔹 COLUMNA DERECHA (Contenido Principal) */}
+        {/* COLUMNA DERECHA */}
         <main className="detalle-content">
           <div className="detalle-header">
             <h1>{dataset.title || dataset.nombre}</h1>
-            <Link to={`/conjuntodatos/${id}/graficos`} className="btn-graficar">
+            {/* El botón ahora abre el modal en lugar de redirigir directamente */}
+            <button 
+              className={`btn-graficar ${archivosGraficables.length === 0 ? 'disabled' : ''}`}
+              onClick={() => archivosGraficables.length > 0 && setIsModalOpen(true)}
+              disabled={archivosGraficables.length === 0}
+            >
               <BarChart2 size={18} />
               Ver datos graficados
-            </Link>
+            </button>
           </div>
 
           <div className="detalle-card description-card">
             <p>{dataset.description || dataset.summary || "No hay descripción disponible para este conjunto de datos."}</p>
           </div>
 
-          {/* Tabla de Distribuciones (Archivos) */}
+          {/* Tabla de Distribuciones */}
           <section className="detalle-section">
             <div className="section-title">
               <FileText size={20} />
@@ -158,63 +173,92 @@ function DatasetDetalle() {
             </div>
           </section>
 
-          {/* Sección de Información Adicional Rediseñada */}
-            <section className="detalle-section">
-              <div className="section-title">
-                <Info size={20} />
-                <h2>Detalles del recurso</h2>
-              </div>
-              
-              <div className="metadata-grid">
-                <div className="metadata-item">
-                  <div className="metadata-icon-box">
-                    <Calendar size={20} />
-                  </div>
-                  <div className="metadata-info">
-                    <span className="metadata-label">Fecha de registro</span>
-                    <span className="metadata-value">
-                      {dataset.creation_date ? dataset.creation_date.split('T')[0] : "N/A"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="metadata-item">
-                  <div className="metadata-icon-box">
-                    <Layers size={20} />
-                  </div>
-                  <div className="metadata-info">
-                    <span className="metadata-label">Categoría</span>
-                    <span className="metadata-value">
-                      <span className="category-badge-simple">
-                        {dataset.category_name || dataset.categoria || "N/A"}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="metadata-item">
-                  <div className="metadata-icon-box">
-                    <FileText size={20} />
-                  </div>
-                  <div className="metadata-info">
-                    <span className="metadata-label">Licencia</span>
-                    <span className="metadata-value">{dataset.license_name || "Licencia Estándar"}</span>
-                  </div>
-                </div>
-
-                <div className="metadata-item">
-                  <div className="metadata-icon-box">
-                    <Globe size={20} />
-                  </div>
-                  <div className="metadata-info">
-                    <span className="metadata-label">Nivel de Acceso</span>
-                    <span className="metadata-value">{dataset.access_level || "Público"}</span>
-                  </div>
+          {/* Información Adicional */}
+          <section className="detalle-section">
+            <div className="section-title">
+              <Info size={20} />
+              <h2>Detalles del recurso</h2>
+            </div>
+            
+            <div className="metadata-grid">
+              <div className="metadata-item">
+                <div className="metadata-icon-box"><Calendar size={20} /></div>
+                <div className="metadata-info">
+                  <span className="metadata-label">Fecha de registro</span>
+                  <span className="metadata-value">{dataset.creation_date?.split('T')[0] || "N/A"}</span>
                 </div>
               </div>
-            </section>
+              <div className="metadata-item">
+                <div className="metadata-icon-box"><Layers size={20} /></div>
+                <div className="metadata-info">
+                  <span className="metadata-label">Categoría</span>
+                  <span className="metadata-value">
+                    <span className="category-badge-simple">{dataset.category_name || dataset.categoria || "N/A"}</span>
+                  </span>
+                </div>
+              </div>
+              <div className="metadata-item">
+                <div className="metadata-icon-box"><FileText size={20} /></div>
+                <div className="metadata-info">
+                  <span className="metadata-label">Licencia</span>
+                  <span className="metadata-value">{dataset.license_name || "Licencia Estándar"}</span>
+                </div>
+              </div>
+              <div className="metadata-item">
+                <div className="metadata-icon-box"><Globe size={20} /></div>
+                <div className="metadata-info">
+                  <span className="metadata-label">Nivel de Acceso</span>
+                  <span className="metadata-value">{dataset.access_level || "Público"}</span>
+                </div>
+              </div>
+            </div>
+          </section>
         </main>
       </div>
+
+      {/* 🛠️ MODAL DE SELECCIÓN DE ARCHIVO */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3>Seleccionar recurso para graficar</h3>
+                <p>Este dataset tiene varios archivos. Elige cuál deseas visualizar.</p>
+              </div>
+              <button className="btn-close-modal" onClick={() => setIsModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="archivos-grid">
+                {archivosGraficables.map((file) => (
+                  <div 
+                    key={file.aws_file_reference_id} 
+                    className="archivo-option-card"
+                    onClick={() => navigate(`/conjuntodatos/${id}/graficos?fileId=${file.aws_file_reference_id}`)}
+                  >
+                    <div className="archivo-icon">
+                      <BarChart2 size={24} color="#2563eb" />
+                    </div>
+                    <div className="archivo-info">
+                      <span className="archivo-name">{file.display_name}</span>
+                      <span className="archivo-format">{file.display_name.split('.').pop().toUpperCase()}</span>
+                    </div>
+                    <div className="archivo-action">
+                      <CheckCircle2 size={18} className="icon-select" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

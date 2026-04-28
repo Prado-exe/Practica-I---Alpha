@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getPublications } from "../../Services/PublicacionesService";
 import { getNoticias } from "../../Services/NoticiasService"; 
-import { Loader2 } from "lucide-react";
+import { Loader2, Newspaper, BookOpen, Calendar, ArrowRight, ExternalLink } from "lucide-react";
 import "../../Styles/ComponentStyle/Home/LastPost.css";
 
 function LastPost() {
   const [contenidos, setContenidos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUltimosContenidos = async () => {
       try {
         setLoading(true);
-        
         const [pubResponse, notResponse] = await Promise.all([
           getPublications({ limit: 3 }),
           getNoticias({ limit: 3 })
@@ -38,83 +38,95 @@ function LastPost() {
         });
 
         setContenidos(todosLosContenidos.slice(0, 3));
-        
       } catch (error) {
         console.error("Error al obtener los últimos contenidos:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchUltimosContenidos();
   }, []);
 
   return (
-    <section className="ultpublic-wrapper">
-      <div className="ultpublic-container">
+    <section className="lastpost-wrapper">
+      <div className="lastpost-inner">
         
-        <div className="ultpublic-header">
-          <h2>Últimas actualizaciones</h2>
-          <p>
-            Revise los artículos, noticias y análisis más recientes publicados en el
-            observatorio.
-          </p>
-          <hr className="ultpublic-separator" />
+        {/* HEADER ESTILO EDITORIAL */}
+        <div className="lastpost-header">
+          <div className="lastpost-title-box">
+            <span className="lastpost-subtitle">Actualidad</span>
+            <h2>Novedades del Observatorio</h2>
+            <div className="lastpost-accent-line"></div>
+          </div>
+          <button className="lastpost-btn-all" onClick={() => navigate('/noticias')}>
+            Ver todo el contenido <ArrowRight size={18} />
+          </button>
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
-            <Loader2 className="animate-spin" size={40} color="#1565c0" />
+          <div className="lastpost-loading">
+            <Loader2 className="animate-spin" size={40} />
+            <p>Sincronizando últimas publicaciones...</p>
           </div>
         ) : (
-          <div className="ultpublic-grid">
+          <div className="lastpost-list">
             {contenidos.map((item) => {
-              const rutaDestino = item.tipo === 'noticia' 
+              const isNoticia = item.tipo === 'noticia';
+              const rutaDestino = isNoticia 
                 ? `/noticias/${item.slug || item.id}` 
                 : `/publicaciones/${item.slug || item.id}`;
 
               return (
-                <article key={`${item.tipo}-${item.id}`} className="ultpublic-card">
+                <article key={`${item.tipo}-${item.id}`} className="lastpost-card">
+                  {/* Barra lateral de color para consistencia con PopularData */}
+                  <div className="card-type-strip"></div>
                   
-                  <div className="ultpublic-image-container">
-                    {/* CORRECCIÓN AQUÍ: 
-                      1. Usamos item.image como prioridad (igual que en PublicationCard).
-                      2. Agregamos el onError con la misma imagen por defecto.
-                    */}
-                    <img 
-                      src={item.image || item.cover_image || item.image_url} 
-                      alt={item.title} 
-                      onError={(e) => { 
-                        e.target.onerror = null; 
-                        e.target.src = "/img/default-publication.jpg"; 
-                      }}
-                    />
-                  </div>
+                  <div className="lastpost-card-content">
+                    <div className="lastpost-img-box">
+                      <img 
+                        src={item.image || item.cover_image || item.image_url || "/img/default-publication.jpg"} 
+                        alt={item.title} 
+                        onError={(e) => { 
+                          e.target.onerror = null; 
+                          e.target.src = "/img/default-publication.jpg"; 
+                        }}
+                      />
+                    </div>
 
-                  <div className="ultpublic-card-content">
-                    <span className="ultpublic-category">
-                      {item.category_name || item.type || item.category || (item.tipo === 'noticia' ? 'Noticia' : 'Publicación')}
-                    </span>
+                    <div className="lastpost-info">
+                      <div className="lastpost-top-meta">
+                        <span className={`lastpost-badge-pill ${item.tipo}`}>
+                          {isNoticia ? <Newspaper size={14} /> : <BookOpen size={14} />}
+                          {isNoticia ? 'Noticia' : 'Publicación'}
+                        </span>
+                        <span className="lastpost-date">
+                          <Calendar size={14} />
+                          {new Date(item.date || item.created_at).toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        </span>
+                      </div>
 
-                    <h3>{item.title}</h3>
+                      <h3 title={item.title}>{item.title}</h3>
+                      
+                      <p className="lastpost-description">
+                        {item.summary || item.description || "Explora los detalles técnicos y narrativos de esta reciente actualización del observatorio."}
+                      </p>
 
-                    <p>{item.summary || item.description}</p>
-
-                    <Link 
-                      to={rutaDestino} 
-                      className="ultpublic-card-button"
-                      style={{ textDecoration: 'none', textAlign: 'center', display: 'inline-block' }}
-                    >
-                      {item.tipo === 'noticia' ? 'Leer noticia' : 'Leer más'}
-                    </Link>
-
+                      <div className="lastpost-footer">
+                        <span className="lastpost-category">
+                          {item.category_name || item.category || "General"}
+                        </span>
+                        <button onClick={() => navigate(rutaDestino)} className="lastpost-action-btn">
+                          {isNoticia ? 'Leer Artículo' : 'Ver Documento'}
+                          <ExternalLink size={16} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </article>
               );
             })}
           </div>
         )}
-
       </div>
     </section>
   );
