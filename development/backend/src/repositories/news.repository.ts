@@ -189,14 +189,45 @@ export async function fetchPublicNewsFromDb() {
   return result.rows;
 }
 
-export async function fetchAllNewsAdminFromDb() {
-  const result = await pool.query(`
-    SELECT n.*, c.name as news_category_name
-    FROM news_posts n
-    LEFT JOIN news_categories c ON n.news_category_id = c.news_category_id
-    WHERE n.deleted_at IS NULL
-    ORDER BY n.created_at DESC
-  `);
+export async function fetchAllNewsAdminFromDb(filters: {
+  search?: string;
+  tipo?: string;
+  estado?: string;
+  categoria?: string;
+  is_featured?: boolean;
+} = {}) {
+  const conditions: string[] = ["n.deleted_at IS NULL"];
+  const values: unknown[] = [];
+  let idx = 1;
+
+  if (filters.search) {
+    conditions.push(`n.title ILIKE $${idx++}`);
+    values.push(`%${filters.search}%`);
+  }
+  if (filters.tipo) {
+    conditions.push(`n.post_type = $${idx++}`);
+    values.push(filters.tipo);
+  }
+  if (filters.estado) {
+    conditions.push(`n.post_status = $${idx++}`);
+    values.push(filters.estado);
+  }
+  if (filters.categoria) {
+    conditions.push(`n.news_category_id = $${idx++}`);
+    values.push(Number(filters.categoria));
+  }
+  if (filters.is_featured) {
+    conditions.push(`n.is_featured = TRUE`);
+  }
+
+  const result = await pool.query(
+    `SELECT n.*, nc.name as news_category_name
+     FROM news_posts n
+     LEFT JOIN news_categories nc ON n.news_category_id = nc.news_category_id
+     WHERE ${conditions.join(" AND ")}
+     ORDER BY n.created_at DESC`,
+    values
+  );
   return result.rows;
 }
 

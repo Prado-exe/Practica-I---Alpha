@@ -40,7 +40,8 @@ function UserDropdown({ user, logout, children }) {
 
   const perms = user.permissions || [];
   const has = (p) => perms.includes(p);
-  const hasAnyAdmin = perms.length > 0;
+  const role = user.role_code || user.role;
+  const hasAnyAdmin = perms.length > 0 && role !== "registered_user";
 
   const close = () => setOpen(false);
 

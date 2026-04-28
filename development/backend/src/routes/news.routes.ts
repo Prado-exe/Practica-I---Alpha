@@ -94,7 +94,15 @@ export async function getPublicNewsAction(req: HttpRequest, res: HttpResponse) {
 
 export async function getAdminNewsAction(req: HttpRequest, res: HttpResponse) {
   try {
-    const news = await getAllNewsAdmin();
+    const url = new URL(req.url || "", `http://${req.headers?.host || "localhost"}`);
+    const filters = {
+      search:      url.searchParams.get("search")   || "",
+      tipo:        url.searchParams.get("tipo")      || "",
+      estado:      url.searchParams.get("estado")    || "",
+      categoria:   url.searchParams.get("categoria") || "",
+      is_featured: url.searchParams.get("is_featured") === "true",
+    };
+    const news = await getAllNewsAdmin(filters);
     sendJson(res, 200, { ok: true, data: news });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });

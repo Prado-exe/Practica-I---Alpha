@@ -182,7 +182,15 @@ export async function getPublicNews() {
 
   return newsFirmadas;
 }
-export async function getAllNewsAdmin() { return await fetchAllNewsAdminFromDb(); }
+export async function getAllNewsAdmin(filters?: {
+  search?: string;
+  tipo?: string;
+  estado?: string;
+  categoria?: string;
+  is_featured?: boolean;
+}) {
+  return await fetchAllNewsAdminFromDb(filters);
+}
 
 export async function getNewsCategories() { return await fetchNewsCategoriesFromDb();}
 

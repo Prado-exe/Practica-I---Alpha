@@ -34,7 +34,8 @@ function NoticiasAdmin() {
     titulo: "",
     tipo: "",
     estado: "",
-    categoria: ""
+    categoria: "",
+    destacado: false
   });
 
   const [coverFile, setCoverFile] = useState(null);
@@ -57,6 +58,7 @@ function NoticiasAdmin() {
       if (appliedFilters.tipo) params.append("tipo", appliedFilters.tipo);
       if (appliedFilters.estado) params.append("estado", appliedFilters.estado);
       if (appliedFilters.categoria) params.append("categoria", appliedFilters.categoria);
+      if (appliedFilters.destacado) params.append("is_featured", "true");
 
       const queryString = params.toString();
       const endpoint = `${import.meta.env.VITE_API_URL}/api/news/admin${queryString ? `?${queryString}` : ''}`;
@@ -100,9 +102,15 @@ function NoticiasAdmin() {
   const handleApplyFilters = () => fetchData(filters);
 
   const handleClearFilters = () => {
-    const empty = { titulo: "", tipo: "", estado: "", categoria: "" };
+    const empty = { titulo: "", tipo: "", estado: "", categoria: "", destacado: false };
     setFilters(empty);
     fetchData(empty);
+  };
+
+  const handleToggleDestacados = () => {
+    const newFilters = { ...filters, destacado: !filters.destacado };
+    setFilters(newFilters);
+    fetchData(newFilters);
   };
 
   const handleInputChange = (e) => {
@@ -267,6 +275,14 @@ function NoticiasAdmin() {
               <div className="na-filters-buttons">
                 <button className="na-btn-apply" onClick={handleApplyFilters}>
                   <Search size={16} /> APLICAR
+                </button>
+                <button
+                  className={`na-btn-featured${filters.destacado ? " na-btn-featured--active" : ""}`}
+                  onClick={handleToggleDestacados}
+                  title={filters.destacado ? "Mostrando solo destacados — clic para ver todos" : "Filtrar por destacados"}
+                >
+                  <Star size={16} fill={filters.destacado ? "#92400e" : "none"} />
+                  Destacados
                 </button>
                 <button className="na-btn-reset" onClick={handleClearFilters} title="Limpiar filtros">
                   <RotateCcw size={16} />
