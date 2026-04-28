@@ -291,67 +291,100 @@ function GestionUsuarios() {
       {/* MODALES DE FORMULARIO */}
       {(modalCreateOpen || modalEditOpen) && (
         <div className="gu-modal-overlay">
-          <div className="gu-modal-content">
+          <div className="gu-modal-card">
             <div className="gu-modal-header">
-              <h2>{modalCreateOpen ? 'Agregar Nuevo Usuario' : 'Editar Perfil de Usuario'}</h2>
-              <X className="gu-modal-close" onClick={() => { setModalCreateOpen(false); setModalEditOpen(false); }} />
-            </div>
-            
-            <form onSubmit={modalCreateOpen ? handleCreateUser : handleEditSubmit} className="gu-modal-body">
-              <div className="gu-form-grid">
-                <div className="gu-form-field gu-full">
-                  <label>Nombre Completo</label>
-                  <input 
-                    type="text" 
-                    value={modalCreateOpen ? createFormData.full_name : editFormData.full_name} 
-                    onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, full_name: e.target.value}) : setEditFormData({...editFormData, full_name: e.target.value})} 
-                    required 
-                  />
-                </div>
-                {modalCreateOpen && (
-                  <div className="gu-form-field">
-                    <label>Nombre de Usuario</label>
-                    <input 
-                      type="text" 
-                      value={createFormData.username} 
-                      onChange={e => setCreateFormData({...createFormData, username: e.target.value})} 
-                      required 
-                    />
-                  </div>
-                )}
-                <div className="gu-form-field">
-                  <label>Correo Electrónico</label>
-                  <input 
-                    type="email" 
-                    value={modalCreateOpen ? createFormData.email : editFormData.email} 
-                    onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, email: e.target.value}) : setEditFormData({...editFormData, email: e.target.value})} 
-                    required 
-                  />
-                </div>
-                <div className="gu-form-field">
-                  <label>{modalCreateOpen ? 'Contraseña' : 'Nueva Contraseña (dejar vacío para mantener)'}</label>
-                  <input 
-                    type="password" 
-                    value={modalCreateOpen ? createFormData.password : editFormData.password} 
-                    onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, password: e.target.value}) : setEditFormData({...editFormData, password: e.target.value})} 
-                    required={modalCreateOpen} 
-                  />
-                </div>
-                <div className="gu-form-field">
-                  <label>Rol Asignado</label>
-                  <select 
-                    value={modalCreateOpen ? createFormData.role_code : editFormData.role_code} 
-                    onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, role_code: e.target.value}) : setEditFormData({...editFormData, role_code: e.target.value})} 
-                    required
-                  >
-                    <option value="">Seleccionar rol...</option>
-                    {rolesDb.map(rol => <option key={rol.code} value={rol.code}>{rol.name}</option>)}
-                  </select>
+              <div className="gu-modal-title-box">
+                <Shield className="gu-modal-icon" size={24} />
+                <div>
+                  <h2>{modalCreateOpen ? 'Crear Nuevo Usuario' : 'Editar Usuario'}</h2>
+                  <p>{modalCreateOpen ? 'Registra una nueva cuenta en el sistema' : 'Actualiza los datos del perfil seleccionado'}</p>
                 </div>
               </div>
-              <div className="gu-modal-footer">
-                <button type="button" className="gu-btn-cancel" onClick={() => { setModalCreateOpen(false); setModalEditOpen(false); }}>Cancelar</button>
-                <button type="submit" className="gu-btn-submit">Guardar Cambios</button>
+              <button className="gu-modal-close-btn" onClick={() => { setModalCreateOpen(false); setModalEditOpen(false); }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={modalCreateOpen ? handleCreateUser : handleEditSubmit} className="gu-modal-form">
+              <div className="gu-modal-grid">
+                
+                <div className="gu-modal-input-group full-width">
+                  <div className="gu-floating-label">
+                    <input 
+                      type="text" 
+                      placeholder=" "
+                      value={modalCreateOpen ? createFormData.full_name : editFormData.full_name} 
+                      onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, full_name: e.target.value}) : setEditFormData({...editFormData, full_name: e.target.value})} 
+                      required 
+                    />
+                    <label>Nombre Completo</label>
+                  </div>
+                </div>
+
+                {modalCreateOpen && (
+                  <div className="gu-modal-input-group">
+                    <div className="gu-floating-label">
+                      <input 
+                        type="text" 
+                        placeholder=" "
+                        value={createFormData.username} 
+                        onChange={e => setCreateFormData({...createFormData, username: e.target.value})} 
+                        required 
+                      />
+                      <label>Nombre de Usuario</label>
+                    </div>
+                  </div>
+                )}
+
+                <div className="gu-modal-input-group">
+                  <div className="gu-floating-label">
+                    <input 
+                      type="email" 
+                      placeholder=" "
+                      value={modalCreateOpen ? createFormData.email : editFormData.email} 
+                      onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, email: e.target.value}) : setEditFormData({...editFormData, email: e.target.value})} 
+                      required 
+                    />
+                    <label>Correo Electrónico</label>
+                  </div>
+                </div>
+
+                <div className="gu-modal-input-group">
+                  <div className="gu-floating-label">
+                    <input 
+                      type="password" 
+                      placeholder=" "
+                      value={modalCreateOpen ? createFormData.password : editFormData.password} 
+                      onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, password: e.target.value}) : setEditFormData({...editFormData, password: e.target.value})} 
+                      required={modalCreateOpen} 
+                    />
+                    <label>{modalCreateOpen ? 'Contraseña' : 'Nueva Contraseña (opcional)'}</label>
+                  </div>
+                </div>
+
+                <div className="gu-modal-input-group">
+                  <div className="gu-floating-label">
+                    <select 
+                      value={modalCreateOpen ? createFormData.role_code : editFormData.role_code} 
+                      onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, role_code: e.target.value}) : setEditFormData({...editFormData, role_code: e.target.value})} 
+                      required
+                    >
+                      <option value="" disabled hidden></option>
+                      {rolesDb.map(rol => <option key={rol.code} value={rol.code}>{rol.name}</option>)}
+                    </select>
+                    <label>Rol del Sistema</label>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="gu-modal-actions">
+                <button type="button" className="gu-btn-modal-secondary" onClick={() => { setModalCreateOpen(false); setModalEditOpen(false); }}>
+                  Cancelar
+                </button>
+                <button type="submit" className="gu-btn-modal-primary">
+                  {modalCreateOpen ? 'Crear Usuario' : 'Guardar Cambios'}
+                </button>
               </div>
             </form>
           </div>
