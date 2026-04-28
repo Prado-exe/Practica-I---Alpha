@@ -65,7 +65,9 @@ import {
   deleteUserFromDb,
   updateUserAdminInDb,
   fetchActiveRolesFromDb,
-  adminCreateUserInDb
+  adminCreateUserInDb,
+  fetchUsersByInstitutionIdFromDb,
+  unlinkUserFromInstitutionInDb
 } from "../repositories/auth.repository";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/mailer";
@@ -125,6 +127,7 @@ export function mapPublicAccount(account: any): PublicAccount {
     full_name: account.full_name,
     account_status: account.account_status, 
     email_verified: account.email_verified, 
+    institution_id: account.institution_id,
     role: account.role_code || "registered_user",
     permissions: account.permissions || []
   };
@@ -311,7 +314,8 @@ export async function loginUser(payload: LoginInput, meta: LoginMeta = {}) {
     email: account.email,
     sessionId: session.session_id,
     permissions: account.permissions || [], 
-    role: account.role_code || "registered_user"
+    role: account.role_code || "registered_user",
+    institution_id: account.institution_id || null
   });
 
   return {
@@ -537,7 +541,8 @@ export async function refreshUserSession(refreshToken: string, meta: LoginMeta =
     email: account.email,
     sessionId: currentSession.session_id,
     permissions: account.permissions || [], 
-    role: account.role_code || "registered_user"
+    role: account.role_code || "registered_user",
+    institution_id: account.institution_id || null
   });
 
   return {
@@ -756,25 +761,19 @@ export async function deleteUser(userId: string | number) {
  * @return {Promise<Object>} Confirmación de actualización.
  * @throws {AppError} 400 si el rol seleccionado es inválido, 404 si no encuentra al usuario.
  */
-export async function editUserAdmin(userId: string | number, fullName: string, email: string, roleCode: string, newPassword?: string) {
+export async function editUserAdmin(userId: string | number, fullName: string, email: string, roleCode: string, newPassword?: string, institutionId?: number | null) {
   let newPasswordHash;
-  
   if (newPassword && newPassword.trim() !== "") {
     newPasswordHash = await hashPassword(newPassword);
   }
 
-  // Buscamos el ID numérico del rol seleccionado
   const roleId = await findRoleIdByCode(roleCode);
-  if (!roleId) {
-    throw new AppError("El rol seleccionado no es válido", 400);
-  }
+  if (!roleId) throw new AppError("El rol seleccionado no es válido", 400);
 
-  const affectedRows = await updateUserAdminInDb(userId, fullName, email, roleId, newPasswordHash);
+  // Inyectamos el institutionId al repositorio
+  const affectedRows = await updateUserAdminInDb(userId, fullName, email, roleId, newPasswordHash, institutionId);
 
-  if (affectedRows === 0) {
-    throw new AppError("Usuario no encontrado", 404);
-  }
-
+  if (affectedRows === 0) throw new AppError("Usuario no encontrado", 404);
   return { message: "Usuario actualizado correctamente" };
 }
 
@@ -814,4 +813,22 @@ export async function adminCreateUser(input: any) {
     message: "Usuario creado y activado exitosamente", 
     user: newUser 
   };
+}
+
+export async function getUsersByInstitution(institutionId: number) {
+  return await fetchUsersByInstitutionIdFromDb(institutionId);
+}
+
+export async function unlinkUser(userId: number, degradeRole: boolean) {
+  let roleIdToDowngrade;
+  
+  if (degradeRole) {
+    roleIdToDowngrade = await findRoleIdByCode('registered_user');
+    if (!roleIdToDowngrade) throw new AppError("Rol base no encontrado", 500);
+  }
+
+  const affectedRows = await unlinkUserFromInstitutionInDb(userId, roleIdToDowngrade);
+  if (affectedRows === 0) throw new AppError("Usuario no encontrado", 404);
+  
+  return { message: degradeRole ? "Usuario desvinculado y degradado a Usuario Registrado." : "Usuario desvinculado correctamente." };
 }

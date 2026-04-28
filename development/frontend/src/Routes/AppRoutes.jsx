@@ -40,6 +40,8 @@ const CrearDatasetUsuario = lazy(() => import("../Pages/Admin/crear_datsets_usua
 const MantenedorTags = lazy(() => import("../Pages/Admin/MantenedorTags"));
 const ContactoAdmin = lazy(() => import("../Pages/Admin/ContactoAdmin"));
 const ContactoDetalle = lazy(() => import("../Pages/Admin/ContactoDetalle"));
+const MisDatasets = lazy(() => import("../Pages/Admin/MisDatasets"));
+const ProponerDatasetWrapper = lazy(() => import("../Pages/Admin/ProponerDatasetWrapper"));
 
 // login, register, auth routes
 const Login = lazy(() => import("../Pages/Login"));
@@ -76,10 +78,16 @@ function AppRoutes() {
       >
         {/* El Dashboard queda abierto a cualquier usuario logueado en el panel */}
         <Route index element={<Dashboard />} />
+        
+        <Route path="mis-datasets" element={
+          <ProtectedRoute requiredPermission="data_management.read">
+            <MisDatasets />
+          </ProtectedRoute>
+        } />
 
         <Route path="proponer-dataset" element={
           <ProtectedRoute requiredPermission="data_management.write">
-            <CrearDatasetUsuario />
+            <ProponerDatasetWrapper />
           </ProtectedRoute>
         } />
         

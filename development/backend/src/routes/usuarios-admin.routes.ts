@@ -250,14 +250,16 @@ export async function editUsuarioAction(req: HttpRequest, res: HttpResponse) {
       return;
     }
 
-    const body = await readJsonBody<{ full_name: string, email: string, role_code: string, password?: string }>(req);
+    // 👇 1. Añadimos institution_id al tipo del body
+    const body = await readJsonBody<{ full_name: string, email: string, role_code: string, password?: string, institution_id?: number | null }>(req);
     
     if (!body.role_code) {
       sendJson(res, 400, { ok: false, message: "El rol es obligatorio" });
       return;
     }
 
-    const result = await editUserAdmin(id, body.full_name, body.email, body.role_code, body.password);
+    // 👇 2. Le pasamos body.institution_id como sexto argumento al servicio
+    const result = await editUserAdmin(id, body.full_name, body.email, body.role_code, body.password, body.institution_id);
     
     sendJson(res, 200, { ok: true, message: result.message });
   } catch (error) {

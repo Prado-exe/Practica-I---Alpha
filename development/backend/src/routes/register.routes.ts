@@ -120,9 +120,17 @@ export async function registerAction(req: HttpRequest, res: HttpResponse) {
  */
 export async function adminCreateUserAction(req: HttpRequest, res: HttpResponse) {
   try {
-    const body = await readJsonBody<any>(req);
+    // 1. Leemos el body permitiendo el campo opcional institution_id
+    const body = await readJsonBody<{ 
+      full_name: string, 
+      email: string, 
+      username: string, 
+      password: string, 
+      role_code: string,
+      institution_id?: number | null // 👈 Añadimos el campo aquí
+    }>(req);
 
-    // 1. Validación de seguridad "Fail-Fast"
+    // 2. Validación de seguridad "Fail-Fast" (Campos obligatorios)
     if (!body.email || !body.username || !body.password || !body.full_name || !body.role_code) {
       return sendJson(res, 400, { ok: false, message: "Faltan campos obligatorios (nombre, email, usuario, contraseña, rol)." });
     }
@@ -131,10 +139,12 @@ export async function adminCreateUserAction(req: HttpRequest, res: HttpResponse)
       return sendJson(res, 400, { ok: false, message: "La contraseña debe tener al menos 8 caracteres por seguridad." });
     }
 
-    // 2. Llamada al servicio que creamos en auth.service.ts
+    // 3. Llamada al servicio
+    // Como el servicio usa (...input) y el repositorio ya busca data.institution_id,
+    // simplemente pasando el body funcionará correctamente.
     const result = await adminCreateUser(body);
 
-    // 3. Respuesta de éxito
+    // 4. Respuesta de éxito
     sendJson(res, 201, {
       ok: true,
       message: result.message,
@@ -142,7 +152,6 @@ export async function adminCreateUserAction(req: HttpRequest, res: HttpResponse)
     });
 
   } catch (error) {
-    // Reutilizamos tus funciones globales de error
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }
 }

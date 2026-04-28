@@ -18,12 +18,12 @@ function GestionUsuarios() {
   const [estadoFiltro, setEstadoFiltro] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [institucionesDb, setInstitucionesDb] = useState([]); 
   const [modalEditOpen, setModalEditOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState({ id: null, full_name: "", email: "", password: "", role_code: "" });
+  const [editFormData, setEditFormData] = useState({ id: null, full_name: "", email: "", password: "", role_code: "", institution_id: "" });
 
   const [modalCreateOpen, setModalCreateOpen] = useState(false);
-  const [createFormData, setCreateFormData] = useState({full_name: "", email: "", username: "", password: "", role_code: "registered_user"});
-  
+  const [createFormData, setCreateFormData] = useState({full_name: "", email: "", username: "", password: "", role_code: "registered_user", institution_id: ""});
   const usuariosPorPagina = 5;
 
   const fetchUsuarios = async () => {
@@ -83,6 +83,33 @@ function GestionUsuarios() {
       console.error("Error al obtener roles:", error);
     }
   };
+
+  const fetchInstitucionesList = async () => {
+    const tokenValido = user?.token || user?.accessToken;
+    if (!tokenValido) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/instituciones`, {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${tokenValido}` },
+        credentials: "include"
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setInstitucionesDb(data.instituciones || []);
+      }
+    } catch (error) {
+      console.error("Error al obtener instituciones:", error);
+    }
+  };
+  
+  useEffect(() => {
+    if (user?.token) {
+      fetchUsuarios();
+      fetchRoles();
+      fetchInstitucionesList(); // 👈 AGREGAR AQUÍ
+    }
+  }, [user?.token]);
   
   useEffect(() => {
     if (user?.token) {
@@ -108,7 +135,7 @@ function GestionUsuarios() {
         alert("Usuario creado y activado con éxito.");
         setModalCreateOpen(false);
         // Limpiamos el formulario
-        setCreateFormData({ full_name: "", email: "", username: "", password: "", role_code: "registered_user" });
+        setCreateFormData({ full_name: "", email: "", username: "", password: "", role_code: "registered_user", institution_id: "" });
         fetchUsuarios(); // Recargamos la tabla
       } else {
         const err = await res.json();
@@ -207,7 +234,8 @@ function GestionUsuarios() {
       full_name: u.full_name || u.nombre || "",
       email: u.email || "",
       password: "",
-      role_code: u.rol || u.role_code || "registered_user" // Obtenemos el rol actual
+      role_code: u.rol || u.role_code || "registered_user",
+      institution_id: u.institution_id || "" // 👈 AÑADIR AQUÍ
     });
     setModalEditOpen(true);
   };
@@ -225,7 +253,8 @@ function GestionUsuarios() {
           full_name: editFormData.full_name,
           email: editFormData.email,
           role_code: editFormData.role_code, 
-          password: editFormData.password || undefined
+          password: editFormData.password || undefined,
+          institution_id: editFormData.institution_id || null
         })
       });
 
@@ -299,6 +328,7 @@ function GestionUsuarios() {
             <tr>
               <th>Nombre</th>
               <th>Email</th>
+              <th>Institución</th>
               <th>Rol</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -312,6 +342,7 @@ function GestionUsuarios() {
                 <tr key={id}>
                   <td>{u.full_name || u.nombre}</td>
                   <td>{u.email}</td>
+                  <td>{u.institucion_nombre || <span style={{ color: "#888" }}>Sin institución</span>}</td>
                   <td>{(u.rol || u.role_code || "").replace("_", " ")}</td>
                   <td>
                     <span className={`estado ${estado}`}>
@@ -372,6 +403,20 @@ function GestionUsuarios() {
                 {rolesDb.map(rol => <option key={rol.code} value={rol.code}>{rol.name}</option>)}
               </select>
 
+              {/* 👇 NUEVO SELECTOR DE INSTITUCIÓN 👇 */}
+              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Vincular Institución (Opcional):</label>
+              <select 
+                value={createFormData.institution_id} 
+                onChange={e => setCreateFormData({...createFormData, institution_id: e.target.value})} 
+                style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc", background: "white" }}
+              >
+                <option value="">-- Sin Institución --</option>
+                {institucionesDb.map(inst => (
+                  <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name}</option>
+                ))}
+              </select>
+
+              {/* LOS BOTONES AHORA VAN AL FINAL */}
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
                 <button type="button" onClick={() => setModalCreateOpen(false)} style={{ background: "#f44336", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Cancelar</button>
                 <button type="submit" style={{ background: "#4CAF50", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Crear Usuario Activo</button>
@@ -397,11 +442,6 @@ function GestionUsuarios() {
               <label style={{ fontWeight: "bold", fontSize: "14px" }}>Nueva Contraseña <small style={{ fontWeight: "normal", color: "#666" }}>(Opcional)</small>:</label>
               <input type="password" placeholder="Dejar en blanco para no cambiarla" value={editFormData.password} onChange={e => setEditFormData({...editFormData, password: e.target.value})} style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
               
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-                <button type="button" onClick={() => setModalEditOpen(false)} style={{ background: "#f44336", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Cancelar</button>
-                <button type="submit" style={{ background: "#4CAF50", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Guardar Cambios</button>
-              </div>
-
               <label style={{ fontWeight: "bold", fontSize: "14px" }}>Rol del Usuario:</label>
               <select 
                 value={editFormData.role_code} 
@@ -416,6 +456,25 @@ function GestionUsuarios() {
                   </option>
                 ))}
               </select>
+
+              {/* 👇 NUEVO SELECTOR DE INSTITUCIÓN 👇 */}
+              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Vincular Institución (Opcional):</label>
+              <select 
+                value={editFormData.institution_id} 
+                onChange={e => setEditFormData({...editFormData, institution_id: e.target.value})} 
+                style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc", background: "white" }}
+              >
+                <option value="">-- Sin Institución --</option>
+                {institucionesDb.map(inst => (
+                  <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name}</option>
+                ))}
+              </select>
+
+              {/* BOTONES AL FINAL */}
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
+                <button type="button" onClick={() => setModalEditOpen(false)} style={{ background: "#f44336", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Cancelar</button>
+                <button type="submit" style={{ background: "#4CAF50", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Guardar Cambios</button>
+              </div>
 
             </form>
           </div>

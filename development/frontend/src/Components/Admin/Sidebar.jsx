@@ -32,7 +32,8 @@ function Sidebar() {
   // Reemplazamos los emojis por componentes de iconos
   const menu = [
     { name: "Dashboard", path: "/administracion", icon: LayoutDashboard }, 
-    { name: "Datasets", path: "/administracion/datasets", icon: Database, requiredPermission: "data_management.read" },
+    { name: "Mis Datasets", path: "/administracion/mis-datasets", icon: Database, requiredPermission: "data_management.read" },
+    { name: "Datasets globales", path: "/administracion/datasets", icon: Database, requiredPermission: "data_management.read" },
     { name: "Contenido Web", path: "/administracion/contenido", icon: Newspaper, requiredPermission: "catalog.write" },
     { name: "Usuarios", path: "/administracion/usuarios", icon: Users, requiredPermission: "user_management.read" },
     { name: "Roles", path: "/administracion/roles", icon: ShieldCheck, requiredPermission: "roles_permissions.read" },

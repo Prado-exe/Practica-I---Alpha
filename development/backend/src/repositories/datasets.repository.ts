@@ -164,21 +164,27 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
   
   const queryParams: any[] = [];
 
-  // 👇 LÓGICA DE SEGURIDAD Y ACCESO (Datos.jsx) 👇
+  // 👇 LÓGICA DE SEGURIDAD Y PRIVACIDAD DE INSTITUCIONES 👇
   if (filters.isPublicCatalog) {
-    // 1. En esta vista solo aparecen los validados/publicados
     baseQuery += ` AND d.dataset_status = 'published'`;
     
-    // 2. Control de Acceso:
-    // Si accountId > 0 (logeado), ve public e internal.
-    // Si accountId == 0 (anónimo), solo ve public.
     if (accountId > 0) {
+      // Usuario logueado
       baseQuery += ` AND d.access_level IN ('public', 'internal')`;
+      
+      if (!isAdmin) {
+        // 🛡️ Filtro de Institución Privada: Si no es Admin, solo ve instituciones 'public',
+        // o si es 'internal', debe pertenecer a ella (lo buscamos en la tabla accounts).
+        baseQuery += ` AND (i.access_level = 'public' OR i.access_level IS NULL OR i.institution_id = (SELECT institution_id FROM accounts WHERE account_id = $${queryParams.length + 1}))`;
+        queryParams.push(accountId);
+      }
     } else {
+      // Visitante anónimo: Se bloquea tanto el dataset interno como la institución interna
       baseQuery += ` AND d.access_level = 'public'`;
+      baseQuery += ` AND (i.access_level = 'public' OR i.access_level IS NULL)`;
     }
   } else if (!isAdmin) {
-    // Si es la vista de gestión privada y no es admin, solo ve los suyos
+    // Si es la vista de gestión privada y no es admin, solo ve sus propios registros
     baseQuery += ` AND d.owner_account_id = $${queryParams.length + 1}`;
     queryParams.push(accountId);
   }
@@ -194,10 +200,8 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
     baseQuery += ` AND d.category_id = ANY(string_to_array($${queryParams.length}, ',')::integer[])`;
   }
 
-  // 👇 NUEVO: FILTRO ODS (Arreglado) 👇
   if (filters.ods) {
     queryParams.push(filters.ods);
-    // Usamos smallint[] porque ods_objective_id es SMALLINT en tu esquema
     baseQuery += ` AND d.ods_objective_id = ANY(string_to_array($${queryParams.length}, ',')::smallint[])`;
   }
 
@@ -230,7 +234,6 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
     )`;
   }
 
-  // 4. Conteo y Paginación (Se mantiene igual)
   const countQuery = `SELECT COUNT(DISTINCT d.dataset_id) ${baseQuery}`;
   const countRes = await pool.query(countQuery, queryParams);
   const total = parseInt(countRes.rows[0].count, 10);
@@ -264,10 +267,11 @@ export async function fetchDatasetsPaginated(accountId: number, isAdmin: boolean
  * @throws {Error} Excepciones generadas por fallos en el motor de base de datos.
  */
 export async function fetchDatasetDetailsFromDb(id: number) {
-  // A. Metadatos principales (👇 Agregamos el JOIN de ods_objectives)
+  // A. Metadatos principales (Se agrega i.access_level)
   const dsRes = await pool.query(`
     SELECT d.*, c.name as category_name, i.legal_name as institution_name, l.name as license_name,
-           o.objective_code, o.objective_name
+           o.objective_code, o.objective_name,
+           i.access_level AS institution_access_level  
     FROM datasets d 
     LEFT JOIN categories c ON d.category_id = c.category_id
     LEFT JOIN institutions i ON d.institution_id = i.institution_id
@@ -279,35 +283,62 @@ export async function fetchDatasetDetailsFromDb(id: number) {
   if (dsRes.rowCount === 0) return null;
   const dataset = dsRes.rows[0];
 
-  // B. Archivos subidos
+  // B. Archivos actuales
   const filesRes = await pool.query(`
     SELECT afr.aws_file_reference_id, df.display_name, afr.file_url, afr.storage_key, afr.mime_type, afr.file_size_bytes
     FROM aws_file_references afr
     INNER JOIN dataset_files df ON afr.aws_file_reference_id = df.aws_file_reference_id
-    WHERE df.dataset_id = $1
+    WHERE df.dataset_id = $1 AND df.is_pending_validation = FALSE
   `, [id]);
   dataset.files = filesRes.rows;
 
-  // C. Eventos de auditoría
-  const eventsRes = await pool.query(`
-    SELECT de.dataset_event_id, de.event_type, de.event_result, de.event_comment, de.created_at,
-           acc.email as actor_email
-    FROM dataset_events de
-    LEFT JOIN accounts acc ON de.actor_account_id = acc.account_id
-    WHERE de.dataset_id = $1
-    ORDER BY de.created_at DESC
-  `, [id]);
-  dataset.events = eventsRes.rows;
-
-  // 👇 D. NUEVO: Etiquetas (Tags)
+  // C. Etiquetas actuales
   const tagsRes = await pool.query(`
-    SELECT t.tag_id, t.name 
-    FROM dataset_tags dt
+    SELECT t.tag_id, t.name FROM dataset_tags dt
     INNER JOIN tags t ON dt.tag_id = t.tag_id
     WHERE dt.dataset_id = $1
   `, [id]);
   dataset.tags = tagsRes.rows;
 
+  const reqRes = await pool.query(`
+    SELECT dr.*, acc.full_name as requester_name
+    FROM dataset_requests dr
+    LEFT JOIN accounts acc ON dr.requester_account_id = acc.account_id
+    WHERE dr.dataset_id = $1 AND dr.request_status = 'pending'
+    LIMIT 1
+  `, [id]);
+
+  if (reqRes.rowCount && reqRes.rowCount > 0) {
+    const request = reqRes.rows[0];
+    if (request.request_type === 'edit' && request.pending_changes) {
+      const pc = request.pending_changes;
+      const [cat, lic, inst, ods] = await Promise.all([
+        pool.query('SELECT name FROM categories WHERE category_id = $1', [pc.category_id]),
+        pool.query('SELECT name FROM licenses WHERE license_id = $1', [pc.license_id]),
+        pool.query('SELECT legal_name FROM institutions WHERE institution_id = $1', [pc.institution_id]),
+        pool.query('SELECT objective_name FROM ods_objectives WHERE ods_objective_id = $1', [pc.ods_objective_id])
+      ]);
+      const tags = await pool.query('SELECT name FROM tags WHERE tag_id = ANY($1::int[])', [pc.tags || []]);
+
+      request.resolved_changes = {
+        ...pc,
+        category_name: cat.rows[0]?.name || "N/A",
+        license_name: lic.rows[0]?.name || "N/A",
+        institution_name: inst.rows[0]?.legal_name || "N/A",
+        ods_name: ods.rows[0]?.objective_name || "N/A",
+        tag_names: tags.rows.map(t => t.name)
+      };
+
+      const pendingFilesRes = await pool.query(`
+        SELECT afr.aws_file_reference_id, df.display_name, afr.file_url, afr.storage_key, afr.mime_type, afr.file_size_bytes
+        FROM aws_file_references afr
+        INNER JOIN dataset_files df ON afr.aws_file_reference_id = df.aws_file_reference_id
+        WHERE df.dataset_id = $1 AND df.is_pending_validation = TRUE
+      `, [id]);
+      request.new_files_info = pendingFilesRes.rows;
+    }
+    dataset.pending_request = request;
+  }
   return dataset;
 }
 
@@ -474,7 +505,7 @@ export async function createDatasetRequestInDb(accountId: number, data: any) {
     ]);
     const dataset_id = datasetRes.rows[0].dataset_id;
 
-    // 2. Insertar Archivos (sin cambios)
+    // 2. Insertar Archivos
     for (const file of data.files) {
       let safeMimeType = file.mime_type;
       if (safeMimeType === 'application/x-zip-compressed') safeMimeType = 'application/zip';
@@ -507,6 +538,15 @@ export async function createDatasetRequestInDb(accountId: number, data: any) {
       `, [dataset_id, aws_file_id, file.file_role || 'source', file.display_name, finalFormat, safeMimeType, file.file_size_bytes]);
     }
 
+    // CORRECCIÓN: INSERTAR LAS ETIQUETAS EN LA BD
+    if (data.tags && data.tags.length > 0) {
+      for (const tagId of data.tags) {
+        await client.query(`
+          INSERT INTO dataset_tags (dataset_id, tag_id) VALUES ($1, $2)
+        `, [dataset_id, tagId]);
+      }
+    }
+
     // 3. Lógica Condicional: ¿Borrador o Petición de Validación?
     if (data.dataset_status === 'pending_validation') {
       // Se genera la solicitud para el admin
@@ -537,46 +577,194 @@ export async function createDatasetRequestInDb(accountId: number, data: any) {
   }
 }
 
+
 /**
- * Resuelve una solicitud de dataset (Publicar o Rechazar).
- * Actualiza datasets, dataset_requests y genera un dataset_events.
+ * Resuelve una solicitud de dataset (Aprobar o Rechazar).
+ * Lee el request_type para saber exactamente qué acción aplicar sobre la base de datos.
  */
 export async function resolveDatasetRequestInDb(datasetId: number, adminAccountId: number, action: 'publish' | 'reject', reviewComment: string) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
-    const newDatasetStatus = action === 'publish' ? 'published' : 'rejected';
-    const newRequestStatus = action === 'publish' ? 'approved' : 'rejected';
-    const eventType = action === 'publish' ? 'published' : 'rejected';
+    // 1. Buscar la solicitud pendiente y su tipo
+    const reqRes = await client.query(
+      `SELECT request_type, pending_changes FROM dataset_requests WHERE dataset_id = $1 AND request_status = 'pending'`,
+      [datasetId]
+    );
+    
+    if (reqRes.rowCount === 0) {
+      throw new Error("No hay solicitudes pendientes de revisión para este dataset.");
+    }
+    
+    const { request_type, pending_changes } = reqRes.rows[0];
+    let s3KeysToDelete: string[] = [];
+    let isHardDeleted = false;
 
-    // 1. Actualizar el Dataset
-    const updateDatasetQuery = `
-      UPDATE datasets 
-      SET dataset_status = $1, updated_at = NOW()
-      ${action === 'publish' ? ', published_at = NOW()' : ''}
-      WHERE dataset_id = $2
-      RETURNING title
-    `;
-    const dsRes = await client.query(updateDatasetQuery, [newDatasetStatus, datasetId]);
-    if (dsRes.rowCount === 0) throw new Error("Dataset no encontrado");
+    // ==========================================
+    // ESCENARIO A: RECHAZAR SOLICITUD
+    // ==========================================
+    if (action === 'reject') {
+      if (request_type === 'create') {
+        // Rechazo de Creación -> HARD DELETE (Opción B)
+        const filesRes = await client.query(`
+          SELECT afr.aws_file_reference_id, afr.storage_key
+          FROM dataset_files df
+          INNER JOIN aws_file_references afr ON df.aws_file_reference_id = afr.aws_file_reference_id
+          WHERE df.dataset_id = $1
+        `, [datasetId]);
+        
+        s3KeysToDelete = filesRes.rows.map(r => r.storage_key);
+        const fileIds = filesRes.rows.map(r => r.aws_file_reference_id);
 
-    // 2. Actualizar la Solicitud (dataset_requests)
-    await client.query(`
-      UPDATE dataset_requests 
-      SET request_status = $1, review_comment = $2, claimed_by_admin_account_id = $3, updated_at = NOW(), claimed_at = NOW()
-      WHERE dataset_id = $4 AND request_status = 'pending'
-    `, [newRequestStatus, reviewComment, adminAccountId, datasetId]);
+        // El CASCADE borrará el dataset, dataset_requests, dataset_events y dataset_tags
+        await client.query(`DELETE FROM datasets WHERE dataset_id = $1`, [datasetId]);
 
-    // 3. Registrar el Evento de Auditoría
-    const eventComment = `El administrador ha ${action === 'publish' ? 'publicado' : 'rechazado'} el dataset. Comentario: ${reviewComment}`;
-    await client.query(`
-      INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
-      VALUES ($1, $2, $3, 'success', $4)
-    `, [datasetId, adminAccountId, eventType, eventComment]);
+        // Limpiar los registros huérfanos de archivos
+        if (fileIds.length > 0) {
+          await client.query(`DELETE FROM aws_file_references WHERE aws_file_reference_id = ANY($1::bigint[])`, [fileIds]);
+        }
+        isHardDeleted = true;
+      } 
+      else if (request_type === 'edit') {
+        // Rechazo de Edición -> Borrar solo los archivos NUEVOS que estaban esperando
+        const newFilesRes = await client.query(`
+          SELECT afr.aws_file_reference_id, afr.storage_key
+          FROM dataset_files df
+          INNER JOIN aws_file_references afr ON df.aws_file_reference_id = afr.aws_file_reference_id
+          WHERE df.dataset_id = $1 AND df.is_pending_validation = TRUE
+        `, [datasetId]);
+        
+        s3KeysToDelete = newFilesRes.rows.map(r => r.storage_key);
+        const fileIds = newFilesRes.rows.map(r => r.aws_file_reference_id);
+
+        if (fileIds.length > 0) {
+          await client.query(`DELETE FROM dataset_files WHERE aws_file_reference_id = ANY($1::bigint[])`, [fileIds]);
+          await client.query(`DELETE FROM aws_file_references WHERE aws_file_reference_id = ANY($1::bigint[])`, [fileIds]);
+        }
+
+        // Actualizar ticket
+        await client.query(`
+          UPDATE dataset_requests SET request_status = 'rejected', review_comment = $1, claimed_by_admin_account_id = $2, updated_at = NOW(), claimed_at = NOW()
+          WHERE dataset_id = $3 AND request_status = 'pending'
+        `, [reviewComment, adminAccountId, datasetId]);
+
+        await client.query(`
+          INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
+          VALUES ($1, $2, 'rejected', 'success', $3)
+        `, [datasetId, adminAccountId, `Edición rechazada. Comentario: ${reviewComment}`]);
+      }
+      else if (request_type === 'archive') {
+        // Rechazo de Archivado -> Queda público
+        await client.query(`
+          UPDATE dataset_requests SET request_status = 'rejected', review_comment = $1, claimed_by_admin_account_id = $2, updated_at = NOW(), claimed_at = NOW()
+          WHERE dataset_id = $3 AND request_status = 'pending'
+        `, [reviewComment, adminAccountId, datasetId]);
+
+        await client.query(`
+          INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
+          VALUES ($1, $2, 'rejected', 'success', $3)
+        `, [datasetId, adminAccountId, `Archivado rechazado. Comentario: ${reviewComment}`]);
+      }
+    } 
+    // ==========================================
+    // ESCENARIO B: APROBAR SOLICITUD ('publish')
+    // ==========================================
+    else if (action === 'publish') {
+      if (request_type === 'destroy') {
+    // 1. Obtener información de archivos para retorno (para que el servicio limpie S3)
+    const filesRes = await client.query(`
+      SELECT afr.storage_key, afr.aws_file_reference_id
+      FROM dataset_files df
+      INNER JOIN aws_file_references afr ON df.aws_file_reference_id = afr.aws_file_reference_id
+      WHERE df.dataset_id = $1
+    `, [datasetId]);
+    
+    s3KeysToDelete = filesRes.rows.map(r => r.storage_key);
+    const fileIds = filesRes.rows.map(r => r.aws_file_reference_id);
+
+    // 2. Borrado Nuclear: El CASCADE se encarga de tablas hijas, pero borramos referencias maestras de archivos
+    await client.query(`DELETE FROM datasets WHERE dataset_id = $1`, [datasetId]);
+    if (fileIds.length > 0) {
+      await client.query(`DELETE FROM aws_file_references WHERE aws_file_reference_id = ANY($1::bigint[])`, [fileIds]);
+    }
+    
+    isHardDeleted = true; // Flag para retornar el mensaje correcto
+  }
+
+      if (request_type === 'create') {
+        await client.query(`UPDATE datasets SET dataset_status = 'published', published_at = NOW(), updated_at = NOW() WHERE dataset_id = $1`, [datasetId]);
+      }
+      else if (request_type === 'edit') {
+        const data = pending_changes;
+        
+        // 1. Aplicar metadatos al dataset original
+        await client.query(`
+          UPDATE datasets SET 
+            title = $1, category_id = $2, license_id = $3, institution_id = $4,
+            summary = $5, description = $6, access_level = $7,
+            creation_date = $8, geographic_coverage = $9, update_frequency = $10, 
+            source_url = $11, temporal_coverage_start = $12, temporal_coverage_end = $13,
+            ods_objective_id = $14, updated_at = NOW()
+          WHERE dataset_id = $15
+        `, [
+          data.title, data.category_id, data.license_id, data.institution_id || null,
+          data.summary, data.description, data.access_level,
+          data.creation_date, data.geographic_coverage || null, data.update_frequency || null,
+          data.source_url || null, data.temporal_coverage_start || null, data.temporal_coverage_end || null,
+          data.ods_objective_id || null, datasetId
+        ]);
+
+        // 2. Reemplazar Etiquetas (Tags)
+        if (data.tags && Array.isArray(data.tags)) {
+          await client.query(`DELETE FROM dataset_tags WHERE dataset_id = $1`, [datasetId]);
+          for (const tagId of data.tags) {
+            await client.query(`INSERT INTO dataset_tags (dataset_id, tag_id) VALUES ($1, $2)`, [datasetId, tagId]);
+          }
+        }
+
+        // 3. Activar archivos nuevos quitando el booleano
+        await client.query(`
+          UPDATE dataset_files SET is_pending_validation = FALSE 
+          WHERE dataset_id = $1 AND is_pending_validation = TRUE
+        `, [datasetId]);
+
+        // 4. Recolectar llaves y eliminar en BD los archivos que el usuario pidió borrar
+        if (data.deleted_file_ids && data.deleted_file_ids.length > 0) {
+          const keysRes = await client.query(`SELECT storage_key FROM aws_file_references WHERE aws_file_reference_id = ANY($1::bigint[])`, [data.deleted_file_ids]);
+          s3KeysToDelete = keysRes.rows.map(r => r.storage_key);
+          
+          await client.query(`DELETE FROM dataset_files WHERE aws_file_reference_id = ANY($1::bigint[])`, [data.deleted_file_ids]);
+          await client.query(`DELETE FROM aws_file_references WHERE aws_file_reference_id = ANY($1::bigint[])`, [data.deleted_file_ids]);
+        }
+      }
+      else if (request_type === 'archive') {
+        await client.query(`UPDATE datasets SET dataset_status = 'archived', updated_at = NOW() WHERE dataset_id = $1`, [datasetId]);
+      }
+
+      // Actualizar el ticket a Aprobado
+      await client.query(`
+        UPDATE dataset_requests SET request_status = 'approved', review_comment = $1, claimed_by_admin_account_id = $2, updated_at = NOW(), claimed_at = NOW()
+        WHERE dataset_id = $3 AND request_status = 'pending'
+      `, [reviewComment, adminAccountId, datasetId]);
+
+      // CORRECCIÓN DEL EVENT_TYPE PARA EVITAR ERROR 500 EN LA TABLA dataset_events
+      let eventTypeStr = 'published';
+      if (request_type === 'edit') eventTypeStr = 'updated';
+      if (request_type === 'archive') eventTypeStr = 'archived';
+
+      await client.query(`
+        INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
+        VALUES ($1, $2, $3, 'success', $4)
+      `, [datasetId, adminAccountId, eventTypeStr, `Solicitud aprobada. Comentario: ${reviewComment}`]);
+    }
 
     await client.query('COMMIT');
-    return { message: `Dataset ${newDatasetStatus} exitosamente.` };
+    return { 
+      message: isHardDeleted ? "Dataset rechazado y destruido correctamente." : "Solicitud resuelta y aplicada correctamente.",
+      s3KeysToDelete,
+      isHardDeleted
+    };
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -739,4 +927,190 @@ export async function fetchDashboardStats() {
     pendingValidations: pendingRes.rows,
     recentActivity:     activityRes.rows,
   };
+}
+
+
+/**
+ * Crea una solicitud de ARCHIVADO (Soft Delete).
+ */
+export async function createArchiveRequestInDb(datasetId: number, accountId: number) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Solución al error TS18047
+    const checkRes = await client.query(
+      `SELECT 1 FROM dataset_requests WHERE dataset_id = $1 AND request_status = 'pending'`,
+      [datasetId]
+    );
+    if ((checkRes.rowCount ?? 0) > 0) {
+      throw new Error("Ya existe una solicitud pendiente de revisión para este dataset.");
+    }
+
+    await client.query(`
+      INSERT INTO dataset_requests (dataset_id, requester_account_id, request_type, request_status)
+      VALUES ($1, $2, 'archive', 'pending')
+    `, [datasetId, accountId]);
+
+    await client.query(`
+      INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
+      VALUES ($1, $2, 'archive_requested', 'success', 'El usuario solicitó dar de baja el dataset. En espera de validación.')
+    `, [datasetId, accountId]);
+
+    await client.query('COMMIT');
+    return { message: "Solicitud de archivado enviada a los administradores." };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Función auxiliar para procesar e insertar archivos nuevos en estado "Pendiente".
+ * Se ejecuta dentro de la transacción padre usando el mismo `client`.
+ */
+export async function insertPendingFilesInDb(client: any, datasetId: number, accountId: number, newFiles: any[]) {
+  for (const file of newFiles) {
+    let safeMimeType = file.mime_type;
+    // Sanitización básica para firmas de SO
+    if (safeMimeType === 'application/x-zip-compressed') safeMimeType = 'application/zip';
+    if (safeMimeType === 'application/vnd.ms-excel') safeMimeType = 'text/csv';
+
+    const ext = file.display_name.split('.').pop()?.toLowerCase();
+    const allowedFormats = ['csv', 'json', 'xml', 'xlsx', 'pdf', 'zip', 'txt'];
+    const finalFormat = allowedFormats.includes(ext) ? ext : 'txt';
+
+    // 1. Insertar referencia física (aws_file_references)
+    const fileRes = await client.query(`
+      INSERT INTO aws_file_references (
+        storage_key, file_url, file_format_id, file_size_bytes, mime_type, 
+        file_category, owner_account_id, status
+      ) VALUES (
+        $1, $2, COALESCE((SELECT file_format_id FROM file_formats WHERE mime_type = $3 LIMIT 1), 1), 
+        $4, $3, 'dataset_source', $5, 'active'
+      ) RETURNING aws_file_reference_id
+    `, [file.storage_key, file.file_url, safeMimeType, file.file_size_bytes, accountId]);
+    
+    const aws_file_id = fileRes.rows[0].aws_file_reference_id;
+
+    // 2. Insertar relación con dataset marcada como PENDIENTE (is_pending_validation = TRUE)
+    await client.query(`
+      INSERT INTO dataset_files (
+        dataset_id, aws_file_reference_id, file_role, display_name, file_format, 
+        mime_type, file_size_bytes, is_pending_validation
+      ) VALUES ($1, $2, 'source', $3, $4, $5, $6, TRUE)
+    `, [datasetId, aws_file_id, file.display_name, finalFormat, safeMimeType, file.file_size_bytes]);
+  }
+}
+
+/**
+ * Crea una solicitud de EDICIÓN, guardando los metadatos en el JSONB `pending_changes`.
+ * Delega la inserción de archivos a `insertPendingFilesInDb`.
+ */
+export async function createEditRequestInDb(datasetId: number, accountId: number, pendingChanges: any) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Bloqueo de múltiples ediciones
+    const checkRes = await client.query(
+      `SELECT 1 FROM dataset_requests WHERE dataset_id = $1 AND request_status = 'pending'`,
+      [datasetId]
+    );
+    if ((checkRes.rowCount ?? 0) > 0) {
+      throw new Error("Ya existe una solicitud pendiente de revisión para este dataset.");
+    }
+
+    // 2. Insertar el ticket con el JSONB
+    await client.query(`
+      INSERT INTO dataset_requests (dataset_id, requester_account_id, request_type, request_status, pending_changes)
+      VALUES ($1, $2, 'edit', 'pending', $3)
+    `, [datasetId, accountId, JSON.stringify(pendingChanges)]);
+
+    // 3. Procesar archivos nuevos (si existen) usando la función auxiliar
+    if (pendingChanges.new_files && pendingChanges.new_files.length > 0) {
+      await insertPendingFilesInDb(client, datasetId, accountId, pendingChanges.new_files);
+    }
+
+    // 4. Registrar evento forense
+    await client.query(`
+      INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
+      VALUES ($1, $2, 'submitted_for_validation', 'success', 'El usuario solicitó editar el dataset. En espera de validación.')
+    `, [datasetId, accountId]);
+
+    await client.query('COMMIT');
+    return { message: "Solicitud de edición enviada a los administradores." };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Recupera los datasets donde el usuario es el propietario O pertenecen a su institución.
+ * Filtra los datasets que han sido eliminados físicamente.
+ */
+export async function fetchUserAndInstitutionDatasetsFromDb(accountId: number, institutionId: number | null) {
+  const query = `
+    SELECT 
+      d.dataset_id AS id, 
+      d.title AS nombre, 
+      c.name AS categoria, 
+      i.legal_name AS institucion, 
+      TO_CHAR(d.created_at, 'YYYY-MM-DD') AS fecha, 
+      d.dataset_status
+    FROM datasets d
+    LEFT JOIN categories c ON d.category_id = c.category_id  -- 👈 CAMBIADO A LEFT JOIN
+    LEFT JOIN institutions i ON d.institution_id = i.institution_id
+    WHERE (d.owner_account_id = $1 
+       OR (d.institution_id IS NOT NULL AND d.institution_id = $2))
+       AND d.dataset_status != 'deleted'
+    ORDER BY d.created_at DESC
+  `;
+  const { rows } = await pool.query(query, [accountId, institutionId]);
+  return rows;
+}
+
+/**
+ * Crea una solicitud formal para destruir permanentemente un dataset.
+ * Solo se permite si no hay otras solicitudes pendientes.
+ */
+export async function createDestroyRequestInDb(datasetId: number, accountId: number) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Verificar si ya existe una solicitud pendiente de cualquier tipo
+    const checkRes = await client.query(
+      `SELECT 1 FROM dataset_requests WHERE dataset_id = $1 AND request_status = 'pending'`,
+      [datasetId]
+    );
+    if ((checkRes.rowCount ?? 0) > 0) {
+      throw new Error("Ya existe una solicitud pendiente de revisión para este dataset.");
+    }
+
+    // 2. Insertar el ticket de tipo 'destroy'
+    await client.query(`
+      INSERT INTO dataset_requests (dataset_id, requester_account_id, request_type, request_status, message)
+      VALUES ($1, $2, 'destroy', 'pending', 'Solicitud del usuario para eliminación permanente del dataset y sus archivos.')
+    `, [datasetId, accountId]);
+
+    // 3. Registrar el evento en el historial
+    await client.query(`
+      INSERT INTO dataset_events (dataset_id, actor_account_id, event_type, event_result, event_comment)
+      VALUES ($1, $2, 'destroy_requested', 'success', 'El usuario ha solicitado la destrucción física del recurso.')
+    `, [datasetId, accountId]);
+
+    await client.query('COMMIT');
+    return { message: "Tu solicitud de eliminación ha sido enviada para revisión administrativa." };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }

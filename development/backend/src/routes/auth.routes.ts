@@ -51,7 +51,7 @@ import {
   updateInstitucionAction, 
   deleteInstitucionAction,
   getPublicInstitucionesAction,
-  getPublicInstitucionByIdAction,         // <--- AÑADIR ESTA
+  getPublicInstitucionByIdAction,        
   getPublicInstitucionDatasetsAction 
 } from "./instituciones.routes";
 
@@ -68,7 +68,9 @@ import {
   requestDatasetAction,
   validateDatasetAction,
   destroyDatasetAction,
-  getDashboardStatsAction 
+  getDashboardStatsAction,
+  getMyDatasetsAction,
+  requestDestroyDatasetAction 
 } from "./datasets.routes";
 import { getAllOdsAction } from "./ods.routes";
 import { getAllTagsAction, createTagAction, deleteTagAction } from "./tags.routes";
@@ -91,6 +93,11 @@ import {
   deleteContactAction,
   getContactByIdAction 
 } from "./contact.routes";
+
+import { 
+  getInstitutionUsersAction, 
+  unlinkUserAction 
+} from "./usuarios-instituciones.routes";
 
 /**
  * Descripción: Extrae el identificador de la sesión activa desde el Access Token o el Refresh Token.
@@ -194,7 +201,8 @@ authRouter.add("GET", "/api/licenses", [], getAllLicensesAction);
 authRouter.add("GET", "/api/ods", [], getAllOdsAction);
 
 //---datasets
-// 2. Busca la sección de RUTAS DE DATASETS al final del archivo y déjalas así:
+
+authRouter.add("GET", "/api/datasets/my", [requireLogin], getMyDatasetsAction);
 
 authRouter.add("GET", "/api/dashboard/stats", [requirePermission("catalog.read")], getDashboardStatsAction);
 authRouter.add("GET", "/api/public/datasets", [], getPublicDatasetsAction);
@@ -206,13 +214,14 @@ authRouter.add("PUT", "/api/datasets/:id", [requirePermission("data_management.w
 authRouter.add("PATCH", "/api/datasets/:id/archive", [requirePermission("data_management.delete")], archiveDatasetAction);
 authRouter.add("PATCH", "/api/datasets/:id/unarchive", [requirePermission("data_management.delete")], unarchiveDatasetAction);
 authRouter.add("DELETE", "/api/datasets/:id/hard", [requirePermission("data_management.delete")], destroyDatasetAction);
+authRouter.add("POST", "/api/datasets/:id/request-destroy", [requirePermission("data_management.write")], requestDestroyDatasetAction);
 
 // 1. Busca donde tienes la ruta de presigned-url original y añade esta justo debajo:
-authRouter.add("POST", "/api/upload/presigned-url/user", [requirePermission("user_management.write")], generateUploadUrlAction);
+authRouter.add("POST", "/api/upload/presigned-url/user", [requirePermission("data_management.write")], generateUploadUrlAction);
 
 // 2. Busca la sección de datasets y añade la nueva ruta para las solicitudes de usuarios:
-authRouter.add("POST", "/api/datasets/request", [requirePermission("user_management.write")], requestDatasetAction);
-authRouter.add("POST", "/api/datasets/:id/validate", [requirePermission("data_validation.execute")], validateDatasetAction);
+authRouter.add("POST", "/api/datasets/request", [requirePermission("data_management.write")], requestDatasetAction);
+authRouter.add("PUT", "/api/datasets/:id/validate", [requirePermission("data_validation.execute")], validateDatasetAction);
 
 // --- RUTAS DE NOTICIAS ---
 authRouter.add("GET", "/api/news-categories", [], getNewsCategoriesAction);
@@ -236,3 +245,11 @@ authRouter.add("GET", "/api/contact", [requirePermission("admin_general.manage")
 authRouter.add("PATCH", "/api/contact/:id/read", [requirePermission("admin_general.manage")], markContactReadAction);
 authRouter.add("DELETE", "/api/contact/:id", [requirePermission("admin_general.manage")], deleteContactAction);
 authRouter.add("GET", "/api/contact/:id", [requirePermission("admin_general.manage")], getContactByIdAction);
+
+// --- RUTAS RELACIÓN USUARIOS - INSTITUCIONES ---
+
+// Listar miembros de una institución (Requiere permisos de administrar instituciones)
+authRouter.add("GET", "/api/instituciones/:id/usuarios", [requirePermission("admin_general.manage")], getInstitutionUsersAction);
+
+// Desvincular un usuario de su institución (Requiere permisos de escribir/editar usuarios)
+authRouter.add("PATCH", "/api/usuarios/:id/desvincular", [requirePermission("user_management.write")], unlinkUserAction);

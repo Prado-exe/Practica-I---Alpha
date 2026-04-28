@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS dataset_requests (
     review_stage VARCHAR(30) NULL,
 
     message TEXT NULL,
+    
+    pending_changes JSONB NULL, 
+
     claimed_by_admin_account_id BIGINT NULL,
     claimed_at TIMESTAMPTZ NULL,
     claim_expires_at TIMESTAMPTZ NULL,
@@ -36,7 +39,7 @@ CREATE TABLE IF NOT EXISTS dataset_requests (
         ON UPDATE CASCADE,
 
     CONSTRAINT chk_dataset_requests_type
-        CHECK (request_type IN ('create', 'edit', 'delete', 'add_files', 'publish')),
+        CHECK (request_type IN ('create', 'edit', 'delete', 'add_files', 'publish', 'archive')),
 
     CONSTRAINT chk_dataset_requests_status
         CHECK (request_status IN ('pending', 'claimed', 'approved', 'rejected', 'cancelled')),

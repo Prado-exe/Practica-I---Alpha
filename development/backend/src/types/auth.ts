@@ -29,6 +29,7 @@ export interface Account {
   full_name: string;
   account_status: string;
   email_verified: boolean;
+  institution_id?: number | null;
   failed_login_count?: number;
   locked_until?: string | Date | null;
   last_login_at?: string | Date | null;
@@ -45,6 +46,7 @@ export interface BasicAccount {
   full_name: string;
   account_status: string;
   email_verified: boolean;
+  institution_id?: number | null;
 }
 
 export interface LoginAccount extends BasicAccount {
@@ -99,6 +101,7 @@ export interface PublicAccount {
   email_verified: boolean;
   role: string;
   permissions: string[];
+  institution_id?: number | null;
 }
 
 export interface RegisterInput {
@@ -128,6 +131,7 @@ export interface JwtAccessPayload {
   sessionId: number | string;
   role: string;
   permissions: string[];
+  institution_id?: number | null;
 }
 
 export interface JwtRefreshPayload {

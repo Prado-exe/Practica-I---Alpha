@@ -225,6 +225,7 @@ export async function findAccountLoginByEmail(email: string): Promise<LoginAccou
       a.email_verified,
       a.failed_login_count,
       a.locked_until,
+      a.institution_id,
       r.code AS role_code,
       COALESCE(
         json_agg(p.code) FILTER (WHERE p.code IS NOT NULL), 
@@ -610,6 +611,7 @@ export async function findAccountByIdForSession(accountId: number | string): Pro
       a.email_verified,
       a.failed_login_count,
       a.locked_until,
+      a.institution_id,
       r.code AS role_code,
       COALESCE(
         json_agg(p.code) FILTER (WHERE p.code IS NOT NULL), 
@@ -930,9 +932,12 @@ export async function fetchAllUsersFromDb() {
       a.full_name AS nombre, 
       a.email, 
       a.account_status AS estado, 
-      r.code AS rol
+      r.code AS rol,
+      a.institution_id,
+      i.legal_name AS institucion_nombre
     FROM accounts a
     JOIN roles r ON a.role_id = r.role_id
+    LEFT JOIN institutions i ON a.institution_id = i.institution_id
     ORDER BY a.account_id DESC
   `;
   const { rows } = await pool.query(query);
@@ -999,14 +1004,17 @@ export async function deleteUserFromDb(userId: string | number) {
  * @return {Promise<number>} Filas actualizadas (0 o 1).
  * @throws {Ninguna}
  */
-export async function updateUserAdminInDb(id: string | number, fullName: string, email: string, roleId: number, passwordHash?: string) {
+export async function updateUserAdminInDb(id: string | number, fullName: string, email: string, roleId: number, passwordHash?: string, institutionId?: number | null) {
+  // Transformamos cualquier string vacío del frontend a un NULL real de SQL
+  const instId = institutionId || null; 
+
   if (passwordHash) {
-    const query = `UPDATE accounts SET full_name = $1, email = $2, role_id = $3, password_hash = $4, updated_at = NOW() WHERE account_id = $5 RETURNING account_id`;
-    const { rowCount } = await pool.query(query, [fullName, email, roleId, passwordHash, id]);
+    const query = `UPDATE accounts SET full_name = $1, email = $2, role_id = $3, password_hash = $4, institution_id = $5, updated_at = NOW() WHERE account_id = $6 RETURNING account_id`;
+    const { rowCount } = await pool.query(query, [fullName, email, roleId, passwordHash, instId, id]);
     return rowCount ?? 0;
   } else {
-    const query = `UPDATE accounts SET full_name = $1, email = $2, role_id = $3, updated_at = NOW() WHERE account_id = $4 RETURNING account_id`;
-    const { rowCount } = await pool.query(query, [fullName, email, roleId, id]);
+    const query = `UPDATE accounts SET full_name = $1, email = $2, role_id = $3, institution_id = $4, updated_at = NOW() WHERE account_id = $5 RETURNING account_id`;
+    const { rowCount } = await pool.query(query, [fullName, email, roleId, instId, id]);
     return rowCount ?? 0;
   }
 }
@@ -1059,4 +1067,29 @@ export async function adminCreateUserInDb(data: any) {
 
   const { rows } = await pool.query(query, values);
   return rows[0];
+}
+
+export async function fetchUsersByInstitutionIdFromDb(institutionId: number) {
+  const query = `
+    SELECT a.account_id AS id, a.full_name AS nombre, a.email, r.code AS rol
+    FROM accounts a
+    JOIN roles r ON a.role_id = r.role_id
+    WHERE a.institution_id = $1
+    ORDER BY a.full_name ASC
+  `;
+  const { rows } = await pool.query(query, [institutionId]);
+  return rows;
+}
+
+export async function unlinkUserFromInstitutionInDb(userId: number, roleIdForDowngrade?: number) {
+  // Aquí usamos explícitamente "= NULL" para respetar tu ON DELETE SET NULL
+  if (roleIdForDowngrade) {
+    const query = `UPDATE accounts SET institution_id = NULL, role_id = $1, updated_at = NOW() WHERE account_id = $2 RETURNING account_id`;
+    const { rowCount } = await pool.query(query, [roleIdForDowngrade, userId]);
+    return rowCount ?? 0;
+  } else {
+    const query = `UPDATE accounts SET institution_id = NULL, updated_at = NOW() WHERE account_id = $1 RETURNING account_id`;
+    const { rowCount } = await pool.query(query, [userId]);
+    return rowCount ?? 0;
+  }
 }

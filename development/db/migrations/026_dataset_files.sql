@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS dataset_files (
     sort_order INTEGER NOT NULL DEFAULT 0,
     downloads_count BIGINT NOT NULL DEFAULT 0,
 
+    -- 👇 NUEVA COLUMNA: Identifica si el archivo está en espera de aprobación
+    is_pending_validation BOOLEAN NOT NULL DEFAULT FALSE,
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
@@ -47,3 +50,6 @@ CREATE INDEX IF NOT EXISTS idx_dataset_files_dataset_id
 
 CREATE INDEX IF NOT EXISTS idx_dataset_files_aws_file_reference_id
     ON dataset_files(aws_file_reference_id);
+
+CREATE INDEX IF NOT EXISTS idx_dataset_files_pending
+    ON dataset_files(is_pending_validation);

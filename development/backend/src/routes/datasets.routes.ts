@@ -17,7 +17,7 @@
  * se hacen aquí antes de tocar el servicio para ahorrar carga de CPU y Base de Datos.
  * ============================================================================
  */
-import { createDataset, getDatasets, getDatasetById, editDataset, submitDatasetRequest,archiveDataset, unarchiveDataset } from "../services/datasets.service";
+import { createDataset, getDatasets, getDatasetById, editDataset, submitDatasetRequest,archiveDataset, unarchiveDataset, destroyDataset, getMyDatasets, resolveDatasetRequest, requestDestroyDataset } from "../services/datasets.service";
 import { fetchDashboardStats } from "../repositories/datasets.repository";
 import type { HttpRequest, HttpResponse } from "../types/http";
 import { sendJson } from "../utils/json";
@@ -98,7 +98,14 @@ export async function getDatasetByIdAction(req: HttpRequest, res: HttpResponse) 
     const id = Number((req as any).params?.id);
     if (!id || isNaN(id)) return sendJson(res, 400, { ok: false, message: "ID inválido" });
 
-    const dataset = await getDatasetById(id);
+    // 👇 NUEVO: Extraemos la identidad del usuario desde el token
+    const payload = tryGetAuthPayload(req);
+    const userRole = payload?.role || 'guest';
+    const institutionId = payload?.institution_id ? Number(payload.institution_id) : null;
+
+    // 👇 NUEVO: Pasamos esos datos al servicio
+    const dataset = await getDatasetById(id, userRole, institutionId);
+    
     sendJson(res, 200, { ok: true, data: dataset });
   } catch (error) {
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
@@ -112,7 +119,9 @@ export async function archiveDatasetAction(req: HttpRequest, res: HttpResponse) 
 
     const payload = tryGetAuthPayload(req);
     const accountId = Number(payload?.sub);
-    const result = await archiveDataset(id, accountId);
+    const userRole = payload?.role || 'registered_user';
+    
+    const result = await archiveDataset(id, accountId, userRole);
     
     sendJson(res, 200, { ok: true, message: result.message });
   } catch (error) {
@@ -135,11 +144,14 @@ export async function updateDatasetAction(req: HttpRequest, res: HttpResponse) {
 
     const payload = tryGetAuthPayload(req);
     const accountId = Number(payload?.sub);
+    const userRole = payload?.role || 'registered_user'; // 👈 Extraemos el rol
     const body = await readJsonBody<any>(req);
 
-    const result = await editDataset(id, accountId, body);
-    sendJson(res, 200, { ok: true, message: "Dataset actualizado", data: result });
+    // 👈 Pasamos el userRole como tercer parámetro
+    const result = await editDataset(id, accountId, userRole, body); 
+    sendJson(res, 200, { ok: true, message: "Acción procesada", data: result });
   } catch (error) {
+    console.error(`🔥 ERROR EN EDICIÓN (Dataset ID: ${(req as any).params?.id}):`, error);
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }
 }
@@ -177,27 +189,20 @@ export async function getPublicDatasetsAction(req: HttpRequest, res: HttpRespons
 // 5. Acción para ver detalles de un dataset públicamente (Sin autenticación)
 export async function getPublicDatasetByIdAction(req: HttpRequest, res: HttpResponse) {
   try {
-    // Tu router personalizado inyecta los parámetros en req.params
     const id = Number((req as any).params?.id);
     
     if (!id || isNaN(id)) {
       return sendJson(res, 400, { ok: false, message: "ID de dataset inválido" });
     }
 
-    // Llamamos al servicio que ya tienes creado. 
-    // Este servicio se encarga de traer los datos y firmar las URLs de los archivos.
-    const dataset = await getDatasetById(id);
+    // Los visitantes anónimos entran como 'guest' y sin institución
+    const dataset = await getDatasetById(id, 'guest', null);
     
-    // (Opcional) Seguridad extra: Asegurarnos de que nadie vea un borrador públicamente
-    // Si tu estado público es diferente a 'published', cámbialo aquí.
-    //if (dataset.dataset_status === 'draft' || dataset.dataset_status === 'deleted') {
-      //return sendJson(res, 403, { ok: false, message: "Este dataset no está disponible públicamente" });
-   // }
-
     sendJson(res, 200, { ok: true, data: dataset });
   } catch (error) {
     console.error("❌ Error en getPublicDatasetByIdAction:", error);
-
+    // 👇 ESTA LÍNEA FALTABA: Es vital para devolver el error 403 al frontend 👇
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }
 }
 /**
@@ -240,8 +245,6 @@ export async function validateDatasetAction(req: HttpRequest, res: HttpResponse)
     const adminAccountId = Number(payload?.sub);
     const body = await readJsonBody<any>(req);
 
-    // Importamos dinámicamente o asegúrate de importar resolveDatasetRequest arriba
-    const { resolveDatasetRequest } = require("../services/datasets.service");
     
     const result = await resolveDatasetRequest(id, adminAccountId, body);
     sendJson(res, 200, { ok: true, message: result.message });
@@ -257,9 +260,6 @@ export async function destroyDatasetAction(req: HttpRequest, res: HttpResponse) 
   try {
     const id = Number((req as any).params?.id);
     if (!id || isNaN(id)) return sendJson(res, 400, { ok: false, message: "ID inválido" });
-
-    // Importamos dinámicamente el nuevo servicio
-    const { destroyDataset } = require("../services/datasets.service");
     
     const result = await destroyDataset(id);
     sendJson(res, 200, { ok: true, message: result.message });
@@ -282,3 +282,42 @@ export async function unarchiveDatasetAction(req: HttpRequest, res: HttpResponse
     sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
   }
 }
+
+/**
+ * Controlador para listar exclusivamente los datasets creados por el usuario actual
+ * o que pertenezcan a su institución.
+ */
+export async function getMyDatasetsAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const payload = tryGetAuthPayload(req);
+    const accountId = Number(payload?.sub);
+    
+    // Extraemos la institución del token (si existe)
+    const institutionId = payload?.institution_id ? Number(payload.institution_id) : null;
+
+    
+    const datasets = await getMyDatasets(accountId, institutionId);
+    
+    sendJson(res, 200, { ok: true, data: datasets });
+  } catch (error) {
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
+export async function requestDestroyDatasetAction(req: HttpRequest, res: HttpResponse) {
+  try {
+    const id = Number((req as any).params?.id);
+    const payload = tryGetAuthPayload(req);
+    const accountId = Number(payload?.sub);
+
+    // Llamamos al servicio que creamos en el turno anterior
+    const result = await requestDestroyDataset(id, accountId);
+    sendJson(res, 200, { ok: true, message: result.message });
+  } catch (error) {
+    sendJson(res, getErrorStatus(error), { ok: false, message: getErrorMessage(error) });
+  }
+}
+
+
+
+

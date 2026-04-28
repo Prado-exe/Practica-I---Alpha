@@ -10,10 +10,14 @@ function CrearDatasetUsuario() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth(); 
+  const isSuperAdmin = user?.role === 'super_admin';
+  const userInstitutionId = user?.institution_id || null;
 
   const [categories, setCategories] = useState([]);
   const [licenses, setLicenses] = useState([]);
   const [instituciones, setInstituciones] = useState([]);
+  const [tagsList, setTagsList] = useState([]); 
+  const [odsList, setOdsList] = useState([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -22,6 +26,7 @@ function CrearDatasetUsuario() {
     category_id: "",
     license_id: "",
     institution_id: "", 
+    ods_objective_id: "",
     access_level: "public",
     creation_date: new Date().toISOString().split('T')[0],
     temporal_coverage_start: "",
@@ -29,7 +34,8 @@ function CrearDatasetUsuario() {
     geographic_coverage: "",
     update_frequency: "",
     source_url: "",
-    dataset_status: "pending_validation", // 👈 NUEVO: Estado por defecto
+    tags: [],
+    dataset_status: "pending_validation", 
     message: "" 
   });
 
@@ -44,8 +50,27 @@ function CrearDatasetUsuario() {
         const licRes = await fetch(`${API_URL}/api/licenses`);
         if (licRes.ok) setLicenses((await licRes.json()).data || []);
 
+        // CORRECCIÓN: Leemos .data o .instituciones por si cambia el backend
         const instRes = await fetch(`${API_URL}/api/public/instituciones`);
-        if (instRes.ok) setInstituciones((await instRes.json()).instituciones || []);
+        if (instRes.ok) {
+          const jsonInst = await instRes.json();
+          setInstituciones(jsonInst.data || jsonInst.instituciones || []);
+        }
+
+        // CORRECCIÓN: Leemos .data o .tags
+        const tagsRes = await fetch(`${API_URL}/api/tags`);
+        if (tagsRes.ok) {
+          const jsonTags = await tagsRes.json();
+          setTagsList(jsonTags.data || jsonTags.tags || []);
+        }
+
+        
+        const odsRes = await fetch(`${API_URL}/api/ods`);
+        if (odsRes.ok) {
+          const jsonOds = await odsRes.json();
+          setOdsList(jsonOds.data || jsonOds.ods || []);
+        }
+
       } catch (error) {
         console.error("Error cargando opciones:", error);
       }
@@ -53,9 +78,37 @@ function CrearDatasetUsuario() {
     fetchOptions();
   }, [user.token]);
 
+  useEffect(() => {
+    if (!isSuperAdmin && userInstitutionId) {
+      setFormData(prev => ({ ...prev, institution_id: String(userInstitutionId) }));
+    }
+  }, [isSuperAdmin, userInstitutionId]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // 👈 NUEVO: Handlers para manejar la adición y eliminación de etiquetas
+  const handleAddTag = (e) => {
+    const tagId = Number(e.target.value);
+    if (!tagId) return;
+    
+    setFormData(prev => {
+      if (prev.tags.length >= 5) {
+        alert("Máximo 5 etiquetas permitidas.");
+        return prev;
+      }
+      if (prev.tags.includes(tagId)) return prev;
+      return { ...prev, tags: [...prev.tags, tagId] };
+    });
+  };
+
+  const handleRemoveTag = (tagIdToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(id => id !== tagIdToRemove)
+    }));
   };
 
   const handleFileChange = (e) => setSelectedFiles(Array.from(e.target.files));
@@ -64,6 +117,7 @@ function CrearDatasetUsuario() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (selectedFiles.length === 0) return alert("Debes subir al menos un archivo.");
+    if (formData.tags.length === 0) return alert("Debes seleccionar al menos 1 etiqueta."); // 👈 NUEVO: Validación de etiqueta
     if (formData.dataset_status === 'pending_validation' && (!formData.message || formData.message.trim().length < 10)) {
       return alert("Por favor, incluye un mensaje descriptivo para el revisor.");
     }
@@ -74,7 +128,7 @@ function CrearDatasetUsuario() {
       const uploadedFilesData = [];
 
       for (const file of selectedFiles) {
-        const presignedRes = await fetch(`${API_URL}/api/upload/presigned-url/user`, {
+        const presignedRes = await fetch(`${API_URL}/api/upload/presigned-url`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
           body: JSON.stringify({ fileName: file.name, contentType: file.type })
@@ -98,13 +152,15 @@ function CrearDatasetUsuario() {
         category_id: Number(formData.category_id),
         license_id: Number(formData.license_id),
         institution_id: formData.institution_id ? Number(formData.institution_id) : null,
+        ods_objective_id: formData.ods_objective_id ? Number(formData.ods_objective_id) : null,
         source_url: formData.source_url?.trim() !== "" ? formData.source_url : null,
         temporal_coverage_start: formData.temporal_coverage_start !== "" ? formData.temporal_coverage_start : null,
         temporal_coverage_end: formData.temporal_coverage_end !== "" ? formData.temporal_coverage_end : null,
         geographic_coverage: formData.geographic_coverage?.trim() !== "" ? formData.geographic_coverage : null,
         update_frequency: formData.update_frequency !== "" ? formData.update_frequency : null,
         files: uploadedFilesData,
-        message: formData.dataset_status === 'draft' ? null : formData.message // Ignoramos el mensaje si es borrador
+        tags: formData.tags, // 👈 NUEVO: Enviamos las etiquetas en el payload
+        message: formData.dataset_status === 'draft' ? null : formData.message 
       };
 
       const res = await fetch(`${API_URL}/api/datasets/request`, { 
@@ -147,12 +203,16 @@ function CrearDatasetUsuario() {
         </div>
       </div>
 
-      <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : handleSubmit}>
+      {/* 👈 NUEVO: Modificamos el preventDefault del paso 1 para validar las etiquetas antes de avanzar */}
+      <form onSubmit={step === 1 ? (e) => { 
+        e.preventDefault(); 
+        if(formData.tags.length === 0) return alert("Selecciona al menos 1 etiqueta"); 
+        setStep(2); 
+      } : handleSubmit}>
         
         {/* PASO 1: METADATOS Y ACCIÓN */}
         <div style={{ display: step === 1 ? 'block' : 'none' }}>
           
-          {/* 👇 SECCIÓN DE ACCIÓN (NUEVA) 👇 */}
           <div style={{ marginBottom: '25px', padding: '15px', background: formData.dataset_status === 'draft' ? '#e3f2fd' : '#fff3e0', border: '1px solid', borderColor: formData.dataset_status === 'draft' ? '#90caf9' : '#ffcc80', borderRadius: '5px' }}>
             <label style={{ fontWeight: 'bold', fontSize: '16px' }}>¿Qué deseas hacer con este dataset?</label>
             <select name="dataset_status" value={formData.dataset_status} onChange={handleChange} style={{ width: '100%', padding: '10px', marginTop: '10px', fontSize: '15px', fontWeight: 'bold' }}>
@@ -161,7 +221,6 @@ function CrearDatasetUsuario() {
             </select>
           </div>
 
-          {/* 👇 MENSAJE CONDICIONAL 👇 */}
           {formData.dataset_status === 'pending_validation' && (
             <div style={{ marginBottom: '20px', padding: '15px', background: '#fafafa', border: '1px solid #ddd', borderRadius: '5px', borderLeft: '4px solid #d32f2f' }}>
               <label style={{ color: '#d32f2f', fontWeight: 'bold' }}>Mensaje para el Revisor (Obligatorio) *</label>
@@ -212,11 +271,41 @@ function CrearDatasetUsuario() {
           <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
             <div style={{ flex: 1 }}>
               <label>Institución Responsable</label>
-              <select name="institution_id" value={formData.institution_id} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
-                <option value="">Seleccione...</option>
-                {instituciones.map(inst => <option key={inst.institution_id} value={inst.institution_id}>{inst.legal_name}</option>)}
+              <select 
+                name="institution_id" 
+                value={formData.institution_id} 
+                disabled={true} 
+                style={{ 
+                  width: '100%', 
+                  padding: '8px',
+                  backgroundColor: '#f5f5f5',
+                  cursor: 'not-allowed',
+                  color: '#666'
+                }}
+              >
+                <option value={userInstitutionId || ""}>
+                  {instituciones.find(inst => String(inst.institution_id) === String(userInstitutionId))?.legal_name || "Tu Institución Asignada"}
+                </option>
               </select>
             </div>
+
+            <div style={{ flex: 1 }}>
+              <label>Objetivo ODS (Opcional)</label>
+              <select 
+                name="ods_objective_id" 
+                value={formData.ods_objective_id} 
+                onChange={handleChange} 
+                style={{ width: '100%', padding: '8px' }}
+              >
+                <option value="">Ninguno</option>
+                {odsList.map(o => (
+                  <option key={o.ods_objective_id || o.ods_id} value={o.ods_objective_id || o.ods_id}>
+                    {o.objective_code} - {o.objective_name || o.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div style={{ flex: 1 }}>
               <label>Nivel de Acceso Solicitado</label>
               <select name="access_level" value={formData.access_level} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
@@ -224,6 +313,52 @@ function CrearDatasetUsuario() {
                 <option value="internal">Interno (Registrados)</option>
               </select>
             </div>
+          </div>
+
+          {/* 👇 NUEVO: Selector de Etiquetas adaptado al diseño en línea 👇 */}
+          <div style={{ marginBottom: '15px' }}>
+            <label>Etiquetas (Seleccionadas: {formData.tags.length}/5) *</label>
+            <select 
+              value="" 
+              onChange={handleAddTag}
+              disabled={formData.tags.length >= 5}
+              style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+            >
+              <option value="">
+                {formData.tags.length >= 5 ? "Límite de 5 alcanzado" : "-- Selecciona una etiqueta para añadirla --"}
+              </option>
+              {tagsList
+                .filter(tag => !formData.tags.includes(tag.tag_id))
+                .map(tag => (
+                  <option key={tag.tag_id} value={tag.tag_id}>{tag.name}</option>
+              ))}
+            </select>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {formData.tags.map(tagId => {
+                const tagObj = tagsList.find(t => String(t.tag_id) === String(tagId));
+                return (
+                  <div key={tagId} style={{
+                    display: 'flex', alignItems: 'center', background: '#0056b3', color: 'white',
+                    padding: '5px 12px', borderRadius: '15px', fontSize: '13px'
+                  }}>
+                    {tagObj ? tagObj.name : `Etiqueta #${tagId}`}
+                    <button 
+                      type="button" 
+                      onClick={() => handleRemoveTag(tagId)} 
+                      style={{ 
+                        background: 'transparent', border: 'none', color: 'white', 
+                        marginLeft: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' 
+                      }}
+                      title="Quitar etiqueta"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            {formData.tags.length === 0 && <small style={{color: '#d32f2f', display: 'block', marginTop: '5px'}}>* Selecciona al menos 1 etiqueta para continuar.</small>}
           </div>
 
           <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>

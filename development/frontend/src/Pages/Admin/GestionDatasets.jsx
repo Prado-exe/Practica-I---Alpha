@@ -205,9 +205,6 @@ function GestionDatasets() {
           <h1>Gestión de Conjuntos de Datos</h1>
           <p>Crea, edita y gestiona los conjuntos de datos del observatorio.</p>
         </div>
-        <button className="btn-create" onClick={() => setIsCreating(true)}>
-          <FiPlusCircle size={18} /> Agregar Dataset
-        </button>
       </div>
 
       {/* FILTROS */}

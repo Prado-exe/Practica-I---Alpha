@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import CanView from "../../Components/Common/CanView";
 import { useAuth } from "../../Context/AuthContext";
-import { FiSearch, FiEye, FiEdit, FiTrash2, FiPlusCircle } from "react-icons/fi";
+import { FiSearch, FiEye, FiEdit, FiTrash2, FiPlusCircle, FiUsers } from "react-icons/fi";
 import CrearInstitucion from "./CrearInstitucion"; 
 import EditarInstitucion from "./EditarInstitucion"; 
 import "../../Styles/Pages_styles/Admin/GestionInstituciones.css";
+
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -18,6 +19,10 @@ function GestionInstituciones() {
   const [editingInstitution, setEditingInstitution] = useState(null); 
   const [modalDetallesOpen, setModalDetallesOpen] = useState(false);
   const [institucionDetalle, setInstitucionDetalle] = useState(null);
+  const [modalMiembrosOpen, setModalMiembrosOpen] = useState(false);
+  const [institucionMiembros, setInstitucionMiembros] = useState(null);
+  const [miembrosLista, setMiembrosLista] = useState([]);
+  const [loadingMiembros, setLoadingMiembros] = useState(false);
 
   useEffect(() => {
     if (user?.token) fetchInstituciones();
@@ -41,7 +46,8 @@ function GestionInstituciones() {
   };
 
   const handleEliminar = async (id, nombre) => {
-    if(!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente a ${nombre}?`)) return;
+    const mensajeAlerta = `⚠️ ADVERTENCIA CRÍTICA\n\n¿Estás seguro de que deseas eliminar permanentemente a "${nombre}"?\n\nAl borrarla:\n1. Los usuarios vinculados quedarán sin institución.\n2. Los datasets asociados perderán su vínculo institucional.\n\nEsta acción no se puede deshacer.`;
+    if(!window.confirm(mensajeAlerta)) return;
     
     try {
       const res = await fetch(`${API_URL}/api/instituciones/${id}`, {
@@ -67,6 +73,50 @@ function GestionInstituciones() {
   const abrirModalDetalles = (inst) => {
     setInstitucionDetalle(inst);
     setModalDetallesOpen(true);
+  };
+
+  const abrirModalMiembros = async (inst) => {
+    setInstitucionMiembros(inst);
+    setModalMiembrosOpen(true);
+    setLoadingMiembros(true);
+    try {
+      const res = await fetch(`${API_URL}/api/instituciones/${inst.institution_id || inst.id}/usuarios`, {
+        headers: { "Authorization": `Bearer ${user.token}` }
+      });
+      const data = await res.json();
+      if (data.ok) setMiembrosLista(data.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingMiembros(false);
+    }
+  };
+
+  const handleDesvincular = async (usuarioId, nombre) => {
+    const respuesta = window.prompt(`¿Desvincular a ${nombre}?\n\nEscribe "A" para solo quitar la institución.\nEscribe "B" para quitar institución Y degradarlo a Usuario Registrado.\nDejar vacío para cancelar.`);
+    
+    if (!respuesta) return;
+    const opcion = respuesta.toUpperCase();
+    if (opcion !== "A" && opcion !== "B") return alert("Opción no válida.");
+
+    try {
+      const res = await fetch(`${API_URL}/api/usuarios/${usuarioId}/desvincular`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
+        body: JSON.stringify({ degradeRole: opcion === "B" })
+      });
+      
+      if (res.ok) {
+        alert("Usuario desvinculado con éxito.");
+        setMiembrosLista(miembrosLista.filter(m => m.id !== usuarioId)); // Quitar de la lista del modal
+        fetchInstituciones(); // Actualizar el contador de la tabla principal
+      } else {
+        const err = await res.json();
+        alert(err.message);
+      }
+    } catch(e) {
+      console.error(e);
+    }
   };
 
   if (isCreating) {
@@ -168,6 +218,7 @@ function GestionInstituciones() {
                     </td>
                     <td className="acciones">
                       <FiEye className="action-icon" title="Ver detalles" onClick={() => abrirModalDetalles(inst)} />
+                      <FiUsers className="action-icon" style={{color: "#004e9a"}} title="Ver Miembros" onClick={() => abrirModalMiembros(inst)} />
                       <FiEdit className="action-icon" title="Editar" onClick={() => setEditingInstitution(inst)} />
                       <FiTrash2 className="action-icon" title="Eliminar" onClick={() => handleEliminar(inst.institution_id || inst.id, inst.legal_name)} />
                     </td>
@@ -238,6 +289,13 @@ function GestionInstituciones() {
         </div>
 
         <div className="info-row">
+          <span className="info-label">Miembros registrados :</span>
+          <div className="info-value-box">
+             {institucionDetalle.members_count ?? 0} usuarios asociados
+          </div>
+        </div>
+
+        <div className="info-row">
           <span className="info-label">Licencia de uso :</span>
           <div className="info-value-box">{institucionDetalle.usage_license || "-"}</div>
         </div>
@@ -275,7 +333,55 @@ function GestionInstituciones() {
 
     </div>
   </div>
+
+  
 )}
+{/* MODAL DE MIEMBROS */}
+      {modalMiembrosOpen && institucionMiembros && (
+        <div className="modal-overlay" style={{ zIndex: 2000 }}>
+          <div className="modal-content-ficha" style={{ maxWidth: "700px" }}>
+            <div className="modal-header-ficha">
+              <h2 className="modal-title">Miembros de {institucionMiembros.legal_name}</h2>
+              <button onClick={() => setModalMiembrosOpen(false)} className="modal-close">✕</button>
+            </div>
+
+            <div className="modal-body-ficha" style={{ padding: "20px", overflowY: "auto", maxHeight: "60vh" }}>
+              {loadingMiembros ? <p>Cargando miembros...</p> : miembrosLista.length === 0 ? (
+                <p style={{ textAlign: "center", color: "#666", padding: "20px" }}>No hay usuarios vinculados a esta institución.</p>
+              ) : (
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "14px" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #eee" }}>
+                      <th style={{ padding: "10px" }}>Nombre</th>
+                      <th>Email</th>
+                      <th>Rol Actual</th>
+                      <th style={{ textAlign: "center" }}>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {miembrosLista.map(m => (
+                      <tr key={m.id} style={{ borderBottom: "1px solid #eee" }}>
+                        <td style={{ padding: "10px", fontWeight: "500", color: "#333" }}>{m.nombre}</td>
+                        <td style={{ color: "#666" }}>{m.email}</td>
+                        <td>
+                          <span style={{ background: "#e8f0fe", color: "#1967d2", padding: "4px 8px", borderRadius: "4px", fontSize: "12px" }}>
+                            {(m.rol || "").replace("_", " ")}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <button onClick={() => handleDesvincular(m.id, m.nombre)} style={{ background: "#dc3545", color: "white", border: "none", padding: "6px 12px", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}>
+                            Desvincular
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
