@@ -59,28 +59,15 @@
 
 .filters-grid {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.2fr 1fr 1fr auto; /* Distribución proporcional */
+  grid-template-columns: 2fr 1.2fr 1.2fr 1fr 1fr auto;
   gap: 16px;
-  align-items: flex-end; /* Alinea los inputs con los botones */
-}
-
-.filters-row-top {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.filters-row-bottom {
-  display: flex;
-  gap: 16px;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .input-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
-  background-color: transparent;
   min-width: 180px; 
   flex: 1;
 }
@@ -91,17 +78,11 @@
 }
 
 .input-wrapper label {
-  position: relative; /* Cambiado de absolute para mejor control */
-  top: 0;
-  left: 0;
   margin-bottom: 6px;
   font-size: 12px;
   font-weight: 600;
   color: #4a5568;
-  background: none;
-  padding: 0;
 }
-
 
 .input-wrapper input,
 .input-wrapper select {
@@ -114,38 +95,8 @@
   width: 100%;
   box-sizing: border-box;
   background-color: #f7fafc;
-  height: 42px; /* Altura idéntica para todos */
+  height: 42px;
   transition: border-color 0.2s;
-}
-
-/* Acciones de filtro */
-.filter-actions {
-  display: flex;
-  gap: 8px;
-}
-
-
-
-
-
-.input-with-icon {
-  display: flex;
-  align-items: center;
-  border: 1px solid #dcdcdc;
-  border-radius: 6px;
-  padding-left: 12px;
-  background-color: transparent;
-}
-
-.input-with-icon input {
-  border: none;
-  padding-left: 8px;
-  padding-right: 14px;
-  outline: none;
-}
-
-.input-with-icon .icon {
-  color: #888;
 }
 
 .input-wrapper input:focus,
@@ -153,7 +104,13 @@
   border-color: #1a6bf0;
   background-color: #fff;
 }
-/* BOTONES APLICAR Y LIMPIAR */
+
+/* BOTONES */
+.filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .btn-aplicar {
   background-color: #1a6bf0;
   color: white;
@@ -166,12 +123,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
 }
 
 .btn-limpiar {
-  background-color: #ff0000; /* Rojo sólido */
-  color: white;              /* Icono blanco para contraste */
+  background-color: #ff0000;
+  color: white;
   border: none;
   height: 42px;
   width: 42px;
@@ -180,16 +136,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
 }
 
 .btn-limpiar:hover {
-  background-color: #d90000; /* Rojo más oscuro al pasar el mouse */
-  transform: scale(1.05);
-}
-
-.btn-limpiar:active {
-  transform: scale(0.95);
+  background-color: #d90000;
 }
 
 /* TABLA */
@@ -205,6 +155,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   min-width: 800px;
+  table-layout: fixed; /* 🔥 clave para controlar columnas */
 }
 
 thead th {
@@ -224,11 +175,47 @@ tbody td {
   vertical-align: middle;
 }
 
+/* 🔥 CONTROL DE COLUMNAS */
+table th:nth-child(1),
+table td:nth-child(1) {
+  width: 20%;
+}
+
+table th:nth-child(2),
+table td:nth-child(2) {
+  width: 15%;
+}
+
+/* 👉 COLUMNA INSTITUCIÓN (LA IMPORTANTE) */
+table th:nth-child(3),
+table td:nth-child(3) {
+  width: 200px;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+table th:nth-child(4),
+table td:nth-child(4) {
+  width: 15%;
+}
+
+table th:nth-child(5),
+table td:nth-child(5) {
+  width: 15%;
+}
+
+table th:nth-child(6),
+table td:nth-child(6) {
+  width: 150px;
+}
+
 tbody tr:nth-child(even) {
   background-color: #f2f7fd; 
 }
 
-/* ESTADOS (Píldoras) */
+/* ESTADOS */
 .estado-badge {
   padding: 6px 16px;
   border-radius: 20px;
@@ -246,7 +233,7 @@ tbody tr:nth-child(even) {
 .estado-badge.pending_validation { background-color: #ff9800; }
 .estado-badge.archived { background-color: #757575; }
 
-/* ACCIONES (Iconos Lucide) */
+/* ACCIONES */
 .acciones {
   display: flex;
   gap: 15px;
@@ -256,7 +243,7 @@ tbody tr:nth-child(even) {
 }
 
 .action-icon {
-  color: #1a6bf0; /* Color azul base del proyecto */
+  color: #1a6bf0;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -266,7 +253,6 @@ tbody tr:nth-child(even) {
   opacity: 0.8;
 }
 
-/* Variaciones de color según la acción */
 .btn-hide-icon { color: #757575; }
 .btn-destruir-icon { color: #8B0000; }
 .btn-visible-icon { color: #4CAF50; }
@@ -279,6 +265,7 @@ tbody tr:nth-child(even) {
   pointer-events: none;
 }
 
+/* RESPONSIVE */
 @media (max-width: 1200px) {
   .filters-grid {
     grid-template-columns: 1fr 1fr 1fr;

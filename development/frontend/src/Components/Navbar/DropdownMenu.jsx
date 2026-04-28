@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/ComponentStyle/Navbar/DropdownMenu.css";
 
-function DropdownMenu({ links }) {
+function DropdownMenu({ links, onNavigate }) {
   const [open, setOpen] = useState(false);
   const ref = useRef();
 
@@ -33,8 +33,6 @@ function DropdownMenu({ links }) {
     <div
       className={`dropdown ${open ? "open" : ""}`}
       ref={ref}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
     >
       <button
         className="dropdown-btn"
@@ -58,7 +56,10 @@ function DropdownMenu({ links }) {
             to={link.path}
             role="menuitem"
             className="dropdown-item"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              onNavigate?.(); // 🔥 cierra navbar también
+            }}
           >
             {link.label}
           </Link>
