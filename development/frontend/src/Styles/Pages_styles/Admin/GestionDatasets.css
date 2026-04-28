@@ -1,7 +1,7 @@
 /* CONTENEDOR PRINCIPAL */
 .gestion-datasets {
   padding: 24px;
-  background-color: #f8f9fa; /* Fondo general similar al de la imagen */
+  background-color: #f8f9fa;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   min-height: 100vh;
 }
@@ -26,7 +26,6 @@
   margin: 0;
   font-size: 14px;
   max-width: 600px;
-  /* NUEVO: Evita que el texto empuje al botón de crear fuera de la pantalla */
   overflow-wrap: break-word;
 }
 
@@ -51,10 +50,18 @@
 
 /* FILTROS */
 .filters-section {
-  margin-bottom: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.2fr 1fr 1fr auto; /* Distribución proporcional */
+  gap: 16px;
+  align-items: flex-end; /* Alinea los inputs con los botones */
 }
 
 .filters-row-top {
@@ -69,47 +76,58 @@
   align-items: center;
 }
 
-/* Estilo para las etiquetas montadas sobre el borde */
 .input-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
   background-color: transparent;
-  /* NUEVO: Evita que se encojan demasiado */
   min-width: 180px; 
-  flex: 1; /* Permite que crezcan para llenar el espacio */
+  flex: 1;
 }
 
 .search-wrapper {
-  flex-grow: 2; /* Dale más importancia a la barra de búsqueda */
+  flex-grow: 2;
   min-width: 250px;
 }
+
 .input-wrapper label {
-  position: absolute;
-  top: -8px;
-  left: 12px;
-  background-color: #f8f9fa; /* Debe coincidir con el fondo del contenedor principal (.gestion-datasets) */
-  padding: 0 4px;
-  font-size: 11px;
-  color: #666;
-  z-index: 1;
+  position: relative; /* Cambiado de absolute para mejor control */
+  top: 0;
+  left: 0;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5568;
+  background: none;
+  padding: 0;
 }
+
 
 .input-wrapper input,
 .input-wrapper select {
   padding: 12px 14px;
-  border: 1px solid #dcdcdc;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
   outline: none;
   font-size: 14px;
   color: #333;
   width: 100%;
   box-sizing: border-box;
-  background-color: transparent;
-  appearance: auto; /* Mantiene la flecha nativa en selects */
+  background-color: #f7fafc;
+  height: 42px; /* Altura idéntica para todos */
+  transition: border-color 0.2s;
 }
 
-/* Contenedor específico para la barra de búsqueda con lupa */
+/* Acciones de filtro */
+.filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+
+
+
+
 .input-with-icon {
   display: flex;
   align-items: center;
@@ -128,44 +146,56 @@
 
 .input-with-icon .icon {
   color: #888;
-  font-size: 18px;
 }
 
 .input-wrapper input:focus,
-.input-wrapper select:focus,
-.input-with-icon:focus-within {
+.input-wrapper select:focus {
   border-color: #1a6bf0;
+  background-color: #fff;
 }
-
 /* BOTONES APLICAR Y LIMPIAR */
 .btn-aplicar {
   background-color: #1a6bf0;
   color: white;
   border: none;
-  padding: 12px 24px;
+  height: 42px;
+  padding: 0 20px;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
 }
 
 .btn-limpiar {
-  background-color: #ff0000;
-  color: white;
+  background-color: #ff0000; /* Rojo sólido */
+  color: white;              /* Icono blanco para contraste */
   border: none;
-  padding: 12px 24px;
+  height: 42px;
+  width: 42px;
   border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.5px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-limpiar:hover {
+  background-color: #d90000; /* Rojo más oscuro al pasar el mouse */
+  transform: scale(1.05);
+}
+
+.btn-limpiar:active {
+  transform: scale(0.95);
 }
 
 /* TABLA */
 .table-container {
   background: white;
-  border-radius: 8px; /* Un poco de redondeado se ve mejor */
+  border-radius: 8px;
   overflow-x: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   width: 100%;
@@ -174,7 +204,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 800px; /* FUERZA el scroll horizontal en móviles en lugar de aplastar celdas */
+  min-width: 800px;
 }
 
 thead th {
@@ -192,21 +222,10 @@ tbody td {
   color: #333;
   border-bottom: 1px solid #eee;
   vertical-align: middle;
-  
-  /* NUEVO: Control de desborde */
-  max-width: 200px; /* Ajusta según tu necesidad */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-/* Filas alternas */
 tbody tr:nth-child(even) {
   background-color: #f2f7fd; 
-}
-
-tbody tr:nth-child(odd) {
-  background-color: #ffffff;
 }
 
 /* ESTADOS (Píldoras) */
@@ -217,46 +236,57 @@ tbody tr:nth-child(odd) {
   font-weight: 600;
   color: white;
   display: inline-block;
-  min-width: 90px;
+  min-width: 100px;
   text-align: center;
 }
 
-.estado-badge.publicado {
-  background-color: #1a6bf0; /* Azul */
-}
+.estado-badge.published { background-color: #1a6bf0; }
+.estado-badge.borrador { background-color: #ffcc00; color: #333; }
+.estado-badge.rejected { background-color: #ff0000; }
+.estado-badge.pending_validation { background-color: #ff9800; }
+.estado-badge.archived { background-color: #757575; }
 
-.estado-badge.borrador {
-  background-color: #ffcc00; /* Amarillo */
-  color: #333; /* Texto oscuro para contrastar con amarillo */
-}
-
-.estado-badge.rechazado {
-  background-color: #ff0000; /* Rojo */
-}
-
-.estado-badge.revision {
-  background-color: #ff9800; /* Naranja para pendiente */
-}
-
-/* ACCIONES (Iconos) */
+/* ACCIONES (Iconos Lucide) */
 .acciones {
   display: flex;
-  gap: 14px;
+  gap: 15px;
   justify-content: center;
   align-items: center;
-  /* NUEVO: Asegura que los iconos no se bajen uno debajo de otro */
   white-space: nowrap; 
-  flex-wrap: nowrap;
 }
 
 .action-icon {
-  color: #1a6bf0;
-  font-size: 20px;
+  color: #1a6bf0; /* Color azul base del proyecto */
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: all 0.2s ease;
 }
 
 .action-icon:hover {
-  opacity: 0.7;
-  transform: scale(1.1);
+  transform: scale(1.2);
+  opacity: 0.8;
+}
+
+/* Variaciones de color según la acción */
+.btn-hide-icon { color: #757575; }
+.btn-destruir-icon { color: #8B0000; }
+.btn-visible-icon { color: #4CAF50; }
+.btn-validate-icon { color: #ff9800; }
+.btn-rejected-icon { color: #d32f2f; }
+
+.action-icon.disabled {
+  color: #cccccc;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (max-width: 1200px) {
+  .filters-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
 }

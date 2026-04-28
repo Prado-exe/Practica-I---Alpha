@@ -1,66 +1,265 @@
-.gestion-roles {
-  padding: 20px;
+/* CONTENEDOR PRINCIPAL */
+.groles-container {
+  padding: 24px;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
 }
 
 /* HEADER */
-.roles-header {
+.groles-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  align-items: flex-start;
+  margin-bottom: 30px;
 }
 
-.btn-crear {
-  padding: 8px 14px;
-  background: #2d8cff;
+.groles-header-info h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.groles-header-info p {
+  color: #555;
+  margin: 0;
+  font-size: 14px;
+}
+
+.groles-btn-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #1a6bf0;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color 0.2s;
 }
 
-.btn-crear:hover {
-  background: #1f6ed4;
+.groles-btn-create:hover {
+  background-color: #1254c7;
 }
 
-/* TABLA */
-.roles-tabla {
-  border: 1px solid #ddd;
+/* TABLA ADMINISTRATIVA */
+.groles-table-wrapper {
+  background: white;
   border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.groles-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.groles-table thead th {
+  background-color: #1a6bf0;
+  color: white;
+  padding: 14px 16px;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: left;
+}
+
+.groles-table tbody td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.groles-table tbody tr:nth-child(even) {
+  background-color: #f2f7fd;
+}
+
+/* INFO DE ROL EN CELDA */
+.groles-role-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.groles-role-info strong {
+  color: #1a1a1a;
+  font-size: 15px;
+}
+
+.groles-role-info span {
+  color: #718096;
+  font-size: 12px;
+}
+
+/* BADGES / PÍLDORAS */
+.groles-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.badge-permisos { background-color: #4a5568; }
+.badge-users { background-color: #1a6bf0; }
+
+/* ACCIONES */
+.groles-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.groles-action-icon {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.groles-action-icon.edit { color: #1a6bf0; }
+.groles-action-icon.delete { color: #8B0000; }
+
+.groles-action-icon:hover {
+  transform: scale(1.2);
+}
+
+.groles-locked {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #a0aec0;
+  font-size: 12px;
+  border: 1px dashed #cbd5e0;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* MODAL */
+.groles-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.groles-modal-card {
+  background: white;
+  width: 100%;
+  max-width: 550px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   overflow: hidden;
 }
 
-.roles-fila {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 2fr;
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-  align-items: center;
-}
-
-.roles-cabecera {
-  background: #f5f5f5;
-  font-weight: bold;
-}
-
-/* ACCIONES */
-.acciones {
+.groles-modal-header {
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #edf2f7;
 }
 
-.acciones button {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 5px;
+.groles-modal-header h2 {
+  font-size: 18px;
+  margin: 0;
+  color: #1a202c;
+}
+
+.groles-modal-close {
+  cursor: pointer;
+  color: #a0aec0;
+}
+
+.groles-modal-form {
+  padding: 24px;
+}
+
+.groles-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.groles-input-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.groles-input-group input,
+.groles-input-group textarea {
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #f7fafc;
+  outline: none;
+}
+
+.groles-input-group input:focus {
+  border-color: #1a6bf0;
+  background-color: white;
+}
+
+.groles-permissions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 12px;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.groles-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
   cursor: pointer;
 }
 
-.acciones button:hover {
-  opacity: 0.8;
+.groles-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.eliminar {
-  background: #ff4d4d;
+.btn-cancelar {
+  padding: 10px 20px;
+  border: none;
+  background: #edf2f7;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-guardar {
+  padding: 10px 20px;
+  border: none;
+  background: #1a6bf0;
   color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-guardar:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
 }

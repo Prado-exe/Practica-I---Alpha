@@ -1,5 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
-import SearchBarAdvanced from "../../Components/Common/SearchBarAdvanced";
+import { 
+  Search, 
+  UserPlus, 
+  Edit3, 
+  Trash2, 
+  UserCheck, 
+  UserX, 
+  RotateCcw,
+  Shield,
+  Loader2,
+  X,
+  PlusCircle
+} from "lucide-react";
 import Pagination from "../../Components/Common/Pagination";
 import CanView from "../../Components/Common/CanView";
 import { useAuth } from "../../Context/AuthContext"; 
@@ -24,51 +36,28 @@ function GestionUsuarios() {
   const [modalCreateOpen, setModalCreateOpen] = useState(false);
   const [createFormData, setCreateFormData] = useState({full_name: "", email: "", username: "", password: "", role_code: "registered_user"});
   
-  const usuariosPorPagina = 5;
+  const usuariosPorPagina = 10;
 
   const fetchUsuarios = async () => {
-    // Tomamos el token de forma segura
     const tokenValido = user?.token || user?.accessToken;
-    
-    console.log("🚀 [Fetch] Enviando petición a /api/usuarios");
-    console.log("🎫 [Fetch] Token utilizado:", tokenValido ? `${tokenValido.substring(0, 15)}...` : "¡ESTÁ VACÍO/UNDEFINED!");
-
-    if (!tokenValido) {
-      console.warn("⛔ Petición cancelada: No hay token para enviar.");
-      setLoading(false);
-      return; 
-    }
-
+    if (!tokenValido) { setLoading(false); return; }
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/api/usuarios`, {
-        // 👇 Aseguramos el método GET explícito
         method: "GET", 
-        headers: {
-          "Authorization": `Bearer ${tokenValido}`, 
-          "Content-Type": "application/json"
-        },
-        // 👇 Agregamos credentials para que las cookies viajen si el backend las requiere
+        headers: { "Authorization": `Bearer ${tokenValido}`, "Content-Type": "application/json" },
         credentials: "include"
       });
-      
       if (response.ok) {
         const data = await response.json();
         setUsuarios(data.usuarios || []); 
-      } else {
-        console.error("❌ Error del Backend. Status:", response.status);
       }
-    } catch (error) {
-      console.error("Error de conexión HTTP:", error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error("Error:", error); } finally { setLoading(false); }
   };
 
   const fetchRoles = async () => {
     const tokenValido = user?.token || user?.accessToken;
     if (!tokenValido) return;
-
     try {
       const response = await fetch(`${API_URL}/api/roles`, {
         method: "GET",
@@ -79,126 +68,70 @@ function GestionUsuarios() {
         const data = await response.json();
         setRolesDb(data.roles || []);
       }
-    } catch (error) {
-      console.error("Error al obtener roles:", error);
-    }
+    } catch (error) { console.error("Error:", error); }
   };
   
   useEffect(() => {
-    if (user?.token) {
-      fetchUsuarios();
-      fetchRoles();
-    }
+    if (user?.token) { fetchUsuarios(); fetchRoles(); }
   }, [user?.token]);
-
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
     try {
       const res = await fetch(`${API_URL}/api/users/admin`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${user?.token || user?.accessToken}` 
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user?.token}` },
         body: JSON.stringify(createFormData)
       });
-
       if (res.ok) {
-        alert("Usuario creado y activado con éxito.");
+        alert("Usuario creado con éxito.");
         setModalCreateOpen(false);
-        // Limpiamos el formulario
         setCreateFormData({ full_name: "", email: "", username: "", password: "", role_code: "registered_user" });
-        fetchUsuarios(); // Recargamos la tabla
-      } else {
-        const err = await res.json();
-        alert(err.message || "Error al crear usuario");
+        fetchUsuarios();
       }
-    } catch (err) {
-      console.error(err);
-      alert("Error de conexión");
-    }
+    } catch (err) { alert("Error de conexión"); }
   };
-  
 
-  // 🔍 Filtrado local y Ocultar Usuario Actual
   const usuariosFiltrados = useMemo(() => {
     return usuarios.filter(u => {
-      // 1. Evitar que el Super Admin (tú) se vea a sí mismo
       const userId = String(u.account_id || u.id);
       const myId = String(user?.sub || user?.account_id || user?.id);
-      if (userId === myId) return false; // Te ocultamos de la lista
-
-      // 2. Extraer datos para buscar
+      if (userId === myId) return false;
       const nombreUsuario = (u.full_name || u.nombre || "").toLowerCase();
       const emailUsuario = (u.email || "").toLowerCase();
       const terminoBusqueda = search.toLowerCase();
       const rolUsuario = u.rol || u.role_code || "";
-      
-      // 3. Lógica del buscador (busca por nombre o correo)
       const coincideBusqueda = nombreUsuario.includes(terminoBusqueda) || emailUsuario.includes(terminoBusqueda);
       const coincideRol = rolFiltro ? rolUsuario === rolFiltro : true;
       const coincideEstado = estadoFiltro ? (u.estado || u.account_status) === estadoFiltro : true;
-
       return coincideBusqueda && coincideRol && coincideEstado;
     });
   }, [usuarios, search, rolFiltro, estadoFiltro, user]);
 
   const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina) || 1;
-  const usuariosActuales = usuariosFiltrados.slice(
-    (currentPage - 1) * usuariosPorPagina,
-    currentPage * usuariosPorPagina
-  );
+  const usuariosActuales = usuariosFiltrados.slice((currentPage - 1) * usuariosPorPagina, currentPage * usuariosPorPagina);
 
-  // ❌ 2. Eliminar usuario en el Backend
   const handleEliminar = async (id) => {
-    if (!window.confirm("⚠️ ADVERTENCIA: ¿Estás absolutamente seguro de que deseas ELIMINAR este usuario de forma permanente?")) return;
-
+    if (!window.confirm("¿Eliminar este usuario permanentemente?")) return;
     try {
       const response = await fetch(`${API_URL}/api/usuarios/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${user.token}` }
       });
-
-      if (response.ok) {
-        alert("Usuario eliminado correctamente.");
-        setUsuarios(usuarios.filter(u => (u.account_id || u.id) !== id)); // Lo borramos de la vista
-      } else {
-        const err = await response.json();
-        alert(`Error: ${err.message}`);
-      }
-    } catch (error) {
-      console.error("Error al eliminar:", error);
-    }
+      if (response.ok) fetchUsuarios();
+    } catch (error) { console.error(error); }
   };
 
   const toggleEstado = async (id, estadoActual) => {
-    const accion = estadoActual === "active" ? "DESACTIVAR" : "ACTIVAR";
-    if (!window.confirm(`¿Estás seguro de que deseas ${accion} a este usuario?`)) return;
-
     const nuevoEstado = estadoActual === "active" ? "suspended" : "active";
-    
     try {
       const response = await fetch(`${API_URL}/api/usuarios/${id}/estado`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${user.token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
         body: JSON.stringify({ estado: nuevoEstado })
       });
-
-      if (response.ok) {
-        setUsuarios(usuarios.map(u =>
-          (u.account_id || u.id) === id ? { ...u, estado: nuevoEstado, account_status: nuevoEstado } : u
-        ));
-      } else {
-        const err = await response.json();
-        alert(`Error al cambiar estado: ${err.message}`);
-      }
-    } catch (error) {
-      console.error("Error de conexión:", error);
-    }
+      if (response.ok) fetchUsuarios();
+    } catch (error) { console.error(error); }
   };
 
   const abrirModalEditar = (u) => {
@@ -207,7 +140,7 @@ function GestionUsuarios() {
       full_name: u.full_name || u.nombre || "",
       email: u.email || "",
       password: "",
-      role_code: u.rol || u.role_code || "registered_user" // Obtenemos el rol actual
+      role_code: u.rol || u.role_code || "registered_user"
     });
     setModalEditOpen(true);
   };
@@ -217,212 +150,213 @@ function GestionUsuarios() {
     try {
       const response = await fetch(`${API_URL}/api/usuarios/${editFormData.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${user.token}`
-        },
-        body: JSON.stringify({
-          full_name: editFormData.full_name,
-          email: editFormData.email,
-          role_code: editFormData.role_code, 
-          password: editFormData.password || undefined
-        })
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}` },
+        body: JSON.stringify({ ...editFormData, password: editFormData.password || undefined })
       });
-
-      if (response.ok) {
-        alert("Usuario actualizado correctamente");
-        setModalEditOpen(false);
-        fetchUsuarios(); // Recargamos la tabla para ver los cambios
-      } else {
-        const err = await response.json();
-        alert(`Error: ${err.message}`);
-      }
-    } catch (error) {
-      console.error("Error actualizando:", error);
-    }
+      if (response.ok) { setModalEditOpen(false); fetchUsuarios(); }
+    } catch (error) { console.error(error); }
   };
 
   return (
-    <div className="gestion-usuarios">
-      <header className="usuarios-header">
-        <h1>Gestión de Usuarios</h1>
-        <p>Administra los roles, accesos y estados de las cuentas registradas.</p>
-        <p>{usuariosFiltrados.length} usuarios encontrados</p>
-      </header>
-      <CanView requiredPermission="user_management.write">
-          <button 
-            className="btn-create-user" 
-            onClick={() => setModalCreateOpen(true)}
-            style={{ padding: "10px 20px", backgroundColor: "#007bff", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}
-          >
-            + Nuevo Usuario
+    <div className="gu-container">
+      {/* HEADER ADMINISTRATIVO */}
+      <div className="gu-header">
+        <div className="gu-header-info">
+          <h1>Gestión de Usuarios</h1>
+          <p>Panel administrativo para control de roles, accesos y estados de cuentas.</p>
+        </div>
+        <CanView requiredPermission="user_management.write">
+          <button className="gu-btn-create" onClick={() => setModalCreateOpen(true)}>
+            <PlusCircle size={18} /> Agregar Usuario
           </button>
         </CanView>
-
-      {/* 🔎 FILTROS */}
-      <div className="usuarios-filtros">
-        <SearchBarAdvanced
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre..."
-        />
-        <select onChange={(e) => setRolFiltro(e.target.value)}>
-          <option value="">Todos los roles</option>
-          <option value="super_admin">Super Admin</option>
-          <option value="user_admin">Admin de Usuarios</option>
-          <option value="data_admin">Admin de Datos</option>
-          <option value="registered_user">Usuario Registrado</option>
-        </select>
-
-        <select onChange={(e) => setEstadoFiltro(e.target.value)}>
-          <option value="">Todos</option>
-          <option value="active">Activo</option>
-          <option value="inactive">Inactivo</option>
-          <option value="pending_verification">Pendiente</option>
-        </select>
-
-        <button onClick={() => {
-          setSearch("");
-          setRolFiltro("");
-          setEstadoFiltro("");
-        }}>
-          Limpiar
-        </button>
       </div>
 
-      {/* 📋 TABLA */}
-      {loading ? (
-        <p>Cargando usuarios...</p>
-      ) : (
-        <table className="usuarios-tabla">
+      {/* SECCIÓN DE FILTROS EN GRID */}
+      <div className="gu-filters-section">
+        <div className="gu-filters-grid">
+          <div className="gu-input-wrapper gu-search-area">
+            <label>Buscar Usuario</label>
+            <input 
+              type="text" 
+              placeholder="Nombre o correo..." 
+              value={search} 
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <div className="gu-input-wrapper">
+            <label>Rol</label>
+            <select value={rolFiltro} onChange={(e) => setRolFiltro(e.target.value)}>
+              <option value="">Todos los roles</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="user_admin">Admin de Usuarios</option>
+              <option value="data_admin">Admin de Datos</option>
+              <option value="registered_user">Usuario Registrado</option>
+            </select>
+          </div>
+
+          <div className="gu-input-wrapper">
+            <label>Estado</label>
+            <select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)}>
+              <option value="">Cualquier estado</option>
+              <option value="active">Activo</option>
+              <option value="suspended">Suspendido</option>
+              <option value="pending_verification">Pendiente</option>
+            </select>
+          </div>
+
+          <div className="gu-filter-actions">
+            <button className="gu-btn-apply" onClick={fetchUsuarios}>
+              <Search size={16} /> APLICAR
+            </button>
+            <button className="gu-btn-clear" title="Limpiar filtros" onClick={() => { setSearch(""); setRolFiltro(""); setEstadoFiltro(""); }}>
+              <RotateCcw size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* TABLA DE DATOS */}
+      <div className="gu-table-wrapper">
+        <table>
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th>Nombre de Usuario</th>
+              <th>Correo Electrónico</th>
+              <th>Rol / Privilegios</th>
+              <th style={{ textAlign: 'center' }}>Estado</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {usuariosActuales.map(u => {
-              const id = u.account_id || u.id;
-              const estado = u.estado || u.account_status;
-              return (
-                <tr key={id}>
-                  <td>{u.full_name || u.nombre}</td>
-                  <td>{u.email}</td>
-                  <td>{(u.rol || u.role_code || "").replace("_", " ")}</td>
-                  <td>
-                    <span className={`estado ${estado}`}>
-                      {estado}
-                    </span>
-                  </td>
-                  <td className="acciones">
-                    <CanView requiredPermission="user_management.write">
-                      <button onClick={() => toggleEstado(id, estado)}>
-                        {estado === "active" ? "Desactivar" : "Activar"}
-                      </button>
-                      <button className="editar" onClick={() => abrirModalEditar(u)}>Editar</button>
-                    </CanView>
-
-                    <CanView requiredPermission="user_management.delete">
-                      <button className="eliminar" onClick={() => handleEliminar(id)}>
-                        Eliminar
-                      </button>
-                    </CanView>
-                  </td>
-                </tr>
-              );
-            })}
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="gu-table-loading">
+                  <Loader2 className="gu-spin-icon" /> Cargando usuarios...
+                </td>
+              </tr>
+            ) : usuariosActuales.length > 0 ? (
+              usuariosActuales.map((u) => {
+                const id = u.account_id || u.id;
+                const estado = (u.estado || u.account_status || 'active').toLowerCase();
+                return (
+                  <tr key={id}>
+                    <td className="gu-td-identity">
+                      <div className="gu-user-avatar">
+                        {(u.full_name || u.nombre || "U").charAt(0).toUpperCase()}
+                      </div>
+                      <span>{u.full_name || u.nombre}</span>
+                    </td>
+                    <td>{u.email}</td>
+                    <td>
+                      <span className="gu-badge-role">
+                        <Shield size={12} /> {(u.rol || u.role_code || "").replace("_", " ")}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span className={`gu-status-pill ${estado}`}>
+                        {estado === 'active' ? 'Activo' : estado === 'suspended' ? 'Suspendido' : 'Pendiente'}
+                      </span>
+                    </td>
+                    <td className="gu-td-actions">
+                      <CanView requiredPermission="user_management.write">
+                        <Edit3 className="gu-action-icon" size={20} title="Editar Usuario" onClick={() => abrirModalEditar(u)} />
+                        {estado === "active" ? (
+                          <UserX className="gu-action-icon gu-icon-suspend" size={20} title="Suspender Acceso" onClick={() => toggleEstado(id, estado)} />
+                        ) : (
+                          <UserCheck className="gu-action-icon gu-icon-activate" size={20} title="Activar Acceso" onClick={() => toggleEstado(id, estado)} />
+                        )}
+                      </CanView>
+                      <CanView requiredPermission="user_management.delete">
+                        <Trash2 className="gu-action-icon gu-icon-delete" size={20} title="Eliminar Permanentemente" onClick={() => handleEliminar(id)} />
+                      </CanView>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="5" className="gu-table-empty">No se encontraron usuarios que coincidan con la búsqueda.</td>
+              </tr>
+            )}
           </tbody>
         </table>
-      )}
+      </div>
 
-      {/* 📄 PAGINACIÓN */}
-      {!loading && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPaginas}
-          onPageChange={setCurrentPage}
-        />
-      )}
+      <div className="gu-pagination-container">
+        <Pagination currentPage={currentPage} totalPages={totalPaginas} onPageChange={setCurrentPage} />
+      </div>
 
-      {/* 👇 MODAL DE CREACIÓN 👇 */}
-      {modalCreateOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Registrar Nuevo Usuario</h2>
-            <form onSubmit={handleCreateUser} className="edit-form" style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
-              
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Nombre Completo:</label>
-              <input type="text" value={createFormData.full_name} onChange={e => setCreateFormData({...createFormData, full_name: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
-              
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Nombre de Usuario (Username):</label>
-              <input type="text" value={createFormData.username} onChange={e => setCreateFormData({...createFormData, username: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
-
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Correo Electrónico:</label>
-              <input type="email" value={createFormData.email} onChange={e => setCreateFormData({...createFormData, email: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
-
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Contraseña Temporal:</label>
-              <input type="password" value={createFormData.password} onChange={e => setCreateFormData({...createFormData, password: e.target.value})} required placeholder="Mínimo 8 caracteres" style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
-
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Asignar Rol:</label>
-              <select value={createFormData.role_code} onChange={e => setCreateFormData({...createFormData, role_code: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc", background: "white" }}>
-                {rolesDb.map(rol => <option key={rol.code} value={rol.code}>{rol.name}</option>)}
-              </select>
-
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-                <button type="button" onClick={() => setModalCreateOpen(false)} style={{ background: "#f44336", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Cancelar</button>
-                <button type="submit" style={{ background: "#4CAF50", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Crear Usuario Activo</button>
+      {/* MODALES DE FORMULARIO */}
+      {(modalCreateOpen || modalEditOpen) && (
+        <div className="gu-modal-overlay">
+          <div className="gu-modal-content">
+            <div className="gu-modal-header">
+              <h2>{modalCreateOpen ? 'Agregar Nuevo Usuario' : 'Editar Perfil de Usuario'}</h2>
+              <X className="gu-modal-close" onClick={() => { setModalCreateOpen(false); setModalEditOpen(false); }} />
+            </div>
+            
+            <form onSubmit={modalCreateOpen ? handleCreateUser : handleEditSubmit} className="gu-modal-body">
+              <div className="gu-form-grid">
+                <div className="gu-form-field gu-full">
+                  <label>Nombre Completo</label>
+                  <input 
+                    type="text" 
+                    value={modalCreateOpen ? createFormData.full_name : editFormData.full_name} 
+                    onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, full_name: e.target.value}) : setEditFormData({...editFormData, full_name: e.target.value})} 
+                    required 
+                  />
+                </div>
+                {modalCreateOpen && (
+                  <div className="gu-form-field">
+                    <label>Nombre de Usuario</label>
+                    <input 
+                      type="text" 
+                      value={createFormData.username} 
+                      onChange={e => setCreateFormData({...createFormData, username: e.target.value})} 
+                      required 
+                    />
+                  </div>
+                )}
+                <div className="gu-form-field">
+                  <label>Correo Electrónico</label>
+                  <input 
+                    type="email" 
+                    value={modalCreateOpen ? createFormData.email : editFormData.email} 
+                    onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, email: e.target.value}) : setEditFormData({...editFormData, email: e.target.value})} 
+                    required 
+                  />
+                </div>
+                <div className="gu-form-field">
+                  <label>{modalCreateOpen ? 'Contraseña' : 'Nueva Contraseña (dejar vacío para mantener)'}</label>
+                  <input 
+                    type="password" 
+                    value={modalCreateOpen ? createFormData.password : editFormData.password} 
+                    onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, password: e.target.value}) : setEditFormData({...editFormData, password: e.target.value})} 
+                    required={modalCreateOpen} 
+                  />
+                </div>
+                <div className="gu-form-field">
+                  <label>Rol Asignado</label>
+                  <select 
+                    value={modalCreateOpen ? createFormData.role_code : editFormData.role_code} 
+                    onChange={e => modalCreateOpen ? setCreateFormData({...createFormData, role_code: e.target.value}) : setEditFormData({...editFormData, role_code: e.target.value})} 
+                    required
+                  >
+                    <option value="">Seleccionar rol...</option>
+                    {rolesDb.map(rol => <option key={rol.code} value={rol.code}>{rol.name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="gu-modal-footer">
+                <button type="button" className="gu-btn-cancel" onClick={() => { setModalCreateOpen(false); setModalEditOpen(false); }}>Cancelar</button>
+                <button type="submit" className="gu-btn-submit">Guardar Cambios</button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      {/*MODAL DE EDICIÓN */}
-      {modalEditOpen && (
-        <div className="modal-overlay" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-          <div className="modal-content" style={{ background: "white", padding: "25px", borderRadius: "8px", width: "400px", color: "black", boxShadow: "0 4px 15px rgba(0,0,0,0.2)" }}>
-            <h2 style={{ marginTop: 0, marginBottom: "15px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>Editar Usuario</h2>
-            <form onSubmit={handleEditSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Nombre Completo:</label>
-              <input type="text" value={editFormData.full_name} onChange={e => setEditFormData({...editFormData, full_name: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
-              
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Email:</label>
-              <input type="email" value={editFormData.email} onChange={e => setEditFormData({...editFormData, email: e.target.value})} required style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
-              
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Nueva Contraseña <small style={{ fontWeight: "normal", color: "#666" }}>(Opcional)</small>:</label>
-              <input type="password" placeholder="Dejar en blanco para no cambiarla" value={editFormData.password} onChange={e => setEditFormData({...editFormData, password: e.target.value})} style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }} />
-              
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-                <button type="button" onClick={() => setModalEditOpen(false)} style={{ background: "#f44336", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Cancelar</button>
-                <button type="submit" style={{ background: "#4CAF50", color: "white", padding: "10px 15px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>Guardar Cambios</button>
-              </div>
-
-              <label style={{ fontWeight: "bold", fontSize: "14px" }}>Rol del Usuario:</label>
-              <select 
-                value={editFormData.role_code} 
-                onChange={e => setEditFormData({...editFormData, role_code: e.target.value})} 
-                required 
-                style={{ padding: "10px", borderRadius: "4px", border: "1px solid #ccc", background: "white" }}
-              >
-                <option value="" disabled>Seleccione un rol</option>
-                {rolesDb.map((rol) => (
-                  <option key={rol.code} value={rol.code}>
-                    {rol.name}
-                  </option>
-                ))}
-              </select>
-
-            </form>
-          </div>
-        </div>
-      )}
-      {/*FIN DEL MODAL*/}
-
     </div>
   );
 }

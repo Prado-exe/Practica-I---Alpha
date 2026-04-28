@@ -1,39 +1,400 @@
-.gestion-usuarios {
-  padding: 20px;
+/* ==========================================================================
+   GESTIÓN DE USUARIOS - ESTILOS PRIVADOS (gu-)
+   ========================================================================== */
+
+.gu-container {
+    padding: 24px;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
 }
 
-.usuarios-header {
-  margin-bottom: 20px;
+/* --- HEADER --- */
+.gu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
 }
 
-.usuarios-filtros {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+.gu-header-info h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #1a1a1a;
 }
 
-.usuarios-tabla {
-  width: 100%;
-  border-collapse: collapse;
+.gu-header-info p {
+    color: #555;
+    margin: 0;
+    font-size: 14px;
+    max-width: 600px;
 }
 
-.usuarios-tabla th,
-.usuarios-tabla td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+.gu-btn-create {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: #1a6bf0;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background-color 0.2s;
 }
 
-.estado.activo {
-  color: green;
-  font-weight: bold;
+.gu-btn-create:hover {
+    background-color: #1254c7;
 }
 
-.estado.inactivo {
-  color: red;
-  font-weight: bold;
+/* --- FILTROS (GRID SYSTEM) --- */
+.gu-filters-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
 }
 
-.acciones button {
-  margin-right: 5px;
+.gu-filters-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1.2fr auto;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.gu-search-area {
+    flex-grow: 2;
+}
+
+.gu-input-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.gu-input-wrapper label {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.gu-input-wrapper input,
+.gu-input-wrapper select {
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background-color: #f7fafc;
+    height: 42px;
+    transition: all 0.2s;
+}
+
+.gu-input-wrapper input:focus,
+.gu-input-wrapper select:focus {
+    border-color: #1a6bf0;
+    background-color: #fff;
+}
+
+/* Acciones de filtro */
+.gu-filter-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.gu-btn-apply {
+    background-color: #1a6bf0;
+    color: white;
+    border: none;
+    height: 42px;
+    padding: 0 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.gu-btn-clear {
+    background-color: #ff0000;
+    color: white;
+    border: none;
+    height: 42px;
+    width: 42px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.gu-btn-clear:hover {
+    background-color: #d90000;
+    transform: scale(1.05);
+}
+
+/* --- TABLA ADMINISTRATIVA --- */
+.gu-table-wrapper {
+    background: white;
+    border-radius: 8px;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.gu-table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.gu-table-wrapper th {
+    background-color: #1a6bf0;
+    color: white;
+    padding: 14px 16px;
+    font-weight: 500;
+    font-size: 14px;
+    text-align: left;
+}
+
+.gu-table-wrapper td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.gu-table-wrapper tbody tr:nth-child(even) {
+    background-color: #f2f7fd;
+}
+
+/* Celdas especiales */
+.gu-td-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+
+.gu-user-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #1a6bf0;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.gu-badge-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #e2e8f0;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: capitalize;
+}
+
+/* --- PÍLDORAS DE ESTADO --- */
+.gu-status-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+}
+
+.gu-status-pill.active { background-color: #4CAF50; }
+.gu-status-pill.suspended { background-color: #ff0000; }
+.gu-status-pill.pending_verification { background-color: #ff9800; }
+
+/* --- ACCIONES --- */
+.gu-td-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.gu-action-icon {
+    color: #1a6bf0;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.gu-action-icon:hover {
+    transform: scale(1.2);
+}
+
+.gu-icon-suspend { color: #ff9800; }
+.gu-icon-activate { color: #4CAF50; }
+.gu-icon-delete { color: #8B0000; }
+
+/* --- MODALES --- */
+.gu-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.gu-modal-content {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.gu-modal-header {
+    background-color: #1a6bf0;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.gu-modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.gu-modal-close {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.gu-modal-close:hover {
+    opacity: 0.7;
+}
+
+.gu-modal-body {
+    padding: 24px;
+}
+
+.gu-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.gu-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gu-form-field.gu-full {
+    grid-column: span 2;
+}
+
+.gu-form-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.gu-form-field input,
+.gu-form-field select {
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.gu-modal-footer {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.gu-btn-cancel {
+    padding: 10px 20px;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.gu-btn-submit {
+    padding: 10px 20px;
+    background-color: #1a6bf0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* --- ESTADOS DE CARGA Y VACÍO --- */
+.gu-table-loading, 
+.gu-table-empty {
+    text-align: center;
+    padding: 40px !important;
+    color: #666;
+}
+
+.gu-spin-icon {
+    animation: gu-spin 1s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+@keyframes gu-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.gu-pagination-container {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1024px) {
+    .gu-filters-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .gu-filters-grid,
+    .gu-form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .gu-header {
+        flex-direction: column;
+        gap: 15px;
+    }
 }
