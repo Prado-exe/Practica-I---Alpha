@@ -1,0 +1,161 @@
+/* CONTENEDOR PRINCIPAL - IGUAL A GESTION DATASETS */
+.gestion-datasets {
+  padding: 24px;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.header-info h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.header-info p {
+  color: #555;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* SECCIÓN FORMULARIO (Mimetizada con los filtros) */
+.filters-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+}
+
+.tags-form-layout {
+  display: flex !important;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.input-wrapper label {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.input-wrapper input {
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  background-color: #f7fafc;
+  height: 42px;
+  transition: all 0.2s;
+}
+
+.input-wrapper input:focus {
+  border-color: #1a6bf0;
+  background-color: #fff;
+}
+
+/* BOTONES */
+.btn-aplicar {
+  background-color: #1a6bf0;
+  color: white;
+  border: none;
+  height: 42px;
+  padding: 0 25px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.btn-aplicar:hover {
+  background-color: #1254c7;
+}
+
+/* TABLA ADMINISTRATIVA ESTÁNDAR */
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  background-color: #1a6bf0;
+  color: white;
+  padding: 14px 16px;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: left;
+}
+
+tbody td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f7fd;
+}
+
+/* BADGES DE ESTADO (Reutilizado para el contador) */
+.estado-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 90px;
+}
+
+.estado-badge.archived {
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+/* ACCIONES */
+.acciones {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-icon {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.action-icon:hover {
+  transform: scale(1.2);
+}
+
+.btn-destruir-icon {
+  color: #8B0000;
+}

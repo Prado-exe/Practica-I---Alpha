@@ -1,0 +1,333 @@
+/* =====================
+   Wrapper Principal
+   ===================== */
+.carousel-wrapper {
+  position: relative;
+  /* Restauramos tu margen original que estira el carrusel a los lados */
+  margin: 0.7rem 5rem 2rem; 
+  /* (Eliminamos max-width y width para que ocupe todo el espacio) */
+  border-radius: 20px;
+  overflow: hidden;
+  font-size: 1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #101c3d;
+}
+
+.carousel-wrapper.hc {
+  border: 3px solid #fff;
+  box-shadow: none;
+}
+
+/* =====================
+   Skeleton / Loading
+   ===================== */
+.carousel-skeleton {
+  min-height: 500px;
+  background: linear-gradient(90deg, #e0e5ec 25%, #f0f3f7 50%, #e0e5ec 75%);
+  background-size: 300% 100%;
+  animation: carouselShimmer 1.8s infinite linear;
+}
+
+@keyframes carouselShimmer {
+  0% { background-position: 300% 0; }
+  100% { background-position: -300% 0; }
+}
+
+/* =====================
+   Contenedor Scroll
+   ===================== */
+.carousel {
+  display: flex;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* =====================
+   Slide Individual
+   ===================== */
+.carousel-item {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  min-height: 500px;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 🖼️ Imagen de fondo (ESTO FALTABA CONTROLAR) */
+.carousel-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform 6s ease-in-out;
+}
+
+/* Pequeño efecto Ken Burns para darle vida */
+.carousel-item:hover .carousel-bg-image {
+  transform: scale(1.05);
+}
+
+/* 🌑 Overlay oscuro sobre la imagen para asegurar lectura */
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    95deg,
+    rgba(11, 22, 54, 0.95) 0%,
+    rgba(11, 22, 54, 0.75) 45%,
+    rgba(11, 22, 54, 0.15) 100%
+  );
+  z-index: 1;
+}
+
+/* =====================
+   Contenido Textual
+   ===================== */
+.carousel-content {
+  position: relative;
+  z-index: 2; /* Importante para estar sobre el overlay */
+  padding: 4rem 5rem;
+  max-width: 65%;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.carousel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding-top: 1rem;
+}
+
+/* =====================
+   Etiqueta (Badge)
+   ===================== */
+.carousel-badge {
+  display: inline-block;
+  background: #1565c0;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.35rem 1.2rem;
+  border-radius: 25px;
+  width: fit-content;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.carousel-wrapper.hc .carousel-badge {
+  background: #ff9800;
+  color: #000;
+}
+
+/* =====================
+   Tipografía con Límites Anti-Desborde
+   ===================== */
+.carousel-title {
+  margin: 0;
+  font-size: clamp(1.8rem, calc(2.4rem * var(--font-scale)), 3.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  
+  /* 🚫 EVITAR DESBORDE: Máximo 2 líneas */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carousel-description {
+  margin: 0;
+  font-size: clamp(0.95rem, calc(1.05rem * var(--font-scale)), 1.25rem);
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  max-width: 90%;
+  
+  /* 🚫 EVITAR DESBORDE: Máximo 3 líneas */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =====================
+   Footer de la Tarjeta
+   ===================== */
+.carousel-footer {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding-bottom: 2rem;
+}
+
+.carousel-date {
+  font-size: clamp(0.85rem, calc(0.9rem * var(--font-scale)), 1rem);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* =====================
+   Botón
+   ===================== */
+.carousel-btn {
+  padding: 0.7rem 2rem;
+  border-radius: 30px;
+  background: #fff;
+  color: #101c3d;
+  font-weight: 700;
+  font-size: clamp(0.9rem, calc(0.95rem * var(--font-scale)), 1.1rem);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.carousel-btn:hover {
+  background: #1565c0;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(21, 101, 192, 0.4);
+}
+
+/* =====================
+   Flechas (Glassmorphism)
+   ===================== */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; /* Más amigable y moderno */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.carousel-arrow.left  { left: 20px; }
+.carousel-arrow.right { right: 20px; }
+
+.carousel-arrow:hover {
+  background: #1565c0;
+  border-color: #1565c0;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* =====================
+   Puntos de Paginación
+   ===================== */
+.carousel-dots {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+  z-index: 20;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dot.active {
+  width: 35px; /* Se estira tipo pastilla */
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+/* =====================
+   Accesibilidad Focus
+   ===================== */
+.carousel:focus {
+  outline: 3px solid #ff9800;
+  outline-offset: -3px;
+}
+.carousel-arrow:focus, .carousel-btn:focus, .dot:focus {
+  outline: 3px solid #ff9800;
+}
+
+/* =====================
+   Responsive Adjustments
+   ===================== */
+@media (max-width: 1024px) {
+  .carousel-content {
+    max-width: 80%;
+    padding: 3rem 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-wrapper {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .carousel-item {
+    min-height: 450px;
+  }
+
+  /* Degradado hacia arriba para móviles para que el texto se lea al fondo */
+  .carousel-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(11, 22, 54, 0.1) 0%,
+      rgba(11, 22, 54, 0.85) 60%,
+      rgba(11, 22, 54, 0.98) 100%
+    );
+  }
+
+  .carousel-content {
+    padding: 2rem 1.5rem 3.5rem;
+    max-width: 100%;
+    justify-content: flex-end; /* Texto empujado abajo */
+  }
+
+  .carousel-description {
+    -webkit-line-clamp: 2; /* En móvil dejamos menos texto para no ensuciar */
+  }
+
+  .carousel-arrow {
+    display: none; /* En móviles es mejor deslizar con el dedo (swipe) */
+  }
+
+  .carousel-footer {
+    padding-bottom: 0;
+    margin-top: 1rem;
+    gap: 1rem;
+    justify-content: space-between;
+  }
+}

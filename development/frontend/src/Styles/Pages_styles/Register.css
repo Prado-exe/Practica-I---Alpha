@@ -1,0 +1,128 @@
+/* ELIMINADAS LAS CLASES .login-bg Y .login-bg::before */
+
+/* Contenedor principal de la tarjeta */
+.login-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logo */
+.login-logo {
+  width: 120px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Labels */
+.login-container label {
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  color: #333;
+}
+
+/* Inputs */
+.login-input {
+  padding: 0.65rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.login-input:focus {
+  outline: 2px solid #1565c0;
+  border-color: #1565c0;
+}
+
+/* Botón principal */
+.login-btn {
+  background-color: #1565c0;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.login-btn:hover {
+  background-color: #0d47a1;
+}
+
+/* --- SECCIÓN DE ENLACES ACTUALIZADA --- */
+.login-links {
+  display: flex;         
+  justify-content: center; 
+  align-items: center;     
+  width: 100%;            
+  margin-top: 1rem;        
+}
+
+.login-links a {
+  text-align: center;     
+  text-decoration: none;  
+  color: #1565c0;
+  font-size: 0.85rem;
+}
+
+.login-links a:hover {
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+/* Reglas generales para quitar la línea azul en todos los enlaces de la tarjeta */
+.login-container a {
+  color: #1565c0;
+  text-decoration: none; /* Quita el subrayado */
+}
+
+.login-container a:hover {
+  text-decoration: none; /* Asegura que no salga línea al hacer hover */
+  opacity: 0.8; /* Efecto sutil al pasar el mouse */
+}
+
+/* Estilos específicos para el botón de Volver al Inicio */
+.back-to-home {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eeeeee;
+}
+
+.back-to-home a {
+  color: #666666;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-container{
+    padding: 1.5rem;
+  }
+  .login-logo{
+    width: 100px;
+  }
+}
+.password-error {
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.password-error ul {
+  padding-left: 1.2rem;
+  margin: 0.3rem 0 0;
+}
+
+.password-error li {
+  margin-bottom: 0.2rem;
+}

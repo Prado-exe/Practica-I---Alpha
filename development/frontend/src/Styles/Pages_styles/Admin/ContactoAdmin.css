@@ -1,0 +1,142 @@
+/* Reutilizamos la estructura base del panel administrativo */
+
+.gestion-datasets {
+  padding: 24px;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.header-info h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.header-info p {
+  color: #555;
+  font-size: 14px;
+}
+
+/* FILTROS / TABS */
+.filters-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-aplicar, .btn-create {
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.inactive-tab:hover {
+  background-color: #d1d5db !important;
+}
+
+/* TABLA ADMINISTRATIVA */
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  background-color: #1a6bf0; 
+  color: white;
+  padding: 14px 16px;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: left;
+}
+
+tbody td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f7fd; 
+}
+
+/* ESTADOS / BADGES */
+.estado-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  display: inline-block;
+  min-width: 90px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.estado-badge.archived { background-color: #757575; }
+
+/* ACCIONES */
+.acciones {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-icon {
+  color: #1a6bf0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-icon:hover {
+  transform: scale(1.2);
+}
+
+.btn-destruir-icon {
+  color: #8B0000;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  color: #1a6bf0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

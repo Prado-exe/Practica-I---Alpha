@@ -1,0 +1,201 @@
+.contact-page{
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem 1rem;
+}
+
+.contact-header{
+margin-bottom:30px;
+}
+
+.contact-header p{
+max-width:650px;
+line-height:1.6;
+color:#555;
+}
+
+/* CONTENEDORES */
+
+.step-container{
+background:#f8f9fb;
+padding:30px;
+border-radius:10px;
+border:1px solid #e3e3e3;
+margin-bottom:30px;
+}
+
+/* HEADER PASO */
+
+.step-header{
+display:flex;
+align-items:center;
+gap:14px;
+margin-bottom:20px;
+border-bottom:1px solid #ddd;
+padding-bottom:12px;
+}
+
+.step-number{
+width:34px;
+height:34px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#2c6bed;
+color:white;
+border-radius:50%;
+font-weight:600;
+font-size:16px;
+}
+
+.step-header h2{
+margin:0;
+font-size:18px;
+}
+
+.step-header p{
+margin-top:4px;
+font-size:14px;
+color:#666;
+}
+
+/* FORMULARIO */
+
+.form-row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.form-group{
+display:flex;
+flex-direction:column;
+margin-bottom:20px;
+}
+
+.form-group label{
+margin-bottom:6px;
+font-weight:500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+padding:10px;
+border:1px solid #ccc;
+border-radius:6px;
+font-size:14px;
+}
+
+.form-group small{
+margin-top:6px;
+font-size:13px;
+color:#666;
+}
+
+/* CONTADOR */
+
+.char-counter{
+text-align:right;
+font-size:13px;
+color:#666;
+margin-top:6px;
+}
+
+/* DROPZONE */
+
+.file-dropzone{
+border:2px dashed #cfcfcf;
+border-radius:10px;
+padding:35px;
+text-align:center;
+background:#fafafa;
+transition:all .2s;
+}
+
+.file-dropzone.active{
+border-color:#2c6bed;
+background:#f1f6ff;
+}
+
+.file-input{
+display:none;
+}
+
+.file-label{
+cursor:pointer;
+}
+
+.file-icon{
+font-size:28px;
+margin-bottom:8px;
+}
+
+.file-label span{
+font-weight:600;
+display:block;
+}
+
+.file-label p{
+font-size:14px;
+color:#777;
+margin-top:4px;
+}
+
+.file-preview{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#f4f4f4;
+padding:10px 15px;
+border-radius:6px;
+}
+
+.file-preview button{
+background:none;
+border:none;
+color:#d11a2a;
+cursor:pointer;
+font-weight:600;
+}
+
+/* BOTONES */
+
+.form-buttons{
+display:flex;
+gap:12px;
+margin-top:30px;
+/* hace que el contenedor solo mida lo que ocupan los botones */
+width:fit-content;
+/* empuja el contenedor completo a la derecha */
+margin-left:auto;
+}
+.form-buttons button{
+float:none;
+position:relative;
+}
+
+.clear-btn{
+background:#f2f2f2;
+border:none;
+padding:10px 18px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.clear-btn:hover{
+background:#e4e4e4;
+}
+
+.submit-btn{
+background:#2c6bed;
+color:white;
+border:none;
+padding:10px 18px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.submit-btn:hover{
+background:#1e4fbf;
+}

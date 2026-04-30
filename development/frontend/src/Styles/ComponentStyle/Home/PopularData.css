@@ -1,0 +1,200 @@
+/* Wrapper con Sombreado de Profundidad */
+.popdata-wrapper {
+  background: #fcfdfe;
+  padding: 5rem 2rem;
+  margin: 3rem auto;
+  max-width: 1350px;
+  border-radius: 30px;
+  /* Sombreado trasero suave que da sensación de elevación */
+  box-shadow: 
+    0 10px 50px rgba(0, 0, 0, 0.04),
+    0 20px 80px rgba(21, 101, 192, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.popdata-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header Estilo Editorial */
+.popdata-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 4rem;
+}
+
+.popdata-subtitle {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1565c0;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.popdata-header h2 {
+  font-size: 2.5rem;
+  font-weight: 850;
+  color: #0f172a;
+  margin: 0;
+}
+
+.popdata-accent-line {
+  width: 60px;
+  height: 4px;
+  background: #1565c0;
+  margin-top: 1rem;
+  border-radius: 2px;
+}
+
+.popdata-btn-all {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: transparent;
+  color: #1e293b;
+  border: 2px solid #e2e8f0;
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.popdata-btn-all:hover {
+  border-color: #1565c0;
+  color: #1565c0;
+  background: #f0f7ff;
+}
+
+/* Grid Estricta de 3x2 */
+.popdata-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+}
+
+/* Tarjetas Premium */
+.popdata-card {
+  background: #ffffff;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Variación de color: barra superior */
+.card-color-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #1565c0, #42a5f5);
+}
+
+.popdata-card:nth-child(even) .card-color-strip {
+  background: linear-gradient(90deg, #2e7d32, #66bb6a);
+}
+
+.popdata-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+  border-color: transparent;
+}
+
+/* Elementos de la Card */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.card-logo {
+  width: 55px;
+  height: 55px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid #f1f5f9;
+}
+
+.card-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+.card-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+.card-body h3 {
+  font-size: 1.25rem;
+  font-weight: 750;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+  height: 3.5rem; /* Simetría */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.card-body p {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.6;
+  height: 4.6rem; /* Simetría */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-footer button {
+  width: 100%;
+  padding: 0.9rem;
+  border-radius: 10px;
+  border: none;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.popdata-card:hover .card-footer button {
+  background: #1565c0;
+  color: white;
+}
+
+/* Responsividad */
+@media (max-width: 1100px) {
+  .popdata-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .popdata-header { flex-direction: column; align-items: flex-start; gap: 2rem; }
+  .popdata-grid { grid-template-columns: 1fr; }
+  .popdata-wrapper { padding: 3rem 1.5rem; border-radius: 0; }
+  .popdata-header h2 { font-size: 1.8rem; }
+}
+
