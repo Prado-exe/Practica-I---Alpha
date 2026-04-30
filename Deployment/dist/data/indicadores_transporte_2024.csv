@@ -1,0 +1,49 @@
+REGION,MODO_TRANSPORTE,MES,PASAJEROS,VARIACION_ANUAL,KM_RECORRIDOS
+Metropolitana,Bus,Mayo,15420000,-2.3,8250000
+Metropolitana,Bus,Junio,14890000,-3.1,7980000
+Metropolitana,Bus,Julio,13750000,-1.8,7650000
+Metropolitana,Bus,Agosto,14200000,0.5,7800000
+Metropolitana,Bus,Septiembre,15100000,1.2,8100000
+Metropolitana,Bus,Octubre,16380000,3.8,8640000
+Valparaíso,Bus,Mayo,3250000,1.1,1850000
+Valparaíso,Bus,Junio,3120000,0.4,1780000
+Valparaíso,Bus,Julio,2980000,-0.8,1680000
+Valparaíso,Bus,Agosto,3050000,1.5,1720000
+Valparaíso,Bus,Septiembre,3180000,2.1,1790000
+Valparaíso,Bus,Octubre,3420000,4.5,1920000
+Biobío,Bus,Mayo,2480000,2.4,1380000
+Biobío,Bus,Junio,2350000,1.8,1310000
+Biobío,Bus,Julio,2180000,-0.5,1220000
+Biobío,Bus,Agosto,2240000,0.9,1260000
+Biobío,Bus,Septiembre,2380000,2.6,1340000
+Biobío,Bus,Octubre,2560000,5.1,1420000
+La Araucanía,Bus,Mayo,1240000,3.2,720000
+La Araucanía,Bus,Junio,1180000,2.5,685000
+La Araucanía,Bus,Julio,1090000,-1.2,635000
+La Araucanía,Bus,Agosto,1120000,0.8,650000
+La Araucanía,Bus,Septiembre,1190000,2.1,690000
+La Araucanía,Bus,Octubre,1280000,4.8,745000
+Antofagasta,Bus,Mayo,980000,1.8,580000
+Antofagasta,Bus,Junio,950000,1.2,560000
+Antofagasta,Bus,Julio,890000,-0.4,525000
+Antofagasta,Bus,Agosto,910000,0.6,535000
+Antofagasta,Bus,Septiembre,960000,1.9,565000
+Antofagasta,Bus,Octubre,1020000,3.5,600000
+Los Lagos,Bus,Mayo,820000,2.6,495000
+Los Lagos,Bus,Junio,790000,1.8,478000
+Los Lagos,Bus,Julio,740000,-0.9,450000
+Los Lagos,Bus,Agosto,760000,0.4,460000
+Los Lagos,Bus,Septiembre,805000,1.5,485000
+Los Lagos,Bus,Octubre,860000,4.2,518000
+Coquimbo,Bus,Mayo,750000,2.1,445000
+Coquimbo,Bus,Junio,720000,1.4,428000
+Coquimbo,Bus,Julio,680000,-0.6,405000
+Coquimbo,Bus,Agosto,695000,0.8,415000
+Coquimbo,Bus,Septiembre,730000,1.8,434000
+Coquimbo,Bus,Octubre,785000,3.9,465000
+O'Higgins,Bus,Mayo,680000,1.5,410000
+O'Higgins,Bus,Junio,655000,0.8,395000
+O'Higgins,Bus,Julio,615000,-1.1,372000
+O'Higgins,Bus,Agosto,630000,0.5,380000
+O'Higgins,Bus,Septiembre,665000,1.2,402000
+O'Higgins,Bus,Octubre,712000,3.4,428000
